@@ -1,0 +1,45 @@
+[
+  {
+    "job_id": "sample-job-001",
+    "title": "Build a customer churn prediction baseline",
+    "description": "Create a reproducible Python baseline using tabular customer data. Compare logistic regression and random forest, report precision/recall, and document limitations.",
+    "required_skills": [
+      "Python",
+      "scikit-learn",
+      "classification",
+      "model evaluation"
+    ],
+    "budget": {
+      "min": 250,
+      "max": 450,
+      "currency": "USD"
+    },
+    "duration_days": 14,
+    "screening_questions": [
+      "How would you evaluate an imbalanced classifier?"
+    ],
+    "warning_signals": [],
+    "connects_cost": 8
+  },
+  {
+    "job_id": "sample-job-002",
+    "title": "Unpaid trial: complete a production dashboard",
+    "description": "Build a complete working analytics dashboard for free as a test. Contact the client on an external messaging app to receive credentials.",
+    "required_skills": [
+      "Python",
+      "dashboarding"
+    ],
+    "budget": {
+      "min": 0,
+      "max": 0,
+      "currency": "USD"
+    },
+    "duration_days": 2,
+    "screening_questions": [],
+    "warning_signals": [
+      "unpaid_work",
+      "off_platform_contact"
+    ],
+    "connects_cost": 10
+  }
+]

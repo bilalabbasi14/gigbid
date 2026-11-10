@@ -1,0 +1,26 @@
+marketplace:
+  mode: gigsim
+  max_requests_per_minute: 20
+
+models:
+  profile: open
+  nodes:
+    scout: qwen3-4b
+    analyst: qwen3-4b
+    risk_assessor: qwen3-4b
+    fit_matcher: qwen3-4b
+    pricing: qwen3-4b
+    writer: configure-your-model
+    critic: configure-your-model
+    client_liaison: configure-your-model
+  embeddings: nomic-embed-text
+  reranker: bge-reranker-v2-m3
+
+budgets:
+  max_graph_steps: 30
+  max_revisions: 2
+  max_tokens_per_job: 12000
+
+thresholds:
+  minimum_fit_score: 0.60
+  maximum_risk_score: 0.70
