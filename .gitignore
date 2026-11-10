@@ -1,0 +1,36 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+node_modules/
+.next/
+dist/
+build/
+data/processed/
+# evals/results/ IS committed: every number in README/report must trace to it
+
+# --- private planning / assistant working files (never committed) ---
+CLAUDE.md
+.claude/
+AI-4016_GigBid_Assignment.md
+*.private.md
+scratch/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- data / secrets ---
+data/raw/
+data/personas/_generated_cache/
+*.pem
+*.key
+.env.*
+!.env.example
+playwright-report/
+test-results/

@@ -1,0 +1,17 @@
+[
+  {
+    "freelancer_id": "sample-ai-engineer",
+    "display_name": "Alex Morgan (synthetic)",
+    "headline": "Junior AI/ML Engineer",
+    "skills": [
+      "Python",
+      "scikit-learn",
+      "pandas",
+      "classification",
+      "model evaluation"
+    ],
+    "hourly_rate_usd": 25,
+    "minimum_project_budget_usd": 200,
+    "availability_hours_per_week": 15
+  }
+]

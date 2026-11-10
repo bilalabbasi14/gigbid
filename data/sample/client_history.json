@@ -1,0 +1,9 @@
+[
+  {
+    "client_id": "sample-client-001",
+    "completed_projects": 3,
+    "average_rating": 4.8,
+    "payment_verified": true,
+    "notes": "Synthetic example only. Do not treat these fields as proof of a real client's trustworthiness."
+  }
+]

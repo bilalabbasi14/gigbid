@@ -1,0 +1,21 @@
+# Student Implementation Checklist
+
+- [ ] Read the assignment and the supplied GigSim documentation.
+- [ ] Implement the marketplace port and GigSim adapter.
+- [ ] Implement Portfolio MCP tools, resources and prompts.
+- [ ] Implement Marketplace MCP read/write tools with schemas and idempotency.
+- [ ] Implement Workspace MCP tools or documented local mock.
+- [ ] Ingest CVs, case studies, READMEs, code, reviews and past proposals.
+- [ ] Implement V0 dense retrieval and at least four additional required variants.
+- [ ] Implement claim splitting and evidence verification.
+- [ ] Implement the bid graph with parallel analysis branches.
+- [ ] Implement the conversation graph.
+- [ ] Add bounded Critic loop and Compliance Guard.
+- [ ] Add LangGraph interrupts for all external actions and Connects spend.
+- [ ] Add durable checkpointing and crash/resume test.
+- [ ] Build all required UI screens and approval interactions.
+- [ ] Add worker scheduling, tracing, budgets and guardrails.
+- [ ] Add unit, integration, contract and Playwright tests.
+- [ ] Run evaluations and commit reproducible results.
+- [ ] Deploy and verify reviewer access.
+- [ ] Complete report, demo, technical write-up

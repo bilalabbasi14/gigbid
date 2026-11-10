@@ -1,0 +1,17 @@
+[
+  {
+    "evidence_id": "evidence-001",
+    "freelancer_id": "sample-ai-engineer",
+    "type": "case_study",
+    "title": "Customer churn classification coursework (synthetic example)",
+    "summary": "Built a reproducible classification experiment using Python and scikit-learn. Compared logistic regression and random forest and documented precision and recall.",
+    "skills": [
+      "Python",
+      "scikit-learn",
+      "classification",
+      "model evaluation"
+    ],
+    "outcome": "coursework demonstration",
+    "source": "synthetic sample; replace with verified portfolio evidence"
+  }
+]
