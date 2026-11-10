@@ -1,5 +1,6 @@
 from typing import Any, TypedDict
 
+
 class GigBidState(TypedDict, total=False):
     job: dict[str, Any]
     job_spec: dict[str, Any]
