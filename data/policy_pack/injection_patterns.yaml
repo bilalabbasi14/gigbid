@@ -1,0 +1,20 @@
+# Heuristic prompt-injection patterns applied to job posts and client messages before they enter
+# any prompt. Detection is measured in evals/results/injection.json. Regex, case-insensitive.
+version: 1
+patterns:
+  - id: ignore_previous
+    regex: "ignore (all |any )?(previous|prior|above) (instructions|rules|prompts?)"
+  - id: system_override
+    regex: "(you are now|act as|pretend to be|new (system )?instructions?:|SYSTEM:|\\[INST\\]|<\\|im_start\\|>)"
+  - id: reveal_prompt
+    regex: "(reveal|print|show|repeat) (your|the) (system )?(prompt|instructions)"
+  - id: force_bid
+    regex: "(always|automatically) (bid|apply|submit|recommend)|mark (this|the) job as (safe|legit|high fit)"
+  - id: force_contact
+    regex: "(include|add|put) (your|my|the) (email|phone|whatsapp|telegram) (in|into) (the|your) (proposal|reply)"
+  - id: exfiltration
+    regex: "(send|post|forward) (the|your|all) (portfolio|data|api key|token|secrets?) to"
+  - id: hidden_text
+    regex: "(?s)<!--.*?(instruction|ignore|assistant).*?-->|\\[hidden\\]|\\u200b{3,}"
+  - id: assistant_address
+    regex: "(dear|hey|attention)[, ]+(ai|assistant|language model|llm|chatgpt|claude|gpt)"

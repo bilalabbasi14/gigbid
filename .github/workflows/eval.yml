@@ -1,0 +1,35 @@
+name: Smoke eval
+# 30-job smoke evaluation on every pull request. Fails if unsupported-claim rate rises or
+# bid-or-skip F1 drops past the thresholds in evals/thresholds.yaml.
+on:
+  pull_request:
+    paths:
+      - "agent/**"
+      - "rag/**"
+      - "mcp_servers/**"
+      - "evals/**"
+      - "data/policy_pack/**"
+      - "gigsim/**"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with: { enable-cache: true }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: uv sync --extra dev --extra eval
+      - name: Run 30-job smoke eval against thresholds
+        if: hashFiles('evals/runners/smoke_eval.py') != ''
+        run: uv run python -m evals.runners.smoke_eval --jobs 30 --thresholds evals/thresholds.yaml
+        env:
+          MODEL_PROFILE: open
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          LANGSMITH_TRACING: "false"
+      - uses: actions/upload-artifact@v4
+        if: always() && hashFiles('evals/results/smoke_*.json') != ''
+        with: { name: smoke-eval-results, path: evals/results/smoke_*.json }

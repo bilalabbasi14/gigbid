@@ -5,5 +5,6 @@
 #
 # Do not replace the required graph with a linear chain labelled "multi-agent".
 
+
 def build_bid_graph():
     raise NotImplementedError("Implement the bid graph as specified in the assignment.")
