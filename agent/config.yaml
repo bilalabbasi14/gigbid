@@ -1,26 +1,106 @@
+# GigBid agent configuration.
+# Everything an agent "decides by" lives here, not in code: models per node, budgets, thresholds,
+# retrieval variant, policy version. Edit this file (and data/policy_pack/) to absorb platform
+# policy changes without touching Python.
+
+version: 1
+policy_version: 1            # must match data/policy_pack/policy.yaml -> version
+
 marketplace:
-  mode: gigsim
-  max_requests_per_minute: 20
+  mode: gigsim               # gigsim | upwork_live  (overridden by MARKETPLACE_MODE env)
+  gigsim:
+    max_requests_per_minute: 20
+    scout_interval_minutes: 30
+  upwork_live:
+    max_requests_per_minute: 6
+    scout_interval_minutes: 240   # justified in docs/RUNBOOK.md: never poll like a scraper
 
 models:
-  profile: open
+  profile: open              # open | paid  (overridden by MODEL_PROFILE env)
+  # Provider aliases: groq:<model> | openrouter:<model> | ollama:<model> | openai:<model>
+  profiles:
+    open:
+      small: groq:llama-3.1-8b-instant
+      medium: groq:openai/gpt-oss-20b
+      large: groq:openai/gpt-oss-120b
+      fallback_small: ollama:qwen3:4b
+      fallback_large: openrouter:qwen/qwen3-235b-a22b:free
+    paid:
+      small: groq:llama-3.1-8b-instant
+      medium: openai:gpt-4.1-mini
+      large: openai:gpt-4.1
+      fallback_small: ollama:qwen3:4b
+      fallback_large: groq:openai/gpt-oss-120b
+  # Route by node: tier name resolved against the active profile.
   nodes:
-    scout: qwen3-4b
-    analyst: qwen3-4b
-    risk_assessor: qwen3-4b
-    fit_matcher: qwen3-4b
-    pricing: qwen3-4b
-    writer: configure-your-model
-    critic: configure-your-model
-    client_liaison: configure-your-model
-  embeddings: nomic-embed-text
-  reranker: bge-reranker-v2-m3
+    scout: small
+    analyst: medium
+    risk_assessor: small
+    fit_matcher: medium
+    pricing: small
+    writer: large
+    verifier: medium
+    critic: large
+    compliance: small
+    client_liaison: large
+    intent_classifier: small
+    judge: large
+    portfolio_builder: large
+  embeddings:
+    model: nomic-ai/nomic-embed-text-v1.5   # open, CPU
+    dimensions: 768
+    query_prefix: "search_query: "
+    document_prefix: "search_document: "
+  reranker:
+    model: BAAI/bge-reranker-v2-m3          # open, CPU
+  generation:
+    temperature: 0.2
+    max_output_tokens: 1200
+    request_timeout_seconds: 60
+    max_retries: 3
+
+rag:
+  variant: v0_naive          # set to the measured best after Part B evaluation
+  k: 5
+  chunk_size: 512
+  chunk_overlap: 64
+  hybrid_rrf_k: 60
+  rerank_top_n: 20
+  outcome_boost: { won: 0.25, replied: 0.10, ignored: -0.05 }
 
 budgets:
-  max_graph_steps: 30
-  max_revisions: 2
-  max_tokens_per_job: 12000
+  max_graph_steps: 40
+  max_revisions: 2                 # Critic send-backs per draft
+  max_tokens_per_thread: 40000
+  per_node_timeout_seconds: 90
+  per_node_retries: 2
+  latency_p95_seconds_per_job: 60
+  latency_p95_seconds_per_proposal: 120
+  cost_usd_per_job_analysed: 0.01
+  cost_usd_per_proposal: 0.05
 
 thresholds:
-  minimum_fit_score: 0.60
-  maximum_risk_score: 0.70
+  bid_min_fit_score: 0.60
+  watch_min_fit_score: 0.45
+  max_risk_score: 0.70
+  scam_block_score: 0.85
+  min_evidence_items: 2
+  claim_support_min: 0.55         # verifier: below => unsupported
+  claim_partial_min: 0.35
+
+pricing:
+  user_floor_multiplier: 1.0       # never below the user's floor
+  market_percentile_target: 0.55
+  connects_value_threshold: 0.30   # expected value / Connects cost must exceed this
+
+autonomy:
+  auto_skip_low_fit: true          # allowed by spec; never auto-send
+  auto_send: false                 # hard false; not configurable from UI
+
+memory:
+  style_promotion_min_edits: 3     # same edit pattern seen >= N times => promote
+  outcome_promotion_min_samples: 5 # outcomes per category before a rule is promoted
+
+guardrails:
+  injection_patterns_file: data/policy_pack/injection_patterns.yaml
+  untrusted_delimiter: "<<<UNTRUSTED_JOB_TEXT>>>"
