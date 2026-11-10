@@ -42,19 +42,26 @@ jobs:
   web:
     name: Web lint, typecheck, Playwright
     runs-on: ubuntu-latest
-    if: ${{ hashFiles('apps/web/package.json') != '' }}
     defaults: { run: { working-directory: apps/web } }
     steps:
       - uses: actions/checkout@v4
+      - id: has_web
+        run: echo "present=$([ -f package.json ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
       - uses: actions/setup-node@v4
+        if: steps.has_web.outputs.present == 'true'
         with: { node-version: "22", cache: npm, cache-dependency-path: apps/web/package-lock.json }
       - run: npm ci
+        if: steps.has_web.outputs.present == 'true'
       - run: npm run lint
+        if: steps.has_web.outputs.present == 'true'
       - run: npm run typecheck
+        if: steps.has_web.outputs.present == 'true'
       - run: npx playwright install --with-deps chromium
+        if: steps.has_web.outputs.present == 'true'
       - run: npm run test:e2e
+        if: steps.has_web.outputs.present == 'true'
         env:
           E2E_MOCK_API: "true"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && steps.has_web.outputs.present == 'true'
         with: { name: playwright-report, path: apps/web/playwright-report, retention-days: 14 }

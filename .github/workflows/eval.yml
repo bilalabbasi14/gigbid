@@ -23,6 +23,7 @@ jobs:
         with: { python-version: "3.12" }
       - run: uv sync --extra dev --extra eval
       - name: Run 30-job smoke eval against thresholds
+        if: hashFiles('evals/runners/smoke_eval.py') != ''
         run: uv run python -m evals.runners.smoke_eval --jobs 30 --thresholds evals/thresholds.yaml
         env:
           MODEL_PROFILE: open
@@ -30,5 +31,5 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           LANGSMITH_TRACING: "false"
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: always() && hashFiles('evals/results/smoke_*.json') != ''
         with: { name: smoke-eval-results, path: evals/results/smoke_*.json }
