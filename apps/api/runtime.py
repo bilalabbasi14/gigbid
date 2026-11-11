@@ -299,9 +299,10 @@ class Runtime:
                             )
                             continue
                         status = update.get("status") if isinstance(update, dict) else None
-                        await self._update_run(
-                            thread_id, current_node=node, status=status or "running"
-                        )
+                        # progress only: the run's real status is written once at the end, after
+                        # the inbox and pipeline records are synced, so readers never see
+                        # "awaiting_approval" (or "submitted") ahead of the records behind it
+                        await self._update_run(thread_id, current_node=node, status="running")
                         await b.publish(
                             thread_id,
                             {
