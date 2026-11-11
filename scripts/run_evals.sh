@@ -27,7 +27,7 @@ step() {
 
 # untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run last, after any
 # earlier full retrieval run has finished writing it
-ALL=(tools rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
+ALL=(tools rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best panel_export x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
@@ -40,6 +40,7 @@ for s in "${STEPS[@]}"; do
     proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 4 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
     proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 4 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
     proposals_best) step proposals_best evals.runners.proposal_eval --per-persona 4 --variant best --gigsim --out proposal_eval_best ;;
+    panel_export)   step panel_export evals.runners.blind_panel export --n 15 ;;
     x3)             step x3 evals.runners.x3_eval ;;
     injection)      step injection evals.runners.injection_eval --per-family 1 ;;
     multiagent)     step multiagent evals.runners.multiagent_compare --jobs 30 --gigsim ;;
