@@ -26,16 +26,16 @@ models:
       fallback_small: groq:qwen/qwen3.8-27b          # separate daily quota from gpt-oss on Groq
       fallback_large: groq:qwen/qwen3.8-27b
     local:                                            # fully offline on a laptop (slow on CPU)
-      small: ollama:qwen3:4b
-      medium: ollama:qwen3:4b
-      large: ollama:qwen3:4b
+      small: ollama:qwen3:4b-instruct                 # the plain qwen3:4b tag always thinks
+      medium: ollama:qwen3:4b-instruct
+      large: ollama:qwen3:4b-instruct
       fallback_small: ollama:llama3.2
       fallback_large: ollama:llama3.2
     paid:
       small: groq:openai/gpt-oss-20b
       medium: openai:gpt-4.1-mini
       large: openai:gpt-4.1
-      fallback_small: ollama:qwen3:4b
+      fallback_small: ollama:qwen3:4b-instruct
       fallback_large: groq:openai/gpt-oss-120b
   # Route by node: tier name resolved against the active profile.
   nodes:
@@ -65,6 +65,7 @@ models:
     max_output_tokens: 1200
     request_timeout_seconds: 60
     max_retries: 3
+    local_context_tokens: 6144     # Ollama num_ctx; its default is too small for writer prompts
 
 rag:
   variant: v0_naive          # set to the measured best after Part B evaluation

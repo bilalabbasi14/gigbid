@@ -17,7 +17,7 @@ each with its own daily quota.
 | Medium tier (analyst, fit matcher, claim judge) | `groq:qwen/qwen3.8-27b` | Mid-sized; a separate quota from the gpt-oss models |
 | Large tier (writer, critic, liaison, judge, portfolio builder) | `groq:openai/gpt-oss-120b` | The largest open model on the free plan, for the text a client reads |
 | Fallbacks | `qwen3.8-27b` for both tiers | Different quota pool from the primaries |
-| Local profile | Ollama `qwen3:4b`, fallback `llama3.2` | Fully offline path; slow on CPU |
+| Local profile | Ollama `qwen3:4b-instruct`, fallback `llama3.2` | Fully offline path; slow on CPU. The plain `qwen3:4b` tag is the thinking-only release: thinking cannot be switched off, which costs minutes per call on CPU |
 | Embeddings | `BAAI/bge-base-en-v1.5` (768-d) on CPU | `nomic-embed-text-v1.5` needs remote code that broke with transformers 5 |
 | Reranker | `BAAI/bge-reranker-base` on CPU | `bge-reranker-v2-m3` exhausted RAM during evaluation and crashed Postgres |
 

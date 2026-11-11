@@ -1,7 +1,7 @@
 """Chat-model factory. The only place that knows about providers.
 
 Model specs are provider-qualified strings from agent/config.yaml, e.g. `groq:llama-3.1-8b-instant`,
-`openrouter:qwen/qwen3-235b-a22b:free`, `ollama:qwen3:4b`, `openai:gpt-4.1-mini`.
+`openrouter:qwen/qwen3-235b-a22b:free`, `ollama:qwen3:4b-instruct`, `openai:gpt-4.1-mini`.
 Nodes call `chat_for_node("writer")` and never name a provider or model.
 """
 
@@ -78,6 +78,8 @@ def chat_model(
             base_url=env.ollama_base_url,
             temperature=temperature,
             num_predict=max_tokens,
+            num_ctx=int(gen.get("local_context_tokens", 6144)),
+            reasoning=False,  # qwen3 thinks by default: slow on CPU and noise around the JSON
         )
     if provider == "openai":
         from langchain_openai import ChatOpenAI
