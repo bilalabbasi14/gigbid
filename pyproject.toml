@@ -35,6 +35,7 @@ dependencies = [
   "arq>=0.26",
   # rag
   "sentence-transformers>=3.0",
+  "torch>=2.4",
   "einops>=0.8",
   "rank-bm25>=0.2",
   "pypdf>=4.3",
@@ -83,6 +84,16 @@ packages = ["agent", "rag", "mcp_servers", "apps", "worker", "evals", "gigsim"]
 [tool.uv]
 default-groups = []
 
+# CPU-only PyTorch everywhere: the embedding model and reranker run on CPU, and CUDA wheels would
+# add several GB to every Docker image.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
@@ -104,4 +115,8 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 addopts = "-q"
-markers = ["integration: needs running services", "slow: slow tests"]
+markers = [
+    "integration: needs running services",
+    "slow: slow tests",
+    "shipped_policy: runs against data/policy_pack instead of the frozen test pack",
+]

@@ -10,6 +10,7 @@ from pydantic import BaseModel, EmailStr, Field
 from agent.handoffs import (
     ApprovalPayload,
     BidDecision,
+    Claim,
     ComplianceVerdict,
     Critique,
     FitReport,
@@ -163,14 +164,45 @@ class MessageApprovalPayload(BaseModel):
     latest_message: dict[str, Any] | None = None
 
 
+class CodeFact(BaseModel):
+    fact_id: str
+    kind: str
+    text: str
+    source: str
+
+
+class PortfolioDraftOut(BaseModel):
+    repo: str
+    url: str | None = None
+    title: str
+    markdown: str
+    facts: list[CodeFact] = Field(default_factory=list)
+    claims: list[Claim] = Field(default_factory=list)
+    profile: dict[str, Any] = Field(default_factory=dict)
+    verification: dict[str, Any] = Field(default_factory=dict)
+    seconds: float | None = None
+
+
+class PortfolioBuildPayload(BaseModel):
+    """X3: case studies drafted from repositories, waiting for the human."""
+
+    kind: Literal["portfolio"] = "portfolio"
+    thread_id: str | None = None
+    owner: str | None = None
+    persona_key: str | None = None
+    drafts: list[PortfolioDraftOut] = Field(default_factory=list)
+    skipped: list[dict[str, Any]] = Field(default_factory=list)
+
+
 class ApprovalItem(BaseModel):
     thread_id: str
-    kind: Literal["proposal", "message"]
+    kind: Literal["proposal", "message", "portfolio"]
     job_id: str | None
     title: str
     created_at: dt.datetime
     proposal: ApprovalPayload | None = None
     message: MessageApprovalPayload | None = None
+    portfolio: PortfolioBuildPayload | None = None
 
 
 class ApprovalListOut(BaseModel):
@@ -183,6 +215,9 @@ class ApprovalDecisionIn(BaseModel):
     edited_answers: list[str] | None = None
     reason: str | None = Field(default=None, max_length=500)
     confirmed_slot: dict[str, Any] | None = None
+    portfolio_decisions: dict[str, dict[str, Any]] | None = Field(
+        default=None, description="X3: {repo: {action: approve|edit|reject, markdown?}}"
+    )
 
 
 class ApprovalResultOut(BaseModel):
@@ -282,11 +317,21 @@ class AnalyticsOut(BaseModel):
 
 class HealthOut(BaseModel):
     status: str
+    persistence: Literal["postgres", "memory", "unknown"] = Field(
+        "unknown",
+        description="Checkpoint store; with memory, pending approvals do not survive a restart",
+    )
     marketplace_mode: str
     marketplace_reachable: bool
     degraded: dict[str, Any]
     policy_version: int
+    marketplace_policy_version: int | None = Field(
+        None, description="Policy version the marketplace says it enforces, when it reports one"
+    )
+    policy_drift: bool = Field(
+        False, description="The marketplace enforces a different policy version than GigBid's pack"
+    )
     model_profile: str
 
 
-__all__ = ["ApprovalPayload", "MessageApprovalPayload"]
+__all__ = ["ApprovalPayload", "MessageApprovalPayload", "PortfolioBuildPayload"]

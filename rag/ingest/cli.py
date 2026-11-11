@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -44,7 +45,8 @@ def build_chunks(persona_dir: Path, contextual: bool = False) -> list[Chunk]:
 def ingest_persona(
     store: ChunkStore, persona_dir: Path, *, contextual: bool = False, force: bool = False
 ) -> dict[str, int]:
-    persona = persona_dir.name
+    # the contextual (V6) chunks live in their own index key so the normal index is untouched
+    persona = persona_dir.name + ("__ctx" if contextual else "")
     t0 = time.time()
     chunks = build_chunks(persona_dir, contextual=contextual)
     existing = store.existing_hashes(persona)
@@ -77,15 +79,29 @@ def main() -> None:
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     personas = args.persona or (
-        [d.name for d in PERSONAS_ROOT.iterdir() if d.is_dir() and not d.name.startswith("_")]
+        [
+            d.name
+            for d in PERSONAS_ROOT.iterdir()
+            if d.is_dir() and not d.name.startswith(("_", "x3_"))  # x3_* are evaluation copies
+        ]
         if args.all
         else []
     )
     if not personas:
         ap.error("pass --persona NAME or --all")
+    if args.contextual:  # the V6 index is evaluation input: only its configured model writes it
+        os.environ.setdefault("GIGBID_STRICT_MODELS", "1")
     store = ChunkStore()
     for p in personas:
-        ingest_persona(store, PERSONAS_ROOT / p, contextual=args.contextual, force=args.force)
+        try:
+            ingest_persona(store, PERSONAS_ROOT / p, contextual=args.contextual, force=args.force)
+        except Exception as exc:
+            from agent import llm
+
+            if not llm.is_daily_cap(exc):
+                raise
+            log.warning("partial: daily model cap reached while indexing %s; rerun later", p)
+            raise SystemExit(3) from exc
 
 
 if __name__ == "__main__":

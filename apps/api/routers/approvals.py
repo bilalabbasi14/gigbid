@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from agent import llm
-from agent.guardrails import SYSTEM_GUARD
+from agent.guardrails import system_guard
 from agent.handoffs import ApprovalPayload
 from agent.nodes.writer import evidence_block
 from agent.prompts import load_prompt
@@ -22,6 +22,7 @@ from apps.api.schemas import (
     ApprovalListOut,
     ApprovalResultOut,
     MessageApprovalPayload,
+    PortfolioBuildPayload,
     RegenerateIn,
     RegenerateOut,
 )
@@ -31,6 +32,17 @@ router = APIRouter(tags=["approvals"])
 
 def to_item(r: Run, payload: dict) -> ApprovalItem:
     """Typed approval item: the bid graph's ApprovalPayload or the conversation graph's payload."""
+    if r.kind == "portfolio":
+        pf = PortfolioBuildPayload.model_validate(payload)
+        title = f"Portfolio builder: {len(pf.drafts)} case studies from {pf.owner}"
+        return ApprovalItem(
+            thread_id=r.thread_id,
+            kind="portfolio",
+            job_id=None,
+            title=title,
+            created_at=r.updated_at,
+            portfolio=pf,
+        )
     if r.kind == "conversation":
         msg = MessageApprovalPayload.model_validate(payload)
         title = (msg.job or {}).get("title") or r.job_id or r.thread_id
@@ -144,7 +156,7 @@ async def regenerate_paragraph(
     )
     resp = await llm.ainvoke_for_node(
         "writer",
-        [SystemMessage(content=f"{system}\n\n{SYSTEM_GUARD}"), HumanMessage(content=prompt)],
+        [SystemMessage(content=f"{system}\n\n{system_guard()}"), HumanMessage(content=prompt)],
     )
     new_para = str(resp.content).strip()
     known = {e["evidence_id"] for e in values.get("evidence", [])}

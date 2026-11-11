@@ -7,6 +7,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
+from agent import policy
 from agent.deps import Deps
 from agent.handoffs import ProposalDraft
 from agent.nodes._common import job_text, llm_event, node_output
@@ -68,6 +69,8 @@ async def run(state: BidState, deps: Deps) -> dict[str, Any]:
         style_rules="; ".join(state.get("style_rules", [])) or "none",
         outcome_hints="; ".join(state.get("outcome_hints", [])) or "none",
         revision_block=revision_block,
+        policy_version=policy.version(),
+        policy_rules=policy.rules_for_writer("proposal"),
     )
     cover, answers = parse_draft(res.text)
     cited = sorted(set(re.findall(r"\[([0-9a-f]{8,32})\]", cover + " " + " ".join(answers))))

@@ -2462,6 +2462,82 @@
         }
       }
     },
+    "/portfolio/github/build": {
+      "post": {
+        "tags": [
+          "portfolio"
+        ],
+        "summary": "Build From Github",
+        "description": "X3 Portfolio builder: turn repositories into case studies verified against their code.\nsource=github reads the user's account through the official GitHub MCP server (read-only);\nsource=demo reads a demo persona's repositories from disk, so the feature works without a token.\nDrafts stop at an approval; only approved case studies are added to the user's own portfolio.",
+        "operationId": "build_from_github_portfolio_github_build_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          },
+          {
+            "name": "gigbid_session",
+            "in": "cookie",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gigbid Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BuildIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildOut"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/portfolio/reindex": {
       "post": {
         "tags": [
@@ -3092,6 +3168,22 @@
               }
             ],
             "title": "Confirmed Slot"
+          },
+          "portfolio_decisions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portfolio Decisions",
+            "description": "X3: {repo: {action: approve|edit|reject, markdown?}}"
           }
         },
         "type": "object",
@@ -3110,7 +3202,8 @@
             "type": "string",
             "enum": [
               "proposal",
-              "message"
+              "message",
+              "portfolio"
             ],
             "title": "Kind"
           },
@@ -3148,6 +3241,16 @@
             "anyOf": [
               {
                 "$ref": "#/components/schemas/MessageApprovalPayload"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "portfolio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PortfolioBuildPayload"
               },
               {
                 "type": "null"
@@ -3441,6 +3544,81 @@
         ],
         "title": "Body_upload_portfolio_upload_post"
       },
+      "BuildIn": {
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "github",
+              "demo"
+            ],
+            "title": "Source",
+            "default": "github"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100,
+                "pattern": "^[A-Za-z0-9-]*$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner",
+            "description": "GitHub username (source=github)"
+          },
+          "max_repos": {
+            "type": "integer",
+            "maximum": 15.0,
+            "minimum": 1.0,
+            "title": "Max Repos",
+            "default": 6
+          },
+          "demo_persona": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "ai_ml",
+                  "fullstack",
+                  "data_analyst"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Persona"
+          }
+        },
+        "type": "object",
+        "title": "BuildIn"
+      },
+      "BuildOut": {
+        "properties": {
+          "thread_id": {
+            "type": "string",
+            "title": "Thread Id"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "thread_id",
+          "status",
+          "source"
+        ],
+        "title": "BuildOut"
+      },
       "Claim": {
         "properties": {
           "claim_id": {
@@ -3501,6 +3679,34 @@
           "text"
         ],
         "title": "Claim"
+      },
+      "CodeFact": {
+        "properties": {
+          "fact_id": {
+            "type": "string",
+            "title": "Fact Id"
+          },
+          "kind": {
+            "type": "string",
+            "title": "Kind"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fact_id",
+          "kind",
+          "text",
+          "source"
+        ],
+        "title": "CodeFact"
       },
       "ComplianceVerdict": {
         "properties": {
@@ -3809,6 +4015,17 @@
             "type": "string",
             "title": "Status"
           },
+          "persistence": {
+            "type": "string",
+            "enum": [
+              "postgres",
+              "memory",
+              "unknown"
+            ],
+            "title": "Persistence",
+            "description": "Checkpoint store; with memory, pending approvals do not survive a restart",
+            "default": "unknown"
+          },
           "marketplace_mode": {
             "type": "string",
             "title": "Marketplace Mode"
@@ -3825,6 +4042,24 @@
           "policy_version": {
             "type": "integer",
             "title": "Policy Version"
+          },
+          "marketplace_policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marketplace Policy Version",
+            "description": "Policy version the marketplace says it enforces, when it reports one"
+          },
+          "policy_drift": {
+            "type": "boolean",
+            "title": "Policy Drift",
+            "description": "The marketplace enforces a different policy version than GigBid's pack",
+            "default": false
           },
           "model_profile": {
             "type": "string",
@@ -4650,6 +4885,136 @@
           "columns"
         ],
         "title": "PipelineOut"
+      },
+      "PortfolioBuildPayload": {
+        "properties": {
+          "kind": {
+            "type": "string",
+            "const": "portfolio",
+            "title": "Kind",
+            "default": "portfolio"
+          },
+          "thread_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thread Id"
+          },
+          "owner": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner"
+          },
+          "persona_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Persona Key"
+          },
+          "drafts": {
+            "items": {
+              "$ref": "#/components/schemas/PortfolioDraftOut"
+            },
+            "type": "array",
+            "title": "Drafts"
+          },
+          "skipped": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Skipped"
+          }
+        },
+        "type": "object",
+        "title": "PortfolioBuildPayload",
+        "description": "X3: case studies drafted from repositories, waiting for the human."
+      },
+      "PortfolioDraftOut": {
+        "properties": {
+          "repo": {
+            "type": "string",
+            "title": "Repo"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "markdown": {
+            "type": "string",
+            "title": "Markdown"
+          },
+          "facts": {
+            "items": {
+              "$ref": "#/components/schemas/CodeFact"
+            },
+            "type": "array",
+            "title": "Facts"
+          },
+          "claims": {
+            "items": {
+              "$ref": "#/components/schemas/Claim"
+            },
+            "type": "array",
+            "title": "Claims"
+          },
+          "profile": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Profile"
+          },
+          "verification": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Verification"
+          },
+          "seconds": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repo",
+          "title",
+          "markdown"
+        ],
+        "title": "PortfolioDraftOut"
       },
       "PortfolioItemOut": {
         "properties": {

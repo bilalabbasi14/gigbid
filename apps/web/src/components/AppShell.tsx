@@ -13,6 +13,7 @@ const NAV = [
   { href: "/inbox", label: "Inbox" },
   { href: "/pipeline", label: "Pipeline" },
   { href: "/messages", label: "Messages" },
+  { href: "/portfolio", label: "Portfolio" },
   { href: "/runs", label: "Agent runs" },
   { href: "/analytics", label: "Analytics" },
   { href: "/settings", label: "Settings" },
@@ -99,7 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       {pendingCount > 0 && !onboarding && !path.startsWith("/studio") && (
         <div className="border-b border-indigo-200 bg-indigo-50 px-4 py-1.5 text-center text-sm text-indigo-950 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-100">
           {pendingCount} item{pendingCount > 1 ? "s" : ""} waiting for your approval.{" "}
-          <Link className="font-medium underline" href={pending.data!.items[0].kind === "proposal" ? `/studio/${pending.data!.items[0].thread_id}` : "/messages"}>
+          <Link className="font-medium underline" href={pending.data!.items[0].kind === "proposal" ? `/studio/${pending.data!.items[0].thread_id}` : pending.data!.items[0].kind === "portfolio" ? `/portfolio?build=${pending.data!.items[0].thread_id}` : "/messages"}>
             Review now
           </Link>
         </div>

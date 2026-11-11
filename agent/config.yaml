@@ -40,6 +40,7 @@ models:
   # Route by node: tier name resolved against the active profile.
   nodes:
     scout: small
+    contextualizer: small        # V6 index-time context lines (offline, one call per document)
     analyst: medium
     risk_assessor: small
     fit_matcher: medium
@@ -117,5 +118,7 @@ memory:
   outcome_promotion_min_samples: 5 # outcomes per category before a rule is promoted
 
 guardrails:
+  enabled: true                    # injection defences; only the injection evaluation turns them off
   injection_patterns_file: data/policy_pack/injection_patterns.yaml
+  policy_file: data/policy_pack/policy.yaml   # rules the Compliance Guard and Writer follow
   untrusted_delimiter: "<<<UNTRUSTED_JOB_TEXT>>>"

@@ -30,8 +30,20 @@ def _patterns() -> list[tuple[str, re.Pattern[str]]]:
     return out
 
 
+def enabled() -> bool:
+    """Injection defences are always on in the product. evals/runners/injection_eval.py switches
+    them off to measure the attack success rate without them (guardrails.enabled in config)."""
+    return bool(settings.config().guardrails.get("enabled", True))
+
+
+def system_guard() -> str:
+    return SYSTEM_GUARD if enabled() else ""
+
+
 def detect_injection(text: str) -> list[dict[str, Any]]:
     """Return matched patterns [{id, span}] in untrusted text."""
+    if not enabled():
+        return []
     hits: list[dict[str, Any]] = []
     for pid, rx in _patterns():
         for m in rx.finditer(text or ""):
@@ -56,6 +68,8 @@ def delimit_untrusted(
     text: str, kind: str = "JOB_TEXT", *, neutralise_first: bool = True, max_chars: int = 6000
 ) -> str:
     """Wrap untrusted text in delimiters every prompt tells the model to treat as data."""
+    if not enabled():
+        return (text or "")[:max_chars]
     body = neutralise(text) if neutralise_first else (text or "")
     body = body.replace("<<<", "<<").replace(">>>", ">>")  # never let the data forge our delimiters
     return f"{_OPEN.format(kind=kind)}\n{body[:max_chars]}\n{_CLOSE.format(kind=kind)}"

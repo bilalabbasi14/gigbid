@@ -7,6 +7,8 @@
    in a row that cites a results file, or inside a <!-- results: path --> block).
 
 Run: `python scripts/ci_checks.py`  (exit 1 on any violation)
+Freeze gigsim/ the day the instructor's simulator is swapped in:
+     `python scripts/ci_checks.py --freeze-gigsim`  (writes gigsim/.lock.sha256)
 """
 
 from __future__ import annotations
@@ -73,8 +75,34 @@ def check_secrets(files: list[Path]) -> list[str]:
     return errors
 
 
+GIGSIM_LOCK = ROOT / "gigsim" / ".lock.sha256"
+
+
+def _digest(p: Path) -> str:
+    """SHA-256 of a file; text files are hashed with LF endings so Windows and Linux checkouts
+    of the same commit agree."""
+    data = p.read_bytes()
+    if b"\0" not in data[:8192]:
+        data = data.replace(b"\r\n", b"\n")
+    return hashlib.sha256(data).hexdigest()
+
+
+def freeze_gigsim() -> int:
+    root = ROOT / "gigsim"
+    files = sorted(
+        f
+        for f in root.rglob("*")
+        if f.is_file() and f != GIGSIM_LOCK and "__pycache__" not in f.parts
+    )
+    lines = ["# sha256 (text hashed with LF line endings)  path under gigsim/"]
+    lines += [f"{_digest(f)}  {f.relative_to(root).as_posix()}" for f in files]
+    GIGSIM_LOCK.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"locked {len(files)} files in {GIGSIM_LOCK.relative_to(ROOT).as_posix()}")
+    return 0
+
+
 def check_gigsim_lock() -> list[str]:
-    lock = ROOT / "gigsim" / ".lock.sha256"
+    lock = GIGSIM_LOCK
     if not lock.exists():
         return []  # not frozen yet (student-built simulator still evolving)
     expected: dict[str, str] = {}
@@ -89,7 +117,7 @@ def check_gigsim_lock() -> list[str]:
         if not p.exists():
             errors.append(f"gigsim/{rel} missing (locked)")
             continue
-        actual = hashlib.sha256(p.read_bytes()).hexdigest()
+        actual = _digest(p)
         if actual != digest:
             errors.append(f"gigsim/{rel} modified (locked by gigsim/.lock.sha256)")
     return errors
@@ -161,4 +189,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(freeze_gigsim() if "--freeze-gigsim" in sys.argv[1:] else main())

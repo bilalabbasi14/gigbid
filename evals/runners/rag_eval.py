@@ -90,6 +90,9 @@ def main() -> None:
     ap.add_argument("--variants", default="v0_naive")
     ap.add_argument("--personas", default="ai_ml,fullstack,data_analyst")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument(
+        "--tag", default="", help="suffix for result files/summary keys, e.g. _subset20"
+    )
     args = ap.parse_args()
     variants = [v for v in args.variants.split(",") if v]
     personas = [p for p in args.personas.split(",") if p]
@@ -98,13 +101,16 @@ def main() -> None:
             ap.error(f"unknown variant {v}")
     RESULTS.mkdir(parents=True, exist_ok=True)
     res = Resources()
-    summary_path = RESULTS / "rag_summary.json"
+    summary_path = RESULTS / f"rag_summary{args.tag}.json"
     summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
     for v in variants:
         result = run_variant(v, personas, args.limit, res)
         result["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        (RESULTS / f"rag_{v}.json").write_text(json.dumps(result, indent=2), encoding="utf-8")
-        summary[v] = {
+        (RESULTS / f"rag_{v}{args.tag}.json").write_text(
+            json.dumps(result, indent=2), encoding="utf-8"
+        )
+        result["limit_per_persona"] = args.limit
+        summary[f"{v}{args.tag}"] = {
             "overall": result.get("overall"),
             "personas": result["personas"],
             "n_jobs": result["n_jobs"],

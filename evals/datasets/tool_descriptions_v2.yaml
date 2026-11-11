@@ -1,0 +1,58 @@
+# R&D question A, tool set C: the same fine-grained tools with rewritten descriptions.
+# Pattern: what it does, when to use it, when NOT to use it (and what to use instead), key args.
+search_jobs: >-
+  Find OPEN job posts on the marketplace. Use for any request to look for, list, browse or filter jobs
+  (by keywords in `query`, required `skills`, `payment_type` fixed|hourly, `min_budget`, `posted_after`,
+  `page`/`limit`). Do not use to open one known job id (use get_job).
+get_job: >-
+  Fetch ONE job post by its id (job_...): full description, screening questions, budget, Connects cost
+  and a client summary. Use whenever the user names a specific job id. Do not use to search.
+get_client_history: >-
+  Fetch a CLIENT's public history by client id (cl_...): spend, hires, rating, payment verification,
+  past jobs. Use for trust, risk or "has this client hired before" questions.
+get_connects_balance: >-
+  Return the freelancer's current Connects balance. Use for any question about Connects left or before
+  spending Connects. Takes no arguments.
+list_threads: >-
+  List the freelancer's client conversation threads with unread counts. Use to see which conversations
+  exist or need attention. Do not use to read one thread (use list_messages).
+list_messages: >-
+  Read the messages of ONE conversation thread by `thread_id` (thr_...), oldest first.
+list_events: >-
+  List pipeline events (proposal viewed, replied, interview, hired, message received) after `since_id`.
+  Use for "what happened to my proposals since ..." questions.
+marketplace_health: >-
+  Report whether the marketplace is reachable and which policy version it enforces. Use for
+  availability or policy-version questions.
+create_proposal_draft: >-
+  PREVIEW a proposal without sending it or spending Connects: returns exactly what would be sent and
+  its cost. Use when the user wants a draft or preview of a proposal. `draft` needs job_id,
+  cover_letter, bid_amount, bid_type and an idempotency_key.
+submit_proposal: >-
+  SUBMIT an approved proposal (spends Connects). Use only when the user says it is approved / submit /
+  send the proposal. Set draft.dry_run=true when they ask what WOULD be sent. `draft` needs job_id,
+  cover_letter, bid_amount, bid_type, idempotency_key.
+send_message: >-
+  SEND an approved reply in a client thread. `message` needs thread_id, body and idempotency_key. Do not
+  use for email (use create_email_draft).
+search_evidence: >-
+  Search the freelancer's PORTFOLIO for evidence supporting one requirement (case studies, code, reviews,
+  past proposals). Use for "do I have evidence / experience of X". Put the skill or deliverable in
+  `requirement`; `k` = how many items; `filters` can restrict doc_types (e.g. ["code"]) or outcome
+  (won|replied|ignored).
+get_case_study: >-
+  Open ONE portfolio project by project id (p01, p02, ...): full case study, results, stack, reviews.
+  Use whenever the user names a project id.
+list_skills: >-
+  List all skills and technologies the portfolio can evidence, with counts. Use for "what skills /
+  technologies do I have" questions. Takes no required arguments.
+get_free_slots: >-
+  List FREE calendar slots for interviews (`days` ahead, `slot_minutes` long, `max_slots`). Use for
+  availability questions. Does not book anything.
+create_interview_hold: >-
+  Book a TENTATIVE calendar hold for an interview: `start`, `end` (ISO-8601 UTC), `title`,
+  `idempotency_key`.
+create_email_draft: >-
+  Save an EMAIL as a draft (never sends): `to`, `subject`, `body`, `idempotency_key`.
+list_workspace_items: >-
+  List existing interview holds and email drafts.

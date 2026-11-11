@@ -47,7 +47,7 @@ class Env(BaseSettings):
     mcp_marketplace_url: str = "http://localhost:8102/mcp"
     mcp_workspace_url: str = "http://localhost:8103/mcp"
     mcp_bearer_token: str = "dev-mcp-token"  # noqa: S105 (dev default, overridden by .env)
-    github_mcp_url: str = "https://api.githubcopilot.com/mcp/"
+    github_mcp_url: str = "https://api.githubcopilot.com/mcp/x/repos/readonly"
     github_token: str = ""
 
     model_profile: Literal["open", "paid", "local"] = "open"

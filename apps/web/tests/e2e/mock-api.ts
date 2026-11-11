@@ -1,7 +1,7 @@
 import type { Page, Route } from "@playwright/test";
 
 // Stateful stand-in for the FastAPI backend. Shapes follow src/lib/api/schema.d.ts.
-export type MockOptions = { onboarded?: boolean; marketplaceDown?: boolean; signedIn?: boolean };
+export type MockOptions = { onboarded?: boolean; marketplaceDown?: boolean; signedIn?: boolean; marketplacePolicy?: number };
 
 export const THREAD = "bid-test0001";
 const EV1 = "aaaa1111bbbb2222";
@@ -43,7 +43,7 @@ function proposalPayload(letter = LETTER, revision = 0) {
 }
 
 export class MockApi {
-  state: { user: Record<string, unknown> | null; settings: Record<string, unknown>; approval: ReturnType<typeof proposalPayload> | null; decisions: Record<string, unknown>[]; marketplaceDown: boolean };
+  state: { user: Record<string, unknown> | null; settings: Record<string, unknown>; approval: ReturnType<typeof proposalPayload> | null; decisions: Record<string, unknown>[]; marketplaceDown: boolean; marketplacePolicy: number };
   constructor(opts: MockOptions = {}) {
     this.state = {
       user: opts.signedIn === false ? null : { user_id: "usr_1", email: "reviewer@gigbid.local", display_name: "Reviewer", role: "reviewer", persona: "ai_ml", onboarded: opts.onboarded ?? true, settings: { onboarded: opts.onboarded ?? true, persona: "ai_ml" } },
@@ -51,6 +51,7 @@ export class MockApi {
       approval: proposalPayload(),
       decisions: [],
       marketplaceDown: !!opts.marketplaceDown,
+      marketplacePolicy: opts.marketplacePolicy ?? 1,
     };
   }
 
@@ -70,7 +71,7 @@ export class MockApi {
     const body = req.postData() ? (() => { try { return JSON.parse(req.postData()!); } catch { return {}; } })() : {};
     const s = this.state;
 
-    if (path === "/health") return this.json(route, { status: s.marketplaceDown ? "degraded" : "ok", marketplace_mode: "gigsim", marketplace_reachable: !s.marketplaceDown, degraded: s.marketplaceDown ? { marketplace: { since: 0, error: "503" } } : {}, policy_version: 1, model_profile: "open" });
+    if (path === "/health") return this.json(route, { status: s.marketplaceDown ? "degraded" : "ok", marketplace_mode: "gigsim", marketplace_reachable: !s.marketplaceDown, degraded: s.marketplaceDown ? { marketplace: { since: 0, error: "503" } } : {}, policy_version: 1, marketplace_policy_version: s.marketplacePolicy, policy_drift: s.marketplacePolicy !== 1, persistence: "postgres", model_profile: "open" });
     if (path === "/auth/me") return s.user ? this.json(route, s.user) : this.json(route, { detail: "not signed in" }, 401);
     if (path === "/auth/login" || path === "/auth/register") {
       s.user = s.user ?? { user_id: "usr_1", email: body.email, display_name: body.display_name || "New", role: "user", persona: "ai_ml", onboarded: path === "/auth/login", settings: {} };

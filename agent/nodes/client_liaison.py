@@ -7,6 +7,7 @@ from __future__ import annotations
 import time
 from typing import Any
 
+from agent import policy
 from agent.deps import Deps
 from agent.guardrails import delimit_untrusted, detect_injection
 from agent.handoffs import ComplianceVerdict, IntentClassification, ReplyDraft
@@ -125,6 +126,7 @@ async def draft_reply(state: ConversationState, deps: Deps) -> dict[str, Any]:
         or "(none)",
         slots="; ".join(f"{s['start']} to {s['end']}" for s in slots) or "(none requested)",
         style_rules="; ".join(state.get("style_rules", [])) or "none",
+        policy_rules=policy.rules_for_writer("message"),
     )
     reply = ReplyDraft(
         thread_id=state["marketplace_thread_id"],
@@ -132,7 +134,7 @@ async def draft_reply(state: ConversationState, deps: Deps) -> dict[str, Any]:
         proposed_slots=slots,
         intent=intent["intent"],
     )
-    violations = check_text(reply.body)
+    violations = check_text(reply.body, kind="message")
     blocking = [v for v in violations if v.severity == "block"]
     verdict = ComplianceVerdict(
         allowed=not blocking,
