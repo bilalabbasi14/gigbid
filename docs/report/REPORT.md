@@ -69,11 +69,37 @@ over a few coarse tools, at a token cost per task. Setup: 40 tasks (`evals/datas
 three tool sets (fine, coarse, best), one model, exactly one call per task. Interim rows are in
 `evals/results/tool_design_rows.jsonl`.
 
-## 4. R&D question B: retrieval and claim verification (*pending*)
+## 4. R&D question B: retrieval and claim verification (*partly pending*)
 
-Variants V0 to V9 plus a composable `best`, retrieval metrics per persona
-(`evals/results/rag_*.json`), claim verification before and after
-(`evals/results/proposal_eval_*.json`), and the judge calibration (`judge_calibration.json`).
+**Hypothesis.** Freelancer evidence is written three ways: case studies in prose, code and
+READMEs, and short reviews. Exact skill names ("Airflow", "dbt") matter as much as meaning, so
+hybrid retrieval should beat dense retrieval, and a cross-encoder should help most where job
+posts and evidence use different words.
+
+**Setup.** 193 dev jobs over three personas, gold relevant projects per job, retrieval at
+project level, past proposals for the same job excluded (leakage guard). Embeddings
+`bge-base-en-v1.5`, reranker `bge-reranker-base`, both on CPU (`evals/results/rag_summary.json`).
+
+| Variant | Recall@5 | MRR | nDCG@10 | ai_ml | fullstack | data_analyst |
+|---|---|---|---|---|---|---|
+| V0 dense | 0.672 | 0.432 | 0.486 | 0.700 | 0.609 | 0.707 |
+| V2 hybrid (BM25 + dense, RRF) | 0.693 | 0.441 | 0.505 | 0.731 | 0.586 | 0.760 |
+| V3 cross-encoder rerank | 0.654 | 0.420 | 0.479 | 0.754 | 0.500 | 0.707 |
+| V4 outcome-aware | 0.654 | 0.439 | 0.503 | 0.715 | 0.523 | 0.723 |
+| V5 multi-vector projects | 0.587 | 0.396 | 0.494 | 0.654 | 0.531 | 0.576 |
+| V8 corrective loop | 0.638 | 0.419 | 0.472 | 0.739 | 0.469 | 0.707 |
+
+Persona columns are Recall@5. Source: `evals/results/rag_summary.json`.
+
+**Findings so far.** Hybrid retrieval helps overall, most for the data analyst (+0.053 Recall@5
+over V0), and costs fullstack 0.023. The reranker is a negative result: it is the best variant
+for ai_ml and the second worst for fullstack, so it does not ship as a global stage. The
+corrective loop shows the same split, which fits the fact that it grades with the same
+cross-encoder. Why the cross-encoder demotes fullstack evidence is not yet established; a
+per-query comparison of V2 and V3 on the fullstack jobs is pending. The LLM-based
+variants (V1 decomposition, V7 HyDE, `best`), V6 contextual and V9 skill graph, claim
+verification before and after (`proposal_eval_*.json`) and the judge calibration
+(`judge_calibration.json`) are pending.
 
 ## 5. R&D question C: single agent, supervisor, graph (*pending: `multiagent_comparison.json`*)
 
