@@ -24,6 +24,7 @@ from apps.api.routers import (
     jobs,
     messages,
     pipeline,
+    portfolio,
     runs,
     settings_router,
 )
@@ -101,6 +102,7 @@ for r in (
     approvals.router,
     messages.router,
     pipeline.router,
+    portfolio.router,
     runs.router,
     streaming.router,
     analytics.router,

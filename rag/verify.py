@@ -192,7 +192,7 @@ async def repair_draft(
     for c in flagged:
         still_there = c.text[:60].lower() in new_text.lower()
         c.action = (
-            "kept"
+            "keep"
             if still_there and c.label == "partly_supported"
             else ("rewritten" if still_there else "removed")
         )  # type: ignore[assignment]

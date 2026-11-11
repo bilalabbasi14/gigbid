@@ -10,7 +10,7 @@ from agent.marketplace_port import MarketplaceError, make_marketplace
 from apps.api.auth.security import CurrentUser
 from apps.api.db import PipelineCard, Run, get_session
 from apps.api.runtime import runtime
-from apps.api.schemas import AnalyseOut, MessagesOut, ThreadOut
+from apps.api.schemas import AnalyseOut, MessageApprovalPayload, MessagesOut, ThreadOut
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -75,7 +75,8 @@ async def messages(
     )
     suggested = None
     if r and r.status == "awaiting_approval":
-        suggested = await runtime().pending_payload(r.thread_id, "conversation", user.user_id)
+        raw = await runtime().pending_payload(r.thread_id, "conversation", user.user_id)
+        suggested = MessageApprovalPayload.model_validate(raw) if raw else None
     return MessagesOut(
         marketplace_thread_id=marketplace_thread_id,
         items=[m.model_dump() for m in items],

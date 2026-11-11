@@ -13,9 +13,11 @@ from agent.handoffs import (
     ComplianceVerdict,
     Critique,
     FitReport,
+    IntentClassification,
     JobSpec,
     PriceQuote,
     ProposalDraft,
+    ReplyDraft,
     RiskReport,
 )
 
@@ -147,13 +149,28 @@ class ScoutOut(BaseModel):
 
 
 # ---- approvals ----
+class MessageApprovalPayload(BaseModel):
+    """What the human sees when the conversation graph pauses before sending a reply."""
+
+    kind: Literal["message"] = "message"
+    thread_id: str
+    marketplace_thread_id: str
+    job: dict[str, Any] | None = None
+    intent: IntentClassification | None = None
+    reply: ReplyDraft | None = None
+    proposed_slots: list[dict[str, Any]] = Field(default_factory=list)
+    compliance: ComplianceVerdict | None = None
+    latest_message: dict[str, Any] | None = None
+
+
 class ApprovalItem(BaseModel):
     thread_id: str
     kind: Literal["proposal", "message"]
     job_id: str | None
     title: str
     created_at: dt.datetime
-    payload: dict[str, Any]
+    proposal: ApprovalPayload | None = None
+    message: MessageApprovalPayload | None = None
 
 
 class ApprovalListOut(BaseModel):
@@ -174,7 +191,8 @@ class ApprovalResultOut(BaseModel):
     submission: dict[str, Any] | None = None
     sent: dict[str, Any] | None = None
     promoted_style_rules: list[str] = Field(default_factory=list)
-    next_payload: dict[str, Any] | None = None
+    next_proposal: ApprovalPayload | None = None
+    next_message: MessageApprovalPayload | None = None
 
 
 class RegenerateIn(BaseModel):
@@ -248,7 +266,7 @@ class ThreadOut(BaseModel):
 class MessagesOut(BaseModel):
     marketplace_thread_id: str
     items: list[dict[str, Any]]
-    suggested_reply: dict[str, Any] | None = None
+    suggested_reply: MessageApprovalPayload | None = None
     conversation_thread_id: str | None = None
 
 
@@ -271,4 +289,4 @@ class HealthOut(BaseModel):
     model_profile: str
 
 
-__all__ = ["ApprovalPayload"]
+__all__ = ["ApprovalPayload", "MessageApprovalPayload"]

@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from agent import llm
 from agent.guardrails import SYSTEM_GUARD
+from agent.handoffs import ApprovalPayload
 from agent.nodes.writer import evidence_block
 from agent.prompts import load_prompt
 from apps.api.auth.security import CurrentUser
@@ -20,11 +21,37 @@ from apps.api.schemas import (
     ApprovalItem,
     ApprovalListOut,
     ApprovalResultOut,
+    MessageApprovalPayload,
     RegenerateIn,
     RegenerateOut,
 )
 
 router = APIRouter(tags=["approvals"])
+
+
+def to_item(r: Run, payload: dict) -> ApprovalItem:
+    """Typed approval item: the bid graph's ApprovalPayload or the conversation graph's payload."""
+    if r.kind == "conversation":
+        msg = MessageApprovalPayload.model_validate(payload)
+        title = (msg.job or {}).get("title") or r.job_id or r.thread_id
+        return ApprovalItem(
+            thread_id=r.thread_id,
+            kind="message",
+            job_id=r.job_id,
+            title=title,
+            created_at=r.updated_at,
+            message=msg,
+        )
+    prop = ApprovalPayload.model_validate(payload)
+    title = (prop.job_spec.title if prop.job_spec else None) or r.job_id or r.thread_id
+    return ApprovalItem(
+        thread_id=r.thread_id,
+        kind="proposal",
+        job_id=r.job_id,
+        title=title,
+        created_at=r.updated_at,
+        proposal=prop,
+    )
 
 
 @router.get("/approvals", response_model=ApprovalListOut)
@@ -43,21 +70,7 @@ async def pending(
         payload = await runtime().pending_payload(r.thread_id, r.kind, user.user_id)
         if not payload:
             continue
-        title = (
-            (payload.get("job") or {}).get("title")
-            if r.kind == "conversation"
-            else (payload.get("job_spec") or {}).get("title") or r.job_id or ""
-        )
-        items.append(
-            ApprovalItem(
-                thread_id=r.thread_id,
-                kind="proposal" if r.kind == "bid" else "message",
-                job_id=r.job_id,
-                title=title or r.thread_id,
-                created_at=r.updated_at,
-                payload=payload,
-            )
-        )
+        items.append(to_item(r, payload))
     return ApprovalListOut(items=items)
 
 
@@ -71,19 +84,7 @@ async def one(
     payload = await runtime().pending_payload(thread_id, r.kind, user.user_id)
     if not payload:
         raise HTTPException(409, f"run is not awaiting approval (status {r.status})")
-    title = (
-        (payload.get("job") or {}).get("title")
-        if r.kind == "conversation"
-        else (payload.get("job_spec") or {}).get("title") or r.job_id or ""
-    )
-    return ApprovalItem(
-        thread_id=thread_id,
-        kind="proposal" if r.kind == "bid" else "message",
-        job_id=r.job_id,
-        title=title or thread_id,
-        created_at=r.updated_at,
-        payload=payload,
-    )
+    return to_item(r, payload)
 
 
 @router.post("/approvals/{thread_id}", response_model=ApprovalResultOut)
@@ -98,18 +99,21 @@ async def decide(thread_id: str, body: ApprovalDecisionIn, user: CurrentUser) ->
         raise HTTPException(404, str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(409, str(exc)) from exc
-    nxt = None
+    next_item = None
     if values.get("status") == "awaiting_approval":
         async for s in get_session():
             r = await s.get(Run, thread_id)
-        nxt = await runtime().pending_payload(thread_id, r.kind if r else "bid", user.user_id)
+        if r is not None:
+            nxt = await runtime().pending_payload(thread_id, r.kind, user.user_id)
+            next_item = to_item(r, nxt) if nxt else None
     return ApprovalResultOut(
         thread_id=thread_id,
         status=values.get("status", "unknown"),
         submission=values.get("submission"),
         sent=values.get("sent"),
         promoted_style_rules=values.get("_promoted_style_rules", []),
-        next_payload=nxt,
+        next_proposal=next_item.proposal if next_item else None,
+        next_message=next_item.message if next_item else None,
     )
 
 

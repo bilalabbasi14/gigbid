@@ -170,11 +170,11 @@ async def test_inbox_analyse_approve_pipeline(client: AsyncClient):
                 break
         assert "event: snapshot" in body
     pending = (await client.get("/approvals")).json()["items"]
-    assert len(pending) == 1 and pending[0]["payload"]["dry_run_preview"]["connects_cost"] == 8
+    assert len(pending) == 1 and pending[0]["proposal"]["dry_run_preview"]["connects_cost"] == 8
     one = (await client.get(f"/approvals/{thread_id}")).json()
-    assert one["payload"]["draft"]["cover_letter"]
+    assert one["proposal"]["draft"]["cover_letter"]
     # regenerate one paragraph would need a model; the edit path is exercised instead
-    edited = one["payload"]["draft"]["cover_letter"].replace(
+    edited = one["proposal"]["draft"]["cover_letter"].replace(
         "I keep the stack", "I will keep the stack"
     )
     r = await client.post(
@@ -183,7 +183,7 @@ async def test_inbox_analyse_approve_pipeline(client: AsyncClient):
     assert (
         r.status_code == 200
         and r.json()["status"] == "awaiting_approval"
-        and r.json()["next_payload"]["draft"]["cover_letter"] == edited
+        and r.json()["next_proposal"]["draft"]["cover_letter"] == edited
     )
     r = await client.post(f"/approvals/{thread_id}", json={"action": "approve"})
     assert (

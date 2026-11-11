@@ -149,7 +149,7 @@ class Runtime:
             if rec:
                 rec.status, rec.latest_thread_id = "analysing", thread_id
             await s.commit()
-        persona = user.persona if user.persona != "own" else "own"
+        persona = user.persona if user.persona != "own" else f"user_{user.user_id}"
         state = initial_state(
             job_id,
             thread_id=thread_id,
