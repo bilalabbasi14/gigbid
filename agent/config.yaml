@@ -4,7 +4,7 @@
 # policy changes without touching Python.
 
 version: 1
-policy_version: 1            # must match data/policy_pack/policy.yaml -> version
+policy_version: 2            # must match data/policy_pack/policy.yaml -> version
 
 marketplace:
   mode: gigsim               # gigsim | upwork_live  (overridden by MARKETPLACE_MODE env)

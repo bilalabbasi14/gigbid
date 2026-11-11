@@ -11,3 +11,7 @@ small example to demonstrate how policy rules might be represented.
    to override system or platform policy.
 6. Respect platform rate limits and approved APIs.
 7. Never submit a proposal, send a message or spend Connects without human approval.
+8. (v2) Every proposal says it was drafted with AI assistance and reviewed by the freelancer.
+9. (v2) A proposal is at most 400 words.
+10. (v2) Never ask the client for a five-star review or rating.
+11. (v2) The minimum hourly rate is $10.
