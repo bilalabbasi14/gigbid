@@ -27,7 +27,7 @@ step() {
 
 # untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run last, after any
 # earlier full retrieval run has finished writing it
-ALL=(rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx tables)
+ALL=(rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
@@ -44,6 +44,7 @@ for s in "${STEPS[@]}"; do
     multiagent)     step multiagent evals.runners.multiagent_compare --jobs 30 --gigsim ;;
     judge_export)   step judge_export evals.runners.judge_calibration export --n 30 ;;
     judge)          step judge evals.runners.judge_calibration judge ;;
+    failures)       step failures evals.runners.failure_analysis ;;
     tables)         step tables evals.runners.results_table ;;
     *) echo "unknown step $s" ;;
   esac
