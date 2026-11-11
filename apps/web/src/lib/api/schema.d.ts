@@ -1085,6 +1085,13 @@ export interface components {
         HealthOut: {
             /** Status */
             status: string;
+            /**
+             * Persistence
+             * @description Checkpoint store; with memory, pending approvals do not survive a restart
+             * @default unknown
+             * @enum {string}
+             */
+            persistence: "postgres" | "memory" | "unknown";
             /** Marketplace Mode */
             marketplace_mode: string;
             /** Marketplace Reachable */

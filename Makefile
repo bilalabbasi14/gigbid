@@ -16,8 +16,8 @@ dev:  ## Start Postgres + Redis + GigSim in Docker, then API (reload) and web de
 	$(COMPOSE) up -d postgres redis gigsim
 	$(MAKE) -j2 api web
 
-api:  ## Run FastAPI with reload
-	$(PY) uvicorn apps.api.main:app --reload --port 8000
+api:  ## Run FastAPI (selector event loop on Windows so the Postgres checkpointer works)
+	$(PY) python -m apps.api.serve --port 8000
 
 web:  ## Run Next.js dev server
 	cd apps/web && npm run dev

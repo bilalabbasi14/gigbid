@@ -317,6 +317,10 @@ class AnalyticsOut(BaseModel):
 
 class HealthOut(BaseModel):
     status: str
+    persistence: Literal["postgres", "memory", "unknown"] = Field(
+        "unknown",
+        description="Checkpoint store; with memory, pending approvals do not survive a restart",
+    )
     marketplace_mode: str
     marketplace_reachable: bool
     degraded: dict[str, Any]

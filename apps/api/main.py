@@ -121,6 +121,7 @@ async def health() -> HealthOut:
     status = "ok" if reachable and not DEGRADED.failing else "degraded"
     return HealthOut(
         status=status,
+        persistence=rt.RUNTIME.persistence if rt.RUNTIME else "unknown",
         marketplace_mode=env.marketplace_mode,
         marketplace_reachable=reachable,
         degraded=DEGRADED.snapshot(),

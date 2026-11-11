@@ -71,6 +71,7 @@ class Runtime:
             self.deps, checkpointer=self.checkpointer, store=self.store
         )
         self._tasks: set[asyncio.Task[Any]] = set()
+        self.persistence = "memory"
         self._cm: list[Any] = []
 
     # ------------------------------------------------------------ lifecycle
@@ -99,6 +100,7 @@ class Runtime:
                 checkpointer, store, cms = None, None, []
         rt = cls(deps, checkpointer, store)
         rt._cm = cms
+        rt.persistence = "postgres" if cms else "memory"
         return rt
 
     async def close(self) -> None:

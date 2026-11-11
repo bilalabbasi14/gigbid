@@ -4015,6 +4015,17 @@
             "type": "string",
             "title": "Status"
           },
+          "persistence": {
+            "type": "string",
+            "enum": [
+              "postgres",
+              "memory",
+              "unknown"
+            ],
+            "title": "Persistence",
+            "description": "Checkpoint store; with memory, pending approvals do not survive a restart",
+            "default": "unknown"
+          },
           "marketplace_mode": {
             "type": "string",
             "title": "Marketplace Mode"
