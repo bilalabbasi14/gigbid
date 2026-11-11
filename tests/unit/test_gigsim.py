@@ -11,6 +11,7 @@ os.environ["GIGSIM_DB_PATH"] = ":memory:"
 os.environ["GIGSIM_CHAOS_RATE"] = "0"
 os.environ["GIGSIM_RATE_PER_MINUTE"] = "1000"
 os.environ["GIGSIM_CLIENT_MODE"] = "rules"
+os.environ["GIGSIM_ACCOUNTS"] = "dev-token:freelancer_dev:Dev Freelancer"
 
 from gigsim import app as gigsim_app  # noqa: E402
 

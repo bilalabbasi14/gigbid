@@ -12,6 +12,7 @@ import json
 import os
 import uuid
 from collections.abc import Iterator
+from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
@@ -46,7 +47,15 @@ chaos = Chaos()
 
 
 def parse_accounts() -> list[dict[str, str]]:
-    raw = os.environ.get("GIGSIM_ACCOUNTS", "dev-token:freelancer_dev:Dev Freelancer")
+    # Default account: the token the app uses (GIGSIM_API_TOKEN, also read from .env when present).
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+    except ImportError:
+        pass
+    default_token = os.environ.get("GIGSIM_API_TOKEN", "dev-token")
+    raw = os.environ.get("GIGSIM_ACCOUNTS", f"{default_token}:freelancer_dev:Dev Freelancer")
     out = []
     for item in raw.split(","):
         key, fid, *rest = item.split(":")

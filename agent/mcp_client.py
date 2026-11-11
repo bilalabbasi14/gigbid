@@ -254,13 +254,19 @@ async def in_process_loader() -> dict[str, list[BaseTool]]:
                         srv._mcp_server
                     ) as session:
                         res = await session.call_tool(tool_name, kwargs)
-                        if res.isError:
-                            raise RuntimeError(res.content[0].text if res.content else "tool error")
-                        return (
+                        error = (
+                            (res.content[0].text if res.content else "tool error")
+                            if res.isError
+                            else None
+                        )
+                        value = (
                             res.structuredContent
                             if res.structuredContent is not None
                             else (res.content[0].text if res.content else None)
                         )
+                    if error is not None:  # raise outside the session so no ExceptionGroup wraps it
+                        raise RuntimeError(error)
+                    return value
 
                 return call
 

@@ -153,13 +153,27 @@ def seed_database(
 
 def ensure_accounts(session: Session, accounts: list[dict[str, str]]) -> None:
     for a in accounts:
-        if session.get(Account, a["api_key"]) is None:
+        existing = session.scalar(
+            select(Account).where(Account.freelancer_id == a["freelancer_id"])
+        )
+        if existing is None:
             session.add(
                 Account(
                     api_key=a["api_key"],
                     freelancer_id=a["freelancer_id"],
                     display_name=a.get("display_name", a["freelancer_id"]),
                     connects=int(a.get("connects", 200)),
+                )
+            )
+        elif existing.api_key != a["api_key"]:  # token rotated in config: re-key the account
+            session.delete(existing)
+            session.flush()
+            session.add(
+                Account(
+                    api_key=a["api_key"],
+                    freelancer_id=a["freelancer_id"],
+                    display_name=existing.display_name,
+                    connects=existing.connects,
                 )
             )
     session.commit()
