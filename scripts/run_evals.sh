@@ -19,7 +19,9 @@ step() {
   fi
 }
 
-ALL=(rag_full rag_ctx_ingest rag_ctx rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge tables)
+# untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run last, after any
+# earlier full retrieval run has finished writing it
+ALL=(rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
