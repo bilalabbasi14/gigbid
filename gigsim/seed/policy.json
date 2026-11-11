@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "source": "student-built GigSim; mirrors data/policy_pack/policy.yaml",
+  "version": 2,
+  "source": "SIMULATED platform update for the change-request rehearsal (not the instructor update)",
   "connects": {
     "cost_per_proposal_default": 8,
     "weekly_budget_default": 80,
@@ -13,7 +13,13 @@
     "no_guarantees",
     "untrusted_input",
     "automation_fair_use",
-    "human_approval"
+    "human_approval",
+    "ai_disclosure",
+    "proposal_length",
+    "no_rating_requests"
   ],
-  "rate_limit_per_minute": 60
+  "rate_limit_per_minute": 60,
+  "pricing": {
+    "min_hourly_usd": 10
+  }
 }
