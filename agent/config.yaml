@@ -120,4 +120,5 @@ memory:
 guardrails:
   enabled: true                    # injection defences; only the injection evaluation turns them off
   injection_patterns_file: data/policy_pack/injection_patterns.yaml
+  policy_file: data/policy_pack/policy.yaml   # rules the Compliance Guard and Writer follow
   untrusted_delimiter: "<<<UNTRUSTED_JOB_TEXT>>>"

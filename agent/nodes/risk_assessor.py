@@ -6,12 +6,9 @@ changes behaviour without code edits."""
 from __future__ import annotations
 
 import json
-from functools import lru_cache
 from typing import Any
 
-import yaml
-
-from agent import settings
+from agent import policy, settings
 from agent.deps import Deps
 from agent.guardrails import detect_injection
 from agent.handoffs import RiskReport
@@ -23,16 +20,9 @@ from agent.structured import call_structured
 NODE = "risk_assessor"
 
 
-@lru_cache(maxsize=1)
-def policy() -> dict[str, Any]:
-    return yaml.safe_load(
-        (settings.ROOT / "data/policy_pack/policy.yaml").read_text(encoding="utf-8")
-    )
-
-
 def prescreen(job: dict[str, Any], client: dict[str, Any] | None) -> dict[str, Any]:
     text = f"{job.get('title', '')}\n{job.get('description', '')}".lower()
-    kw = policy().get("keywords", {})
+    kw = policy.load().get("keywords", {})
     flags: list[str] = []
     score = 0.0
     for key, weight in (("off_platform", 0.45), ("free_work", 0.4), ("guarantee", 0.05)):

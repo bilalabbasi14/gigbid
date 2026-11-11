@@ -89,7 +89,7 @@ async def approval_node(state: ConversationState) -> dict[str, Any]:
     if decision.action == "edit" and decision.edited_cover_letter is not None:
         before = state["reply_draft"]["body"]
         after = decision.edited_cover_letter
-        violations = check_text(after)
+        violations = check_text(after, kind="message")
         blocking = [v for v in violations if v.severity == "block"]
         verdict = ComplianceVerdict(
             allowed=not blocking,

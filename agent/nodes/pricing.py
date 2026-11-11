@@ -6,6 +6,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from agent import policy
 from agent.deps import Deps
 from agent.handoffs import PriceQuote
 from agent.nodes._common import node_output, obs
@@ -60,6 +61,10 @@ def quote(
         rate = float(prefs.get("hourly_rate") or base)
         amount = max(floor, base, min(rate, base * 1.25))
         rationale.append(f"user rate ${rate:g}/h, floor ${floor:g}/h")
+        minimum = policy.pricing_minimums()["hourly"]
+        if amount < minimum:
+            amount = minimum
+            rationale.append(f"raised to the platform minimum ${minimum:g}/h")
         amount = round(amount, 0)
         client_min, client_max = lo, hi
     else:
@@ -75,7 +80,7 @@ def quote(
             p25, p75 = q.get("p25"), q.get("p75")
             base = (p25 + (p75 - p25) * target_pct) if (p25 and p75) else floor * 4
             rationale.append(f"no budget stated; market p25-p75 ${p25}-${p75} for {persona}")
-        amount = round(max(floor, base), 0)
+        amount = round(max(floor, base, policy.pricing_minimums()["fixed"]), 0)
         rationale.append(f"floor ${floor:g}")
         client_min, client_max = (
             float(budget) if budget else None,

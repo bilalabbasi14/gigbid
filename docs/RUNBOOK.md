@@ -94,8 +94,18 @@ approvals stay pending. `docker compose start gigsim` clears it.
 
 ## 6. Policy changes
 
-Marketplace rules live in `data/policy_pack/policy.yaml` (keywords, Connects costs, severities)
-and thresholds and budgets in `agent/config.yaml`. A platform policy update is a data edit: bump
-`version` in `policy.yaml` and `policy_version` in `config.yaml`, adjust the rule, run
-`make test` and `make eval-smoke`. Prompts that mention policy read it from the payload, not from
-hard-coded text.
+Marketplace rules live in `data/policy_pack/policy.yaml` and thresholds and budgets in
+`agent/config.yaml`. A rule is data: an id, a severity (`block`, `rewrite` or `warn`), a
+description, the kinds of text it covers (`applies_to: [proposal, message]`) and detectors
+composed from the types in `agent/policy.py` (contact details, links, keyword lists, whole
+words, regex, word limits, required wording, unsupported claims). The Compliance Guard checks
+every rule, the Writer and the Client Liaison receive every rule's description in their prompt,
+and the Pricing Strategist never quotes below `pricing.min_hourly_usd` / `min_fixed_usd`.
+Connects costs arrive with each job from the marketplace.
+
+To apply a platform policy update:
+1. Edit or add rules in `policy.yaml`; bump its `version` and `policy_version` in `config.yaml`.
+2. `make test` (the pack is validated at load: an unknown detector or keyword list fails).
+3. `make eval-smoke`, then rerun the evaluation queue (results of the old policy are dropped).
+
+Only a rule that needs a new kind of detector requires code: one function in `agent/policy.py`.
