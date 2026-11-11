@@ -8,6 +8,7 @@ GIGSIM_ACCOUNTS ("key:freelancer_id:name,key2:..."), default dev-token:freelance
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import json
 import os
 import uuid
@@ -350,10 +351,13 @@ def create_proposal(
     pid = "prop_" + uuid.uuid4().hex[:12]
     thread_id = "thr_" + uuid.uuid4().hex[:12]
     client = db.get(Client, j.client_id)
+    # seed the client's dice on the job and the letter, not the random proposal id, so the same
+    # proposal to the same job always gets the same reaction (reproducible outcome evaluations)
+    seed_key = f"{j.job_id}:{hashlib.sha256(body.cover_letter.encode()).hexdigest()[:16]}"
     decision = sim_clients.decide(
         job_out(j),
         client.hidden_prefs if client else {},
-        pid,
+        seed_key,
         body.cover_letter,
         body.bid_amount,
         body.screening_answers,
@@ -602,6 +606,45 @@ def admin_reset(db: Session = Depends(get_db)) -> dict[str, Any]:
     db.commit()
     ensure_accounts(db, parse_accounts())
     return {"reset": True, **seed_database(db)}
+
+
+@app.post("/admin/open")
+def admin_open(job_ids: list[str], db: Session = Depends(get_db)) -> dict[str, Any]:
+    """Open specific pooled jobs (evaluation runs use a fixed job set)."""
+    opened = []
+    for jid in job_ids:
+        j = db.get(Job, jid)
+        if j is not None and j.status != "open":
+            j.status = "open"
+            j.posted_at = utcnow()
+            opened.append(jid)
+    db.commit()
+    return {"opened": opened}
+
+
+@app.post("/admin/accounts")
+def admin_account(
+    api_key: str, freelancer_id: str, connects: int = 1000, db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    """Create (or reset) a freelancer account, e.g. one per evaluation run."""
+    acct = db.get(Account, api_key)
+    if acct is None:
+        old = db.scalar(select(Account).where(Account.freelancer_id == freelancer_id))
+        if old is not None:
+            db.delete(old)
+            db.flush()
+        db.add(
+            Account(
+                api_key=api_key,
+                freelancer_id=freelancer_id,
+                display_name=freelancer_id,
+                connects=connects,
+            )
+        )
+    else:
+        acct.connects = connects
+    db.commit()
+    return {"api_key": api_key, "freelancer_id": freelancer_id, "connects": connects}
 
 
 @app.post("/admin/connects")
