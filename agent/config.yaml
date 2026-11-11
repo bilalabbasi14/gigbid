@@ -40,6 +40,7 @@ models:
   # Route by node: tier name resolved against the active profile.
   nodes:
     scout: small
+    contextualizer: small        # V6 index-time context lines (offline, one call per document)
     analyst: medium
     risk_assessor: small
     fit_matcher: medium

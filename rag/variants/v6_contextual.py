@@ -50,7 +50,7 @@ def _context_for(doc: Document) -> str:
 
     async def _go() -> str:
         res = await call_prompt(
-            "scout",
+            "contextualizer",
             "contextual_chunk",
             doc_type=doc.doc_type,
             title=doc.title,
@@ -60,14 +60,22 @@ def _context_for(doc: Document) -> str:
         return " ".join(res.text.split())[:400]
 
     try:
-        text = asyncio.run(_go())
-    except RuntimeError:  # already inside an event loop
-        import concurrent.futures
+        try:
+            text = asyncio.run(_go())
+        except RuntimeError as exc:
+            if "event loop" not in str(exc):
+                raise
+            import concurrent.futures  # already inside an event loop: run in a worker thread
 
-        with concurrent.futures.ThreadPoolExecutor(1) as ex:
-            text = ex.submit(lambda: asyncio.run(_go())).result()
-    except Exception:  # noqa: BLE001 - model unavailable: fall back to metadata only
-        text = (
+            with concurrent.futures.ThreadPoolExecutor(1) as ex:
+                text = ex.submit(lambda: asyncio.run(_go())).result()
+    except Exception as exc:  # noqa: BLE001
+        from agent import llm
+
+        if llm.is_daily_cap(exc):
+            raise  # stop the ingest: lines made so far are cached and a rerun continues from them
+        # model unavailable: a metadata-only line for now, not cached, so a rerun retries it
+        return (
             f"{doc.doc_type.replace('_', ' ')} '{doc.title}'"
             + (f", {doc.year}" if doc.year else "")
             + (f", {doc.client_industry}" if doc.client_industry else "")

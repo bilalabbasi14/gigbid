@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import time
 from pathlib import Path
 
@@ -88,9 +89,19 @@ def main() -> None:
     )
     if not personas:
         ap.error("pass --persona NAME or --all")
+    if args.contextual:  # the V6 index is evaluation input: only its configured model writes it
+        os.environ.setdefault("GIGBID_STRICT_MODELS", "1")
     store = ChunkStore()
     for p in personas:
-        ingest_persona(store, PERSONAS_ROOT / p, contextual=args.contextual, force=args.force)
+        try:
+            ingest_persona(store, PERSONAS_ROOT / p, contextual=args.contextual, force=args.force)
+        except Exception as exc:
+            from agent import llm
+
+            if not llm.is_daily_cap(exc):
+                raise
+            log.warning("partial: daily model cap reached while indexing %s; rerun later", p)
+            raise SystemExit(3) from exc
 
 
 if __name__ == "__main__":
