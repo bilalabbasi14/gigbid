@@ -21,6 +21,7 @@ VARIANTS = {
     "v3_rerank": "rag.variants.v3_rerank:CrossEncoderRerank",
     "v4_outcome": "rag.variants.v4_outcome:OutcomeAware",
     "v5_multivector": "rag.variants.v5_multivector:MultiVectorProjects",
+    "v6_contextual": "rag.variants.v6_contextual:ContextualRetrieval",
     "v7_hyde": "rag.variants.v7_hyde:HyDE",
     "v8_corrective": "rag.variants.v8_corrective:CorrectiveRAG",
     "v9_skill_graph": "rag.variants.v9_skill_graph:SkillGraph",

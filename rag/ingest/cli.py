@@ -44,7 +44,8 @@ def build_chunks(persona_dir: Path, contextual: bool = False) -> list[Chunk]:
 def ingest_persona(
     store: ChunkStore, persona_dir: Path, *, contextual: bool = False, force: bool = False
 ) -> dict[str, int]:
-    persona = persona_dir.name
+    # the contextual (V6) chunks live in their own index key so the normal index is untouched
+    persona = persona_dir.name + ("__ctx" if contextual else "")
     t0 = time.time()
     chunks = build_chunks(persona_dir, contextual=contextual)
     existing = store.existing_hashes(persona)
@@ -77,7 +78,11 @@ def main() -> None:
     ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     personas = args.persona or (
-        [d.name for d in PERSONAS_ROOT.iterdir() if d.is_dir() and not d.name.startswith("_")]
+        [
+            d.name
+            for d in PERSONAS_ROOT.iterdir()
+            if d.is_dir() and not d.name.startswith(("_", "x3_"))  # x3_* are evaluation copies
+        ]
         if args.all
         else []
     )
