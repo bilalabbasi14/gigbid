@@ -47,10 +47,10 @@ models:
     judge: large
     portfolio_builder: large
   embeddings:
-    model: nomic-ai/nomic-embed-text-v1.5   # open, CPU
+    model: BAAI/bge-base-en-v1.5             # open, CPU, no remote code (nomic v1.5 custom code broke on transformers 5)
     dimensions: 768
-    query_prefix: "search_query: "
-    document_prefix: "search_document: "
+    query_prefix: "Represent this sentence for searching relevant passages: "
+    document_prefix: ""
   reranker:
     model: BAAI/bge-reranker-v2-m3          # open, CPU
   generation:

@@ -34,6 +34,7 @@ dependencies = [
   "arq>=0.26",
   # rag
   "sentence-transformers>=3.0",
+  "einops>=0.8",
   "rank-bm25>=0.2",
   "pypdf>=4.3",
   "numpy>=1.26",
@@ -88,7 +89,7 @@ extend-exclude = ["apps/web", "data", "gigsim/vendor"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "N", "S", "ASYNC", "T20"]
 ignore = ["S101", "S104", "B008", "E501"]  # E501: ruff format owns line layout
-per-file-ignores = { "tests/**" = ["S", "T20"], "evals/**" = ["T20"], "scripts/**" = ["T20", "S603", "S607"], "data/scripts/**" = ["T20", "S"], "gigsim/**" = ["S311", "T20"] }
+per-file-ignores = { "tests/**" = ["S", "T20"], "evals/**" = ["T20", "S311"], "scripts/**" = ["T20", "S603", "S607"], "data/scripts/**" = ["T20", "S"], "gigsim/**" = ["S311", "T20"] }
 
 [tool.mypy]
 python_version = "3.12"

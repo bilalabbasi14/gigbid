@@ -1,0 +1,21 @@
+{
+  "v0_naive": {
+    "overall": {
+      "recall@5": 0.7,
+      "mrr": 0.4612,
+      "ndcg@10": 0.5106
+    },
+    "personas": {
+      "ai_ml": {
+        "recall@5": 0.7,
+        "mrr": 0.4612,
+        "ndcg@10": 0.5106,
+        "n": 65,
+        "latency_p50_s": 0.32,
+        "latency_p95_s": 0.852
+      }
+    },
+    "n_jobs": 65,
+    "timestamp": "2026-11-11T03:08:50Z"
+  }
+}
