@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  dbt-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: dbt deps
+        run: dbt deps --profiles-dir .
+      - name: dbt run
+        env:
+          BIGQUERY_PROJECT: ${{ secrets.BIGQUERY_PROJECT }}
+          BIGQUERY_DATASET: ${{ secrets.BIGQUERY_DATASET }}
+        run: dbt run --profiles-dir .
+      - name: dbt test
+        env:
+          BIGQUERY_PROJECT: ${{ secrets.BIGQUERY_PROJECT }}
+          BIGQUERY_DATASET: ${{ secrets.BIGQUERY_DATASET }}
+        run: dbt test --profiles-dir .

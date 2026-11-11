@@ -1,0 +1,10 @@
+express==4.18.2
+apollo-server-express==3.11.1
+graphql==16.6.0
+pg==8.10.0
+cors==2.8.5
+react==18.2.0
+react-dom==18.2.0
+react-beautiful-dnd==13.1.0
+@apollo/client==3.8.5
+typescript==5.2.2

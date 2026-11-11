@@ -1,0 +1,33 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: marketplace
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: postgres://user:password@db:5432/marketplace
+      STRIPE_SECRET_KEY: sk_test_XXXXXXXXXXXXXXXX
+      STRIPE_WEBHOOK_SECRET: whsec_XXXXXXXXXXXXXXXX
+      FRONTEND_URL: http://web:3000
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"
+  web:
+    build: ./frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:4000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+volumes:
+  db_data:

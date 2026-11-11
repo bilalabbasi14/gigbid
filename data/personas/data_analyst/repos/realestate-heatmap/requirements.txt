@@ -1,0 +1,6 @@
+pandas==2.2.2
+geopandas==0.14.2
+google-cloud-bigquery==3.13.0
+shapely==2.0.3
+tableauhyperapi==0.2.0
+tableau-api-lib==0.1.13

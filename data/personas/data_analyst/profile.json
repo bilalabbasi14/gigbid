@@ -1,0 +1,26 @@
+{
+  "persona_id": "data_analyst",
+  "name": "Mariana Costa",
+  "headline": "Data analyst: SQL, Power BI, Tableau, Python, dbt, BigQuery",
+  "years": 5,
+  "hourly": 45,
+  "stack": [
+    "SQL",
+    "Power BI",
+    "DAX",
+    "Tableau",
+    "Python",
+    "pandas",
+    "dbt",
+    "BigQuery",
+    "Snowflake",
+    "Excel",
+    "Looker Studio",
+    "Airflow",
+    "Google Analytics 4",
+    "Statistics",
+    "A/B testing"
+  ],
+  "synthetic": true,
+  "generated_by": "data/scripts/gen_personas.py"
+}

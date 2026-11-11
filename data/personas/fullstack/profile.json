@@ -1,0 +1,28 @@
+{
+  "persona_id": "fullstack",
+  "name": "Daniel Okafor",
+  "headline": "Full-stack web developer: React/Next.js, Node, Django, Postgres",
+  "years": 7,
+  "hourly": 55,
+  "stack": [
+    "TypeScript",
+    "React",
+    "Next.js",
+    "Node.js",
+    "Express",
+    "Django",
+    "Django REST Framework",
+    "PostgreSQL",
+    "Prisma",
+    "Redis",
+    "Stripe",
+    "Tailwind CSS",
+    "Docker",
+    "GitHub Actions",
+    "Playwright",
+    "Supabase",
+    "GraphQL"
+  ],
+  "synthetic": true,
+  "generated_by": "data/scripts/gen_personas.py"
+}

@@ -20,13 +20,19 @@ models:
   # Provider aliases: groq:<model> | openrouter:<model> | ollama:<model> | openai:<model>
   profiles:
     open:
-      small: groq:llama-3.1-8b-instant
-      medium: groq:openai/gpt-oss-20b
+      small: groq:openai/gpt-oss-20b
+      medium: groq:qwen/qwen3.8-27b
       large: groq:openai/gpt-oss-120b
-      fallback_small: ollama:qwen3:4b
-      fallback_large: openrouter:qwen/qwen3-235b-a22b:free
+      fallback_small: groq:qwen/qwen3.8-27b          # separate daily quota from gpt-oss on Groq
+      fallback_large: groq:qwen/qwen3.8-27b
+    local:                                            # fully offline on a laptop (slow on CPU)
+      small: ollama:qwen3:4b
+      medium: ollama:qwen3:4b
+      large: ollama:qwen3:4b
+      fallback_small: ollama:llama3.2
+      fallback_large: ollama:llama3.2
     paid:
-      small: groq:llama-3.1-8b-instant
+      small: groq:openai/gpt-oss-20b
       medium: openai:gpt-4.1-mini
       large: openai:gpt-4.1
       fallback_small: ollama:qwen3:4b
@@ -47,12 +53,12 @@ models:
     judge: large
     portfolio_builder: large
   embeddings:
-    model: nomic-ai/nomic-embed-text-v1.5   # open, CPU
+    model: BAAI/bge-base-en-v1.5             # open, CPU, no remote code (nomic v1.5 custom code broke on transformers 5)
     dimensions: 768
-    query_prefix: "search_query: "
-    document_prefix: "search_document: "
+    query_prefix: "Represent this sentence for searching relevant passages: "
+    document_prefix: ""
   reranker:
-    model: BAAI/bge-reranker-v2-m3          # open, CPU
+    model: BAAI/bge-reranker-base            # open, CPU; v2-m3 (2.2 GB) exhausted RAM on the 8 GB dev laptop
   generation:
     temperature: 0.2
     max_output_tokens: 1200
@@ -67,12 +73,21 @@ rag:
   hybrid_rrf_k: 60
   rerank_top_n: 20
   outcome_boost: { won: 0.25, replied: 0.10, ignored: -0.05 }
+  crag_min_grade: 0.35              # V8: reranker relevance below this => re-query
+  crag_max_rounds: 2
+  best:                             # composition of the shipped pipeline; ablation toggles these
+    decompose: true
+    hybrid: true
+    rerank: true
+    outcome: true
+    corrective: false
+    candidate_k: 20
 
 budgets:
   max_graph_steps: 40
   max_revisions: 2                 # Critic send-backs per draft
   max_tokens_per_thread: 40000
-  per_node_timeout_seconds: 90
+  per_node_timeout_seconds: 180   # first call loads the CPU embedding model
   per_node_retries: 2
   latency_p95_seconds_per_job: 60
   latency_p95_seconds_per_proposal: 120

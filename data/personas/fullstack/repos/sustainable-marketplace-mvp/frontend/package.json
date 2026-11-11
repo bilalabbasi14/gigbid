@@ -1,0 +1,28 @@
+{
+  "name": "sustainable-marketplace-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test:web": "jest"
+  },
+  "dependencies": {
+    "next": "13.4.7",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "next-auth": "4.22.1",
+    "react-query": "3.39.3",
+    "axios": "1.5.0",
+    "tailwindcss": "3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.2",
+    "@types/react": "18.2.14",
+    "typescript": "5.1.6",
+    "jest": "29.6.2",
+    "@testing-library/react": "14.0.0"
+  }
+}

@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  analytics-service:
+    build: .
+    ports:
+      - "4000:4000"
+    environment:
+      - REDIS_HOST=redis
+      - PG_HOST=postgres
+      - PG_USER=analytics
+      - PG_PASSWORD=secret
+      - PG_DB=analytics_db
+    depends_on:
+      - redis
+      - postgres
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: analytics
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: analytics_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
