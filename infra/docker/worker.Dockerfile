@@ -5,6 +5,9 @@ RUN pip install --no-cache-dir uv==0.13.1
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
+# models depend only on the config: code changes never re-download the weights
+COPY agent/config.yaml ./agent/config.yaml
+RUN .venv/bin/python -c "import yaml; from sentence_transformers import SentenceTransformer, CrossEncoder; m = yaml.safe_load(open('agent/config.yaml'))['models']; SentenceTransformer(m['embeddings']['model'], device='cpu'); CrossEncoder(m['reranker']['model'], device='cpu')"
 COPY agent ./agent
 COPY rag ./rag
 COPY mcp_servers ./mcp_servers
@@ -18,5 +21,4 @@ COPY data/policy_pack ./data/policy_pack
 COPY data/personas ./data/personas
 RUN uv sync --frozen --no-dev
 ENV PATH="/app/.venv/bin:$PATH"
-RUN python -c "from rag import embeddings; embeddings.warm()" || echo "model prefetch skipped"
 CMD ["arq", "worker.settings.WorkerSettings"]

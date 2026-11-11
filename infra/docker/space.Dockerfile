@@ -19,10 +19,15 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UV_COMPILE_BYTECODE=1 UV_LINK_M
 RUN apt-get update && apt-get install -y --no-install-recommends redis-server tini && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir uv==0.13.1
 COPY --from=web /usr/local/bin/node /usr/local/bin/node
-RUN useradd -m -u 1000 app
+RUN useradd -m -u 1000 app && mkdir -p /app && chown app /app
+USER app
 WORKDIR /app
 COPY --chown=app pyproject.toml uv.lock README.md ./
 RUN uv sync --frozen --no-dev --no-install-project
+ENV PATH="/app/.venv/bin:$PATH"
+# models depend only on the config, so code changes never re-download ~1.5 GB of weights
+COPY --chown=app agent/config.yaml ./agent/config.yaml
+RUN python -c "import yaml; from sentence_transformers import SentenceTransformer, CrossEncoder; m = yaml.safe_load(open('agent/config.yaml'))['models']; SentenceTransformer(m['embeddings']['model'], device='cpu'); CrossEncoder(m['reranker']['model'], device='cpu')"
 COPY --chown=app agent ./agent
 COPY --chown=app rag ./rag
 COPY --chown=app mcp_servers ./mcp_servers
@@ -36,13 +41,10 @@ COPY --chown=app evals/runners ./evals/runners
 COPY --chown=app data/__init__.py ./data/__init__.py
 COPY --chown=app data/policy_pack ./data/policy_pack
 COPY --chown=app data/personas ./data/personas
-RUN uv sync --frozen --no-dev && mkdir -p /app/models /app/data/processed && chown -R app /app
+RUN uv sync --frozen --no-dev && mkdir -p /app/data/processed
 COPY --from=web --chown=app /web/.next/standalone ./web
 COPY --from=web --chown=app /web/.next/static ./web/.next/static
 COPY --from=web --chown=app /web/public ./web/public
-ENV PATH="/app/.venv/bin:$PATH"
-USER app
-RUN python -c "from rag import embeddings; embeddings.warm()" || echo "model prefetch skipped"
 EXPOSE 7860
 ENTRYPOINT ["tini", "--"]
 CMD ["bash", "scripts/serve_all.sh"]
