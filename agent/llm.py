@@ -28,7 +28,12 @@ def parse_spec(spec: str) -> tuple[str, str]:
 
 
 @lru_cache(maxsize=32)
-def chat_model(spec: str, temperature: float | None = None, max_tokens: int | None = None, timeout: float | None = None) -> BaseChatModel:
+def chat_model(
+    spec: str,
+    temperature: float | None = None,
+    max_tokens: int | None = None,
+    timeout: float | None = None,
+) -> BaseChatModel:
     env = settings.env()
     gen = settings.config().models.generation
     temperature = gen.get("temperature", 0.2) if temperature is None else temperature
@@ -40,19 +45,47 @@ def chat_model(spec: str, temperature: float | None = None, max_tokens: int | No
         from langchain_groq import ChatGroq
 
         extra: dict[str, Any] = {"reasoning_effort": "low"} if "gpt-oss" in model else {}
-        return ChatGroq(model=model, api_key=env.groq_api_key or None, temperature=temperature, max_tokens=max_tokens, timeout=timeout, max_retries=0, **extra)
+        return ChatGroq(
+            model=model,
+            api_key=env.groq_api_key or None,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            max_retries=0,
+            **extra,
+        )
     if provider == "openrouter":
         from langchain_openai import ChatOpenAI
 
-        return ChatOpenAI(model=model, api_key=env.openrouter_api_key or "missing", base_url="https://openrouter.ai/api/v1", temperature=temperature, max_tokens=max_tokens, timeout=timeout, max_retries=0)
+        return ChatOpenAI(
+            model=model,
+            api_key=env.openrouter_api_key or "missing",
+            base_url="https://openrouter.ai/api/v1",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            max_retries=0,
+        )
     if provider == "ollama":
         from langchain_ollama import ChatOllama
 
-        return ChatOllama(model=model, base_url=env.ollama_base_url, temperature=temperature, num_predict=max_tokens)
+        return ChatOllama(
+            model=model,
+            base_url=env.ollama_base_url,
+            temperature=temperature,
+            num_predict=max_tokens,
+        )
     if provider == "openai":
         from langchain_openai import ChatOpenAI
 
-        return ChatOpenAI(model=model, api_key=env.openai_api_key or "missing", temperature=temperature, max_tokens=max_tokens, timeout=timeout, max_retries=0)
+        return ChatOpenAI(
+            model=model,
+            api_key=env.openai_api_key or "missing",
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=timeout,
+            max_retries=0,
+        )
     raise ValueError(f"unknown provider {provider!r} in {spec!r}")
 
 
@@ -62,15 +95,37 @@ def chat_for_node(node: str, *, fallback: bool = False, **kw: Any) -> BaseChatMo
 
 def _is_transient(exc: BaseException) -> bool:
     text = f"{type(exc).__name__}: {exc}".lower()
-    return any(k in text for k in ("429", "rate limit", "rate_limit", "timeout", "timed out", "503", "502", "500", "overloaded", "connection", "temporarily"))
+    return any(
+        k in text
+        for k in (
+            "429",
+            "rate limit",
+            "rate_limit",
+            "timeout",
+            "timed out",
+            "503",
+            "502",
+            "500",
+            "overloaded",
+            "connection",
+            "temporarily",
+        )
+    )
 
 
-@retry(stop=stop_after_attempt(4), wait=wait_exponential_jitter(initial=2, max=40), retry=retry_if_exception(_is_transient), reraise=True)
+@retry(
+    stop=stop_after_attempt(4),
+    wait=wait_exponential_jitter(initial=2, max=40),
+    retry=retry_if_exception(_is_transient),
+    reraise=True,
+)
 def _invoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
     return model.invoke(messages, **kw)
 
 
-def invoke_for_node(node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any):  # type: ignore[no-untyped-def]
+def invoke_for_node(
+    node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any
+):  # type: ignore[no-untyped-def]
     """Invoke the node's configured model; on persistent transient failure use its fallback.
 
     `model_kw` (temperature, max_tokens, timeout) overrides the config defaults for this call.
@@ -99,7 +154,9 @@ async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any)
             await asyncio.sleep(min(40, 2 * 2**attempt))
 
 
-async def ainvoke_for_node(node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any):  # type: ignore[no-untyped-def]
+async def ainvoke_for_node(
+    node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any
+):  # type: ignore[no-untyped-def]
     model_kw = model_kw or {}
     try:
         return await _ainvoke(chat_for_node(node, **model_kw), messages, **kw)
