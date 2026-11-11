@@ -40,7 +40,7 @@ trace id, ok. Table `audit_log` has UPDATE and DELETE revoked; file fallback is 
 | Server | Used for | Trust rationale |
 |---|---|---|
 | Upwork official MCP (`https://mcp.upwork.com/mcp`, OAuth 2.1) | live-mode reads and proposal/message **drafts** | Operated by the platform itself under its automation policy; every write is a draft the user confirms on Upwork, so a misbehaving tool cannot send anything. Mapped onto the marketplace port in `mcp_servers/marketplace/adapters/upwork_live.py`; not exercised without an account. |
-| GitHub official MCP (`github/github-mcp-server`, remote `https://api.githubcopilot.com/mcp/`) | repository ingestion for RAG and the X3 Portfolio builder | First-party GitHub server with read-only use (search, file contents, commits) under a fine-grained PAT scoped to public repository read; outputs are treated as data, never instructions. |
+| GitHub official MCP (remote, read-only repos toolset `https://api.githubcopilot.com/mcp/x/repos/readonly`) | the X3 Portfolio builder and repository ingestion: `search_repositories`, `get_repository_tree`, `get_file_contents`, `list_commits` | Operated by GitHub; the read-only toolset URL exposes no write tools at all, each user connects with their own fine-grained read-only token (stored encrypted), and repository content is treated as untrusted data. |
 
 ## Agent allowlists
 
@@ -56,7 +56,7 @@ trace id, ok. Table `audit_log` has UPDATE and DELETE revoked; file fallback is 
 | Compliance Guard | none |
 | Client Liaison | marketplace: list_threads, list_messages, send_message (after approval), get_job; workspace: get_free_slots, create_interview_hold, create_email_draft |
 | Submitter (post-approval step) | marketplace: create_proposal_draft, submit_proposal, get_connects_balance |
-| Portfolio builder (X3) | github: search_repositories, get_file_contents, list_commits, get_repository; portfolio: list_skills |
+| Portfolio builder (X3) | github: search_repositories, get_repository_tree, get_file_contents, list_commits; portfolio: list_skills |
 
 ## Running the servers
 
