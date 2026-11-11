@@ -14,6 +14,7 @@ import json
 import os
 import random
 import statistics
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -196,11 +197,63 @@ def cost(usage: dict[str, int]) -> float:
     )
 
 
+def hardware() -> dict[str, Any]:
+    """CPU, cores and RAM of the machine that ran the evaluation (local-model numbers need it)."""
+    import platform
+
+    cpu, ram_gb = platform.processor(), None
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            import winreg
+
+            with winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+            ) as k:
+                cpu = str(winreg.QueryValueEx(k, "ProcessorNameString")[0]).strip()
+
+            class _Mem(ctypes.Structure):
+                _fields_ = [  # noqa: RUF012 - ctypes layout
+                    ("dwLength", ctypes.c_ulong),
+                    ("dwMemoryLoad", ctypes.c_ulong),
+                    ("ullTotalPhys", ctypes.c_ulonglong),
+                    ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong),
+                    ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong),
+                    ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+                ]
+
+            m = _Mem()
+            m.dwLength = ctypes.sizeof(_Mem)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
+            ram_gb = round(m.ullTotalPhys / 2**30, 1)
+        else:
+            info = Path("/proc/meminfo").read_text().split()
+            ram_gb = round(int(info[info.index("MemTotal:") + 1]) / 2**20, 1)
+            for line in Path("/proc/cpuinfo").read_text().splitlines():
+                if line.startswith("model name"):
+                    cpu = line.split(":", 1)[1].strip()
+                    break
+    except Exception:  # noqa: BLE001, S110 - best effort; never fail a run over it
+        pass
+    return {
+        "cpu": cpu,
+        "logical_cpus": os.cpu_count(),
+        "ram_gb": ram_gb,
+        "gpu": None,
+        "os": platform.platform(),
+    }
+
+
 def write_result(name: str, payload: dict[str, Any]) -> Path:
     RESULTS.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "price_per_million_tokens_usd": PRICE_PER_M,
+        "model_profile": os.environ.get("MODEL_PROFILE") or settings.config().models.profile,
+        "hardware": hardware(),
         **payload,
     }
     path = RESULTS / f"{name}.json"
