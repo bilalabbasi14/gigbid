@@ -73,6 +73,15 @@ rag:
   hybrid_rrf_k: 60
   rerank_top_n: 20
   outcome_boost: { won: 0.25, replied: 0.10, ignored: -0.05 }
+  crag_min_grade: 0.35              # V8: reranker relevance below this => re-query
+  crag_max_rounds: 2
+  best:                             # composition of the shipped pipeline; ablation toggles these
+    decompose: true
+    hybrid: true
+    rerank: true
+    outcome: true
+    corrective: false
+    candidate_k: 20
 
 budgets:
   max_graph_steps: 40

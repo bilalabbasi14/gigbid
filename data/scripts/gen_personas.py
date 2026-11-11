@@ -297,8 +297,8 @@ def gen_proposals(
         }
         for x in projects
     ]
-    for batch_start in range(0, len(sample), 6):
-        batch = sample[batch_start : batch_start + 6]
+    for batch_start in range(0, len(sample), 3):
+        batch = sample[batch_start : batch_start + 3]
         labels = [
             rng.choices(["won", "replied", "ignored"], weights=[0.22, 0.33, 0.45])[0] for _ in batch
         ]

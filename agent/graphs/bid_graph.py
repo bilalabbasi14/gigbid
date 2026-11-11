@@ -145,6 +145,7 @@ def build_bid_graph(
     ]
     for name, fn, is_llm in nodes:
         g.add_node(name, _guarded(name, fn, deps, is_llm), retry_policy=retry, timeout=timeout)
+
     # the interrupt node is NOT wrapped: exceptions must not swallow GraphInterrupt
     async def approval_node(state: BidState) -> dict[str, Any]:
         return await approval.wait_for_human(state, deps)
