@@ -1,0 +1,40 @@
+{"id": "t01", "request": "Find open Django jobs.", "tool": "search_jobs", "args": {"query": "django"}}
+{"id": "t02", "request": "Show me hourly React jobs paying at least 40 dollars.", "tool": "search_jobs", "args": {"query": "react", "payment_type": "hourly", "min_budget": 40}}
+{"id": "t03", "request": "Search for fixed-price Power BI dashboard work.", "tool": "search_jobs", "args": {"query": "power bi", "payment_type": "fixed"}}
+{"id": "t04", "request": "Are there any new machine learning jobs posted after 2026-11-01?", "tool": "search_jobs", "args": {"query": "machine learning", "posted_after": "2026-11-01"}}
+{"id": "t05", "request": "Open the full post for job job_f30b54a906a9a53b.", "tool": "get_job", "args": {"job_id": "job_f30b54a906a9a53b"}}
+{"id": "t06", "request": "What screening questions does job job_848801d566733fa1 ask?", "tool": "get_job", "args": {"job_id": "job_848801d566733fa1"}}
+{"id": "t07", "request": "How many Connects does job job_069b5a1fef41fd94 cost to apply to?", "tool": "get_job", "args": {"job_id": "job_069b5a1fef41fd94"}}
+{"id": "t08", "request": "Has client cl_9a1b2c3d4e5f ever hired anyone, and is their payment verified?", "tool": "get_client_history", "args": {"client_id": "cl_9a1b2c3d4e5f"}}
+{"id": "t09", "request": "Check how much client cl_0f1e2d3c4b5a has spent on the platform.", "tool": "get_client_history", "args": {"client_id": "cl_0f1e2d3c4b5a"}}
+{"id": "t10", "request": "How many Connects do I have left?", "tool": "get_connects_balance", "args": {}}
+{"id": "t11", "request": "Before I bid, check my Connects balance.", "tool": "get_connects_balance", "args": {}}
+{"id": "t12", "request": "Which client conversations have unread messages?", "tool": "list_threads", "args": {}}
+{"id": "t13", "request": "Show me all my message threads.", "tool": "list_threads", "args": {}}
+{"id": "t14", "request": "Read the conversation in thread thr_0c67fbf0dca6.", "tool": "list_messages", "args": {"thread_id": "thr_0c67fbf0dca6"}}
+{"id": "t15", "request": "What did the client say last in thread thr_5d4c3b2a1f0e?", "tool": "list_messages", "args": {"thread_id": "thr_5d4c3b2a1f0e"}}
+{"id": "t16", "request": "Have any of my proposals been viewed or replied to since event 120?", "tool": "list_events", "args": {"since_id": 120}}
+{"id": "t17", "request": "Is the marketplace up right now, and which policy version is it enforcing?", "tool": "marketplace_health", "args": {}}
+{"id": "t18", "request": "Preview, without sending or spending anything, a proposal for job job_f30b54a906a9a53b: bid 450 fixed, idempotency key prev-0001, letter 'You need an AI blog tool that publishes to WordPress. I built a WordPress plugin around an LLM API and would start with a one-day prototype.'", "tool": "create_proposal_draft", "args": {"draft.job_id": "job_f30b54a906a9a53b", "draft.bid_amount": 450, "draft.bid_type": "fixed", "draft.idempotency_key": "prev-0001"}}
+{"id": "t19", "request": "The human approved it: submit the proposal for job job_848801d566733fa1 at 60 per hour, idempotency key sub-77777777, with the letter 'You need a recommendation pipeline. I built one that lifted click-through from 3.2% to 7.8% and would begin with an offline evaluation of your current model.'", "tool": "submit_proposal", "args": {"draft.job_id": "job_848801d566733fa1", "draft.bid_amount": 60, "draft.bid_type": "hourly", "draft.idempotency_key": "sub-77777777"}}
+{"id": "t20", "request": "Show me exactly what would be sent if I submitted a 300 dollar fixed bid on job job_15ea3926e5f2efa0 (dry run only, key dry-00000001), letter: 'You need a churn model you can trust. I compared logistic regression and random forest on a similar dataset and documented precision and recall.'", "tool": "submit_proposal", "args": {"draft.job_id": "job_15ea3926e5f2efa0", "draft.dry_run": true, "draft.idempotency_key": "dry-00000001"}}
+{"id": "t21", "request": "Approved reply: send 'Tuesday 10:00 UTC works for me.' in thread thr_0c67fbf0dca6 with idempotency key msg-00000042.", "tool": "send_message", "args": {"message.thread_id": "thr_0c67fbf0dca6", "message.idempotency_key": "msg-00000042"}}
+{"id": "t22", "request": "Find portfolio evidence that I have built a RAG chatbot over PDFs.", "tool": "search_evidence", "args": {"requirement": "RAG chatbot over PDFs"}}
+{"id": "t23", "request": "Give me the 3 best portfolio items proving Power BI dashboard experience.", "tool": "search_evidence", "args": {"requirement": "Power BI dashboard", "k": 3}}
+{"id": "t24", "request": "Which of my past proposals that won mention Stripe billing?", "tool": "search_evidence", "args": {"requirement": "Stripe billing", "filters.outcome": "won"}}
+{"id": "t25", "request": "Only look at my code: do I have evidence of writing Airflow pipelines?", "tool": "search_evidence", "args": {"requirement": "Airflow pipelines", "filters.doc_types": ["code"]}}
+{"id": "t26", "request": "Open the full case study for project p07.", "tool": "get_case_study", "args": {"id": "p07"}}
+{"id": "t27", "request": "What were the measured results of project p03?", "tool": "get_case_study", "args": {"id": "p03"}}
+{"id": "t28", "request": "List every skill my portfolio can back up with evidence.", "tool": "list_skills", "args": {}}
+{"id": "t29", "request": "Which technologies have I used most across my projects?", "tool": "list_skills", "args": {}}
+{"id": "t30", "request": "When am I free for a 30-minute call in the next 5 days?", "tool": "get_free_slots", "args": {"days": 5, "slot_minutes": 30}}
+{"id": "t31", "request": "Find me three free one-hour slots this week.", "tool": "get_free_slots", "args": {"slot_minutes": 60, "max_slots": 3}}
+{"id": "t32", "request": "Hold 2026-11-17 10:00 to 10:30 UTC tentatively for an intro call titled 'Intro call: RAG bot', key hold-00000001.", "tool": "create_interview_hold", "args": {"start": "2026-11-17T10:00:00", "end": "2026-11-17T10:30:00", "idempotency_key": "hold-00000001"}}
+{"id": "t33", "request": "Draft (do not send) an email to client@example.com with subject 'Interview times' saying I am free Tuesday morning; key mail-00000009.", "tool": "create_email_draft", "args": {"to": "client@example.com", "subject": "Interview times", "idempotency_key": "mail-00000009"}}
+{"id": "t34", "request": "What interview holds and email drafts do I have?", "tool": "list_workspace_items", "args": {}}
+{"id": "t35", "request": "Look up data analyst jobs mentioning SQL and BigQuery.", "tool": "search_jobs", "args": {"skills": ["SQL", "BigQuery"]}}
+{"id": "t36", "request": "Is this client trustworthy? Client id cl_77aa88bb99cc.", "tool": "get_client_history", "args": {"client_id": "cl_77aa88bb99cc"}}
+{"id": "t37", "request": "Do I have any evidence of computer vision work with OpenCV?", "tool": "search_evidence", "args": {"requirement": "computer vision OpenCV"}}
+{"id": "t38", "request": "Show me page 2 of LangChain jobs, 10 per page.", "tool": "search_jobs", "args": {"query": "langchain", "page": 2, "limit": 10}}
+{"id": "t39", "request": "Get the details of job job_aa11bb22cc33dd44 so I can see the client's budget.", "tool": "get_job", "args": {"job_id": "job_aa11bb22cc33dd44"}}
+{"id": "t40", "request": "Pull the case study for p12 so I can answer the client's question about it.", "tool": "get_case_study", "args": {"id": "p12"}}
