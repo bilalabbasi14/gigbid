@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from agent import llm
-from agent.guardrails import SYSTEM_GUARD
+from agent.guardrails import system_guard
 from agent.handoffs import ApprovalPayload
 from agent.nodes.writer import evidence_block
 from agent.prompts import load_prompt
@@ -156,7 +156,7 @@ async def regenerate_paragraph(
     )
     resp = await llm.ainvoke_for_node(
         "writer",
-        [SystemMessage(content=f"{system}\n\n{SYSTEM_GUARD}"), HumanMessage(content=prompt)],
+        [SystemMessage(content=f"{system}\n\n{system_guard()}"), HumanMessage(content=prompt)],
     )
     new_para = str(resp.content).strip()
     known = {e["evidence_id"] for e in values.get("evidence", [])}

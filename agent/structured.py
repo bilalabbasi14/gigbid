@@ -11,7 +11,7 @@ from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from pydantic import BaseModel, ValidationError
 
 from agent import llm
-from agent.guardrails import SYSTEM_GUARD
+from agent.guardrails import system_guard
 from agent.prompts import load_prompt
 
 
@@ -53,7 +53,7 @@ async def call_prompt(
 ) -> LLMResult:
     """Fill the named prompt and call the node's model. `invoke` can be swapped in tests."""
     system, user = load_prompt(prompt_name)
-    system = f"{system}\n\n{SYSTEM_GUARD}" + (f"\n\n{system_extra}" if system_extra else "")
+    system = f"{system}\n\n{system_guard()}" + (f"\n\n{system_extra}" if system_extra else "")
     msgs: list[BaseMessage] = [
         SystemMessage(content=system),
         HumanMessage(content=user.format(**fields)),
@@ -79,7 +79,7 @@ async def call_structured[T: BaseModel](
         # one repair pass: show the error and ask for corrected JSON
         system, _ = load_prompt(prompt_name)
         msgs: list[BaseMessage] = [
-            SystemMessage(content=f"{system}\n\n{SYSTEM_GUARD}\n\n{schema_hint}"),
+            SystemMessage(content=f"{system}\n\n{system_guard()}\n\n{schema_hint}"),
             HumanMessage(
                 content=f"Your previous output could not be parsed:\n{result.text[:3000]}\n\nError: {exc}\n\nReturn the corrected JSON object only."
             ),

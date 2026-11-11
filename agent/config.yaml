@@ -117,5 +117,6 @@ memory:
   outcome_promotion_min_samples: 5 # outcomes per category before a rule is promoted
 
 guardrails:
+  enabled: true                    # injection defences; only the injection evaluation turns them off
   injection_patterns_file: data/policy_pack/injection_patterns.yaml
   untrusted_delimiter: "<<<UNTRUSTED_JOB_TEXT>>>"
