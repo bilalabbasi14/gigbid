@@ -1,3 +1,101 @@
 # Runbook
 
-TODO: Document startup, deployment, rate limits, recovery and degraded mode.
+How to start, deploy, operate and recover GigBid.
+
+## 1. Local development
+
+```bash
+cp .env.example .env                  # fill GROQ_API_KEY and LANGSMITH_API_KEY (both free)
+make install                          # uv sync + npm install
+docker compose -f infra/docker-compose.yml up -d postgres redis
+make gigsim                           # simulator on :8081 (separate terminal)
+make seed                             # reviewer login + index the persona corpora (first run ~5 min on CPU)
+make api                              # FastAPI on :8000 with the MCP servers mounted in-process
+make web                              # Next.js on :3000
+make worker                           # optional: scheduled scouting, pipeline sync, conversation polling
+```
+
+Sign in with `REVIEWER_EMAIL` / `REVIEWER_PASSWORD` from `.env`.
+
+## 2. Everything in Docker
+
+```bash
+docker compose -f infra/docker-compose.yml up --build -d
+docker compose -f infra/docker-compose.yml exec api python -m scripts.seed
+```
+
+Services: `postgres` (pgvector), `redis`, `gigsim`, `mcp` (the three MCP servers on 8101-8103 over
+streamable HTTP with bearer auth), `api`, `worker`, `web`. `--profile local-llm` adds Ollama for
+the fully offline `local` model profile. On an 8 GB machine run either the compose stack or the
+local developer loop, not both.
+
+## 3. Production deployment (public URL)
+
+The deployed link runs the **open** profile (hosted open-weight models on Groq; embeddings and
+reranker on CPU inside the container).
+
+| Piece | Where | Free tier |
+|---|---|---|
+| App container | Hugging Face Docker Space built from `infra/docker/space.Dockerfile` | 2 vCPU, 16 GB RAM |
+| Postgres + pgvector | Neon | 0.5 GB storage, `CREATE EXTENSION vector` supported |
+| Redis | inside the container (queue state is disposable) | — |
+| Models | Groq (open-weight models) | rate-limited; GigBid backs off and falls back |
+| Tracing | LangSmith | 5k traces per month |
+
+The container runs `scripts/serve_all.sh`: Redis, GigSim (unless `GIGSIM_BASE_URL` points at the
+instructor's simulator), the idempotent seed (reviewer login, saved searches, persona index), the
+API, the worker and the Next.js server on `$PORT` (7860). If any process exits the container exits
+and the host restarts it.
+
+Deploys happen from GitHub Actions (`.github/workflows/deploy.yml`) on every push to `main`: the
+workflow pushes the repository to the Space, which rebuilds. A scheduled job pings `/api/health`
+every 6 hours so the free Space does not sleep before the hidden test run.
+
+**Required Space secrets:** `DATABASE_URL`, `GROQ_API_KEY`, `APP_SECRET_KEY`,
+`TOKEN_ENCRYPTION_KEY`, `REVIEWER_EMAIL`, `REVIEWER_PASSWORD`, `GIGSIM_API_TOKEN`; optional
+`OPENROUTER_API_KEY`, `LANGSMITH_API_KEY`, `LANGSMITH_TRACING=true`, `GIGSIM_BASE_URL` (to point at
+an external GigSim), `GITHUB_TOKEN` (GitHub MCP for the portfolio builder).
+
+## 4. Rate limits and schedules
+
+| Limit | Value | Where set |
+|---|---|---|
+| GigSim requests per token | 60 / min (simulator), GigBid stays at 20 / min per user | `agent/config.yaml` `marketplace.gigsim.max_requests_per_minute` |
+| Upwork live requests | 6 / min per user | `marketplace.upwork_live.max_requests_per_minute` |
+| Saved-search scouting (GigSim) | every 30 min minimum | `marketplace.gigsim.scout_interval_minutes` |
+| Saved-search scouting (Upwork) | every 240 min minimum | `marketplace.upwork_live.scout_interval_minutes` |
+| Worker concurrency | 2 graph runs | `worker/settings.py` |
+
+**Why 240 minutes in live mode.** Upwork's automation guidance treats high-frequency polling as
+scraping. A freelancer checking a saved search a few times a working day is ordinary use; the
+worker never runs a saved search more often than every four hours in live mode, reads only through
+the official MCP server, and never retries a 429 faster than the server's `Retry-After`.
+
+## 5. Degraded mode and recovery
+
+| Symptom | What GigBid does | What to do |
+|---|---|---|
+| Marketplace down (5xx, timeouts) | Adapter retries with backoff; MCP tools return "unavailable, retry after N s"; the UI shows the degraded banner; scouting skips the tick; nothing is sent | Nothing. Work resumes on the next tick. Check `/api/health` |
+| Marketplace rate limited (429) | Back off for `Retry-After`; the per-user limiter keeps GigBid under the marketplace limit | Lower `max_requests_per_minute` if it recurs |
+| Model provider rate limited | Retries with jittered backoff, then the node's fallback model | Wait for the daily quota or set `OPENROUTER_API_KEY` |
+| A node fails repeatedly | The run moves to `needs_attention` with the reason (dead letter); other runs continue | Open the run, fix the cause, re-analyse the job |
+| API restarted while a proposal waits for approval | The thread is checkpointed in Postgres; the approval reappears in the UI | Approve as normal; submission is idempotent per thread |
+| Token budget exceeded | Run stops in `needs_attention` | Raise `budgets.max_tokens_per_thread` or trim the post |
+
+**Crash-and-resume drill (viva):** analyse a job, wait for the approval screen, stop the API
+(`Ctrl+C` or `docker compose restart api`), start it again, open the studio and approve. The
+proposal is submitted once: the bid graph resumes from its Postgres checkpoint and the
+marketplace call carries an idempotency key derived from the thread, so a retried or repeated
+approval returns the stored result instead of spending Connects again.
+
+**Kill the marketplace server (viva):** `docker compose stop gigsim` (or stop `make gigsim`). The
+banner appears within 15 seconds, scouting and analysis report "marketplace unavailable",
+approvals stay pending. `docker compose start gigsim` clears it.
+
+## 6. Policy changes
+
+Marketplace rules live in `data/policy_pack/policy.yaml` (keywords, Connects costs, severities)
+and thresholds and budgets in `agent/config.yaml`. A platform policy update is a data edit: bump
+`version` in `policy.yaml` and `policy_version` in `config.yaml`, adjust the rule, run
+`make test` and `make eval-smoke`. Prompts that mention policy read it from the payload, not from
+hard-coded text.
