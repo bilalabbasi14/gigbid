@@ -1102,6 +1102,17 @@ export interface components {
             };
             /** Policy Version */
             policy_version: number;
+            /**
+             * Marketplace Policy Version
+             * @description Policy version the marketplace says it enforces, when it reports one
+             */
+            marketplace_policy_version?: number | null;
+            /**
+             * Policy Drift
+             * @description The marketplace enforces a different policy version than GigBid's pack
+             * @default false
+             */
+            policy_drift: boolean;
             /** Model Profile */
             model_profile: string;
         };

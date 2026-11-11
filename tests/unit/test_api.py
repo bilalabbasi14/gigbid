@@ -51,6 +51,11 @@ class FakeMarket:
     async def health(self):
         return True
 
+    policy_version = 1
+
+    async def get_policy(self):
+        return {"version": self.policy_version}
+
 
 @pytest.fixture
 async def client(monkeypatch, tmp_path):
@@ -236,3 +241,13 @@ async def test_health_reports_mode(client: AsyncClient):
         and "policy_version" in h
         and h["model_profile"] in ("open", "paid", "local")
     )
+
+
+async def test_health_flags_a_newer_marketplace_policy(
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+):
+    h = (await client.get("/health")).json()
+    assert h["marketplace_policy_version"] == 1 and h["policy_drift"] is False
+    monkeypatch.setattr(FakeMarket, "policy_version", 2)
+    h = (await client.get("/health")).json()
+    assert h["marketplace_policy_version"] == 2 and h["policy_drift"] is True

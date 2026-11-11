@@ -325,6 +325,12 @@ class HealthOut(BaseModel):
     marketplace_reachable: bool
     degraded: dict[str, Any]
     policy_version: int
+    marketplace_policy_version: int | None = Field(
+        None, description="Policy version the marketplace says it enforces, when it reports one"
+    )
+    policy_drift: bool = Field(
+        False, description="The marketplace enforces a different policy version than GigBid's pack"
+    )
     model_profile: str
 
 

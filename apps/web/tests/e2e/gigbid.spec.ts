@@ -75,6 +75,16 @@ test("degraded mode: an unreachable marketplace shows a banner and the app keeps
   await expect(page.getByTestId("degraded-banner")).toHaveCount(0);
 });
 
+test("policy drift: a newer marketplace policy is flagged until the pack is updated", async ({ page }) => {
+  const api = new MockApi({ marketplacePolicy: 2 });
+  await api.install(page);
+  await page.goto("/inbox");
+  await expect(page.getByTestId("policy-drift-banner")).toContainText("enforces policy v2");
+  api.state.marketplacePolicy = 1;
+  await page.reload();
+  await expect(page.getByTestId("policy-drift-banner")).toHaveCount(0);
+});
+
 test("auth: signed-out users are sent to sign in and back", async ({ page }) => {
   const api = new MockApi({ signedIn: false });
   await api.install(page);

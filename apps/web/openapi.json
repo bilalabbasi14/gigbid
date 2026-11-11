@@ -4043,6 +4043,24 @@
             "type": "integer",
             "title": "Policy Version"
           },
+          "marketplace_policy_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marketplace Policy Version",
+            "description": "Policy version the marketplace says it enforces, when it reports one"
+          },
+          "policy_drift": {
+            "type": "boolean",
+            "title": "Policy Drift",
+            "description": "The marketplace enforces a different policy version than GigBid's pack",
+            "default": false
+          },
           "model_profile": {
             "type": "string",
             "title": "Model Profile"

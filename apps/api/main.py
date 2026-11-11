@@ -113,11 +113,19 @@ for r in (
 @app.get("/health", response_model=HealthOut, tags=["health"])
 async def health() -> HealthOut:
     env = settings.env()
-    reachable = False
+    reachable, market_version = False, None
+    mkt = make_marketplace()
     try:
-        reachable = await make_marketplace().health()
+        reachable = await mkt.health()
     except Exception:  # noqa: BLE001
         reachable = False
+    if reachable:
+        try:
+            v = (await mkt.get_policy()).get("version")
+            market_version = int(v) if v is not None else None
+        except Exception as exc:  # noqa: BLE001 - health still answers; drift is just unknown
+            log.debug("marketplace policy unavailable: %s", exc)
+    ours = int(settings.config().policy_version)
     status = "ok" if reachable and not DEGRADED.failing else "degraded"
     return HealthOut(
         status=status,
@@ -125,7 +133,9 @@ async def health() -> HealthOut:
         marketplace_mode=env.marketplace_mode,
         marketplace_reachable=reachable,
         degraded=DEGRADED.snapshot(),
-        policy_version=int(settings.config().policy_version),
+        policy_version=ours,
+        marketplace_policy_version=market_version,
+        policy_drift=market_version is not None and market_version != ours,
         model_profile=env.model_profile,
     )
 
