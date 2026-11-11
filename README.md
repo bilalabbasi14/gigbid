@@ -25,7 +25,9 @@ through the same adapter.
    client's budget, the freelancer's floor and whether the Connects are worth it.
 4. **Writes** a proposal citing evidence inline, **verifies every claim** against that evidence
    (unsupported sentences are removed or rewritten), lets a Critic send it back at most twice, and
-   runs a **Compliance Guard** over the platform policy.
+   runs a **Compliance Guard** over the platform policy. The policy is data: a platform update is
+   a YAML edit that reaches the Guard, the Writer's prompt and pricing, and the app warns when the
+   marketplace enforces a newer version ([rehearsal](evals/results/change_request_rehearsal.json)).
 5. **Stops for the human**: the proposal studio shows the evidence behind each claim on hover, the
    Critic and Compliance notes, the price rationale and a dry-run preview of exactly what will be
    sent and what it costs. Approve, edit (re-checked, and learned as a style preference) or reject.
