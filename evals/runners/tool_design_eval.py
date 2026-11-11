@@ -190,8 +190,14 @@ async def ask(
             resp = await model.ainvoke(msgs)
             break
         except Exception as exc:  # noqa: BLE001
-            text = str(exc).lower()
-            if "429" in text or "rate" in text:
+            text = f"{type(exc).__name__} {exc}".lower()
+            if (
+                "429" in text
+                or "rate" in text
+                or "connection" in text
+                or "timeout" in text
+                or "503" in text
+            ):
                 await asyncio.sleep(min(60, 10 + 5 * attempt))
                 continue
             if "tool_use_failed" in text or "failed to call a function" in text:
@@ -210,29 +216,51 @@ async def ask(
     return calls[0]["name"], calls[0].get("args") or {}, usage, time.perf_counter() - t0
 
 
+ROWS = ROOT / "evals/results/tool_design_rows.jsonl"
+
+
+def _done(kind: str, spec: str) -> dict[str, dict[str, Any]]:
+    """Rows already measured for this tool set and model (the run resumes after a crash)."""
+    if not ROWS.exists():
+        return {}
+    out = {}
+    for line in ROWS.open(encoding="utf-8"):
+        r = json.loads(line)
+        if r["tool_set"] == kind and r["model"] == spec:
+            out[r["id"]] = r
+    return out
+
+
 async def run(kind: str, spec: str, tasks: list[dict[str, Any]]) -> dict[str, Any]:
     tools, server_of = toolset(kind)
     model = llm.chat_model(spec, temperature=0.0, max_tokens=600).bind_tools(
         tools, tool_choice="required"
     )
+    done = _done(kind, spec)
     rows = []
     for t in tasks:
+        if t["id"] in done:
+            rows.append(done[t["id"]])
+            continue
         name, args, usage, dt = await ask(model, t)
         sel, arg_score = score_call(t, kind, name, args, server_of)
-        rows.append(
-            {
-                "id": t["id"],
-                "expected": t["tool"],
-                "called": name,
-                "args": args,
-                "selected_ok": sel,
-                "arg_score": round(arg_score, 3),
-                "args_ok": sel and arg_score == 1.0,
-                "tokens": sum(usage.values()),
-                "input_tokens": usage.get("input_tokens", 0),
-                "latency_s": round(dt, 2),
-            }
-        )
+        row = {
+            "tool_set": kind,
+            "model": spec,
+            "id": t["id"],
+            "expected": t["tool"],
+            "called": name,
+            "args": args,
+            "selected_ok": sel,
+            "arg_score": round(arg_score, 3),
+            "args_ok": sel and arg_score == 1.0,
+            "tokens": sum(usage.values()),
+            "input_tokens": usage.get("input_tokens", 0),
+            "latency_s": round(dt, 2),
+        }
+        rows.append(row)
+        with ROWS.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, default=str) + "\n")
         print(
             f"  [{kind:6s}] {t['id']} expected={t['tool']:22s} called={name!s:22s} sel={sel!s:5s} args={arg_score:.2f}"
         )

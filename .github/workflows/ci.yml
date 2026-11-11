@@ -38,6 +38,9 @@ jobs:
         env:
           MODEL_PROFILE: open
           LANGSMITH_TRACING: "false"
+      - name: Stand-alone Portfolio MCP package (published artifact)
+        working-directory: packages/gigbid-portfolio-mcp
+        run: uv run --extra dev pytest -q
 
   web:
     name: Web lint, typecheck, Playwright
