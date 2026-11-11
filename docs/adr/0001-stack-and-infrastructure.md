@@ -17,7 +17,7 @@ tracing tool) but leaves the concrete choices open.
 | Tracing | **LangSmith** (free tier) | Self-hosted Langfuse v3 needs ClickHouse + object storage; LangSmith integrates with LangGraph natively and gives per-node token/cost |
 | Hosted open models | **Groq** (gpt-oss-120b / gpt-oss-20b / llama-3.1-8b) with OpenRouter free models as fallback | Free hosts have no GPU; the brief allows hosted open-weight providers; Groq's latency keeps p95 low |
 | Local option | Ollama `qwen3:4b` + `nomic-embed-text`, as an optional compose profile | Honest local path for cheap nodes; too slow for Writer/Critic on CPU |
-| Embeddings / reranker | `nomic-embed-text-v1.5`, `bge-reranker-v2-m3` via sentence-transformers on CPU | Open models in both profiles as required |
+| Embeddings / reranker | `nomic-embed-text-v1.5`, `bge-reranker-v2-m3` via sentence-transformers on CPU (superseded by ADR 0004: `bge-base-en-v1.5`, `bge-reranker-base`) | Open models in both profiles as required |
 | Frontend | Next.js 15 App Router, TypeScript, Tailwind, shadcn/ui, TanStack Query, `openapi-typescript` client | Required screens are data-heavy dashboards; generated client enforces the typed contract |
 | Auth | Own users table, Argon2, JWT cookie, Fernet-encrypted token store | Multi-user without an external identity provider |
 
