@@ -26,6 +26,8 @@ from agent.graphs.conversation_graph import (
     conversation_config,
     initial_conversation_state,
 )
+from agent.graphs.portfolio_builder_graph import build_graph as build_portfolio_graph
+from agent.graphs.portfolio_builder_graph import builder_config, initial_builder_state
 from agent.memory import promotion_rules
 from agent.memory import store as memstore
 from agent.memory.promotion_rules import proposal_features
@@ -64,6 +66,7 @@ class Runtime:
         self.bid_graph = build_bid_graph(
             self.deps, checkpointer=self.checkpointer, store=self.store
         )
+        self.portfolio_graph = build_portfolio_graph(self.deps, checkpointer=self.checkpointer)
         self.conv_graph = build_conversation_graph(
             self.deps, checkpointer=self.checkpointer, store=self.store
         )
@@ -106,6 +109,14 @@ class Runtime:
                 await cm.__aexit__(None, None, None)
 
     # ------------------------------------------------------------ helpers
+    def _gc(self, kind: str, thread_id: str, user_id: str) -> tuple[Any, dict[str, Any]]:
+        """The compiled graph and run config for a thread of this kind."""
+        if kind == "bid":
+            return self.bid_graph, run_config(thread_id, user_id=user_id)
+        if kind == "portfolio":
+            return self.portfolio_graph, builder_config(thread_id, user_id=user_id)
+        return self.conv_graph, conversation_config(thread_id, user_id=user_id)
+
     def _spawn(self, coro: Any) -> asyncio.Task[Any]:
         t = asyncio.create_task(coro)
         self._tasks.add(t)
@@ -217,6 +228,52 @@ class Runtime:
             await coro
         return thread_id
 
+    async def start_portfolio_build(
+        self,
+        user: User,
+        *,
+        owner: str,
+        source_kind: str,
+        local_root: str | None = None,
+        max_repos: int = 6,
+        github_token: str | None = None,
+    ) -> str:
+        """X3: build verified case studies from a GitHub account (or the demo repositories)."""
+        thread_id = f"pf-{uuid.uuid4().hex[:12]}"
+        async with session_factory()() as s:
+            s.add(Run(thread_id=thread_id, user_id=user.user_id, kind="portfolio", status="queued"))
+            await s.commit()
+        deps = self.deps
+        if source_kind == "github":
+            from agent.mcp_client import ToolProvider, github_tool_loader
+
+            deps = Deps(
+                tools=ToolProvider(loader=github_tool_loader(github_token or "")),
+                invoke=self.deps.invoke,
+                use_reranker=self.deps.use_reranker,
+            )
+        graph = build_portfolio_graph(deps, checkpointer=self.checkpointer)
+        state = initial_builder_state(
+            thread_id=thread_id,
+            owner=owner,
+            persona_key=f"user_{user.user_id}",
+            user_id=user.user_id,
+            source_kind=source_kind,
+            local_root=local_root,
+            max_repos=max_repos,
+        )
+        self._spawn(
+            self._execute(
+                thread_id,
+                user.user_id,
+                graph,
+                state,
+                builder_config(thread_id, user_id=user.user_id),
+                kind="portfolio",
+            )
+        )
+        return thread_id
+
     async def _execute(
         self, thread_id: str, user_id: str, graph: Any, inp: Any, cfg: dict[str, Any], *, kind: str
     ) -> dict[str, Any]:
@@ -301,12 +358,7 @@ class Runtime:
             if run is None or run.user_id != user_id:
                 raise LookupError("run not found")
             kind = run.kind
-        graph = self.bid_graph if kind == "bid" else self.conv_graph
-        cfg = (
-            run_config(thread_id, user_id=user_id)
-            if kind == "bid"
-            else conversation_config(thread_id, user_id=user_id)
-        )
+        graph, cfg = self._gc(kind, thread_id, user_id)
         state = await graph.aget_state(cfg)
         if not state.next:
             raise ValueError("run is not waiting for approval")
@@ -322,8 +374,11 @@ class Runtime:
                 job_category=state.values.get("persona"),
                 store=self.store,
             )
+        resume_value: Any = decision
+        if kind == "portfolio":
+            resume_value = {"decisions": decision.get("portfolio_decisions") or {}}
         values = await self._execute(
-            thread_id, user_id, graph, Command(resume=decision), cfg, kind=kind
+            thread_id, user_id, graph, Command(resume=resume_value), cfg, kind=kind
         )
         values["_promoted_style_rules"] = promoted
         return values
@@ -435,24 +490,14 @@ class Runtime:
     async def state_values(
         self, thread_id: str, kind: str, user_id: str
     ) -> tuple[dict[str, Any], list[str]]:
-        graph = self.bid_graph if kind == "bid" else self.conv_graph
-        cfg = (
-            run_config(thread_id, user_id=user_id)
-            if kind == "bid"
-            else conversation_config(thread_id, user_id=user_id)
-        )
+        graph, cfg = self._gc(kind, thread_id, user_id)
         st = await graph.aget_state(cfg)
         return st.values, list(st.next or [])
 
     async def pending_payload(
         self, thread_id: str, kind: str, user_id: str
     ) -> dict[str, Any] | None:
-        graph = self.bid_graph if kind == "bid" else self.conv_graph
-        cfg = (
-            run_config(thread_id, user_id=user_id)
-            if kind == "bid"
-            else conversation_config(thread_id, user_id=user_id)
-        )
+        graph, cfg = self._gc(kind, thread_id, user_id)
         st = await graph.aget_state(cfg)
         for task in st.tasks:
             for intr in getattr(task, "interrupts", []) or []:
@@ -464,12 +509,7 @@ class Runtime:
     async def history(
         self, thread_id: str, kind: str, user_id: str, limit: int = 50
     ) -> list[dict[str, Any]]:
-        graph = self.bid_graph if kind == "bid" else self.conv_graph
-        cfg = (
-            run_config(thread_id, user_id=user_id)
-            if kind == "bid"
-            else conversation_config(thread_id, user_id=user_id)
-        )
+        graph, cfg = self._gc(kind, thread_id, user_id)
         out = []
         async for snap in graph.aget_state_history(cfg):
             out.append(
@@ -491,12 +531,7 @@ class Runtime:
 
     async def replay(self, thread_id: str, kind: str, user: User, checkpoint_id: str) -> str:
         """Fork a new thread from a past checkpoint and run it forward (time travel)."""
-        graph = self.bid_graph if kind == "bid" else self.conv_graph
-        src_cfg = (
-            run_config(thread_id, user_id=user.user_id)
-            if kind == "bid"
-            else conversation_config(thread_id, user_id=user.user_id)
-        )
+        graph, src_cfg = self._gc(kind, thread_id, user.user_id)
         src_cfg = {
             **src_cfg,
             "configurable": {**src_cfg["configurable"], "checkpoint_id": checkpoint_id},
@@ -515,11 +550,7 @@ class Runtime:
             )
             await s.commit()
         values = {**snap.values, "thread_id": new_thread, "trace": [], "errors": []}
-        cfg = (
-            run_config(new_thread, user_id=user.user_id)
-            if kind == "bid"
-            else conversation_config(new_thread, user_id=user.user_id)
-        )
+        _, cfg = self._gc(kind, new_thread, user.user_id)
         # seed the new thread with the old values at the same position, then continue
         await graph.aupdate_state(
             cfg,

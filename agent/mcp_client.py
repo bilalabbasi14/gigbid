@@ -222,6 +222,29 @@ class ToolProvider:
             ) from exc
 
 
+def github_tool_loader(token: str):  # type: ignore[no-untyped-def]
+    """Loader for the official GitHub MCP server (remote, read-only repos toolset) with a user's
+    token. Used per portfolio build so each user reads GitHub with their own credentials."""
+
+    async def load() -> dict[str, list[BaseTool]]:
+        if not token:
+            raise RuntimeError("GitHub is not connected: add a read-only token in Settings")
+        from langchain_mcp_adapters.client import MultiServerMCPClient
+
+        client = MultiServerMCPClient(
+            {
+                "github": {
+                    "transport": "streamable_http",
+                    "url": settings.env().github_mcp_url,
+                    "headers": {"Authorization": f"Bearer {token}"},
+                }
+            }
+        )
+        return {"github": await client.get_tools(server_name="github")}
+
+    return load
+
+
 async def in_process_loader() -> dict[str, list[BaseTool]]:
     """Mount our three servers in-process (no HTTP) and load their tools. Used by tests and `make demo`."""
     from langchain_mcp_adapters.tools import load_mcp_tools

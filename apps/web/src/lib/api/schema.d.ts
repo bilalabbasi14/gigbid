@@ -537,6 +537,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/portfolio/github/build": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Build From Github
+         * @description X3 Portfolio builder: turn repositories into case studies verified against their code.
+         *     source=github reads the user's account through the official GitHub MCP server (read-only);
+         *     source=demo reads a demo persona's repositories from disk, so the feature works without a token.
+         *     Drafts stop at an approval; only approved case studies are added to the user's own portfolio.
+         */
+        post: operations["build_from_github_portfolio_github_build_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/portfolio/reindex": {
         parameters: {
             query?: never;
@@ -714,6 +737,15 @@ export interface components {
             confirmed_slot?: {
                 [key: string]: unknown;
             } | null;
+            /**
+             * Portfolio Decisions
+             * @description X3: {repo: {action: approve|edit|reject, markdown?}}
+             */
+            portfolio_decisions?: {
+                [key: string]: {
+                    [key: string]: unknown;
+                };
+            } | null;
         };
         /** ApprovalItem */
         ApprovalItem: {
@@ -723,7 +755,7 @@ export interface components {
              * Kind
              * @enum {string}
              */
-            kind: "proposal" | "message";
+            kind: "proposal" | "message" | "portfolio";
             /** Job Id */
             job_id: string | null;
             /** Title */
@@ -735,6 +767,7 @@ export interface components {
             created_at: string;
             proposal?: components["schemas"]["ApprovalPayload"] | null;
             message?: components["schemas"]["MessageApprovalPayload"] | null;
+            portfolio?: components["schemas"]["PortfolioBuildPayload"] | null;
         };
         /** ApprovalListOut */
         ApprovalListOut: {
@@ -847,6 +880,36 @@ export interface components {
              */
             client_industry: string;
         };
+        /** BuildIn */
+        BuildIn: {
+            /**
+             * Source
+             * @default github
+             * @enum {string}
+             */
+            source: "github" | "demo";
+            /**
+             * Owner
+             * @description GitHub username (source=github)
+             */
+            owner?: string | null;
+            /**
+             * Max Repos
+             * @default 6
+             */
+            max_repos: number;
+            /** Demo Persona */
+            demo_persona?: ("ai_ml" | "fullstack" | "data_analyst") | null;
+        };
+        /** BuildOut */
+        BuildOut: {
+            /** Thread Id */
+            thread_id: string;
+            /** Status */
+            status: string;
+            /** Source */
+            source: string;
+        };
         /** Claim */
         Claim: {
             /** Claim Id */
@@ -874,6 +937,17 @@ export interface components {
              * @enum {string}
              */
             action: "keep" | "rewritten" | "removed";
+        };
+        /** CodeFact */
+        CodeFact: {
+            /** Fact Id */
+            fact_id: string;
+            /** Kind */
+            kind: string;
+            /** Text */
+            text: string;
+            /** Source */
+            source: string;
         };
         /**
          * ComplianceVerdict
@@ -1274,6 +1348,55 @@ export interface components {
             columns: {
                 [key: string]: components["schemas"]["PipelineCardOut"][];
             };
+        };
+        /**
+         * PortfolioBuildPayload
+         * @description X3: case studies drafted from repositories, waiting for the human.
+         */
+        PortfolioBuildPayload: {
+            /**
+             * Kind
+             * @default portfolio
+             * @constant
+             */
+            kind: "portfolio";
+            /** Thread Id */
+            thread_id?: string | null;
+            /** Owner */
+            owner?: string | null;
+            /** Persona Key */
+            persona_key?: string | null;
+            /** Drafts */
+            drafts?: components["schemas"]["PortfolioDraftOut"][];
+            /** Skipped */
+            skipped?: {
+                [key: string]: unknown;
+            }[];
+        };
+        /** PortfolioDraftOut */
+        PortfolioDraftOut: {
+            /** Repo */
+            repo: string;
+            /** Url */
+            url?: string | null;
+            /** Title */
+            title: string;
+            /** Markdown */
+            markdown: string;
+            /** Facts */
+            facts?: components["schemas"]["CodeFact"][];
+            /** Claims */
+            claims?: components["schemas"]["Claim"][];
+            /** Profile */
+            profile?: {
+                [key: string]: unknown;
+            };
+            /** Verification */
+            verification?: {
+                [key: string]: unknown;
+            };
+            /** Seconds */
+            seconds?: number | null;
         };
         /** PortfolioItemOut */
         PortfolioItemOut: {
@@ -2985,6 +3108,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PortfolioItemOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    build_from_github_portfolio_github_build_post: {
+        parameters: {
+            query?: never;
+            header?: {
+                authorization?: string | null;
+            };
+            path?: never;
+            cookie?: {
+                gigbid_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BuildIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BuildOut"];
                 };
             };
             /** @description Validation Error */

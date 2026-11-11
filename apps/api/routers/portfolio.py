@@ -274,6 +274,68 @@ async def upload(
     )
 
 
+class BuildIn(BaseModel):
+    source: Literal["github", "demo"] = "github"
+    owner: str | None = Field(
+        default=None,
+        max_length=100,
+        pattern=r"^[A-Za-z0-9-]*$",
+        description="GitHub username (source=github)",
+    )
+    max_repos: int = Field(default=6, ge=1, le=15)
+    demo_persona: Literal["ai_ml", "fullstack", "data_analyst"] | None = None
+
+
+class BuildOut(BaseModel):
+    thread_id: str
+    status: str
+    source: str
+
+
+@router.post("/github/build", response_model=BuildOut, status_code=202)
+async def build_from_github(
+    body: BuildIn, user: CurrentUser, session: Annotated[AsyncSession, Depends(get_session)]
+) -> BuildOut:
+    """X3 Portfolio builder: turn repositories into case studies verified against their code.
+    source=github reads the user's account through the official GitHub MCP server (read-only);
+    source=demo reads a demo persona's repositories from disk, so the feature works without a token.
+    Drafts stop at an approval; only approved case studies are added to the user's own portfolio."""
+    from apps.api.auth.token_store import get_oauth_token
+    from apps.api.runtime import runtime
+
+    if body.source == "github":
+        if not body.owner:
+            raise HTTPException(422, "owner (GitHub username) is required")
+        tok = await get_oauth_token(session, user.user_id, "github")
+        token = (tok or {}).get("access_token") or settings.env().github_token
+        if not token:
+            raise HTTPException(
+                400, "connect GitHub in Settings first (a read-only personal access token)"
+            )
+        thread_id = await runtime().start_portfolio_build(
+            user,
+            owner=body.owner,
+            source_kind="github",
+            max_repos=body.max_repos,
+            github_token=token,
+        )
+    else:
+        persona = body.demo_persona or (
+            user.persona if user.persona in ("ai_ml", "fullstack", "data_analyst") else "ai_ml"
+        )
+        root = PERSONAS_ROOT / persona / "repos"
+        if not root.exists():
+            raise HTTPException(404, f"no demo repositories for {persona}")
+        thread_id = await runtime().start_portfolio_build(
+            user,
+            owner=f"demo-{persona}",
+            source_kind="local",
+            local_root=str(root),
+            max_repos=body.max_repos,
+        )
+    return BuildOut(thread_id=thread_id, status="queued", source=body.source)
+
+
 @router.post("/reindex", status_code=202)
 async def reindex(user: CurrentUser, background: BackgroundTasks) -> dict[str, str]:
     background.add_task(_reindex, user.user_id, persona_key(user))
