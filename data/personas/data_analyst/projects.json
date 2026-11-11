@@ -1,0 +1,448 @@
+[
+  {
+    "id": "p01",
+    "name": "Churn Prediction & Cohort Retention Dashboard",
+    "client_industry": "SaaS",
+    "client_type": "startup",
+    "year": 2023,
+    "duration_weeks": 6,
+    "skills": [
+      "SQL",
+      "Python",
+      "dbt",
+      "BigQuery",
+      "Power BI"
+    ],
+    "libraries": [
+      "pandas",
+      "scikit-learn",
+      "dbt-core",
+      "google-cloud-bigquery",
+      "Power BI Desktop"
+    ],
+    "problem": "The CTO needed to identify which user segments were at highest risk of churning within 30 days to prioritize support outreach.",
+    "solution": "Built a dbt model layer in BigQuery to calculate 40+ behavioral features and trained an XGBoost classifier to predict churn probability. Delivered an interactive Power BI dashboard that segments users by risk level and maps specific feature contributions to the prediction.",
+    "outcome_metrics": [
+      "Achieved 82% F1-score on validation set",
+      "Reduced 30-day churn by 14% in the first quarter post-launch"
+    ],
+    "has_repo": true,
+    "repo_slug": "saas-churn-prediction-dbts",
+    "role": "Lead Data Analyst"
+  },
+  {
+    "id": "p02",
+    "name": "Subscription Revenue Attribution & LTV Modeling",
+    "client_industry": "SaaS",
+    "client_type": "startup",
+    "year": 2024,
+    "duration_weeks": 5,
+    "skills": [
+      "SQL",
+      "DAX",
+      "BigQuery",
+      "Power BI",
+      "Statistics"
+    ],
+    "libraries": [
+      "dbt-core",
+      "google-cloud-bigquery",
+      "Power BI Desktop",
+      "pandas"
+    ],
+    "problem": "Marketing spend was misallocated because the team could not attribute revenue to specific acquisition channels accurately over time.",
+    "solution": "Rebuilt the revenue mart in dbt to handle multi-touch attribution logic and created a DAX measure for dynamic LTV projections based on cohort retention curves. Integrated Google Analytics 4 data to correlate ad spend with downstream revenue events.",
+    "outcome_metrics": [
+      "Identified 12% over-allocation to low-performing channels",
+      "Improved ROAS reporting accuracy by 25%"
+    ],
+    "has_repo": true,
+    "repo_slug": "saas-ltv-attribution-model",
+    "role": "Independent Consultant"
+  },
+  {
+    "id": "p03",
+    "name": "Enterprise Data Warehouse Migration & dbt Governance",
+    "client_industry": "SaaS",
+    "client_type": "enterprise",
+    "year": 2025,
+    "duration_weeks": 12,
+    "skills": [
+      "dbt",
+      "BigQuery",
+      "Airflow",
+      "SQL",
+      "Python"
+    ],
+    "libraries": [
+      "dbt-core",
+      "apache-airflow",
+      "google-cloud-bigquery",
+      "pytest-dbt"
+    ],
+    "problem": "The company was scaling from a single analyst to a team of five, and their ad-hoc SQL queries were causing data inconsistencies and slow query performance.",
+    "solution": "Migrated legacy SQL scripts to a standardized dbt project with strict testing and documentation. Set up Airflow orchestrations to handle dependency management and added automated data quality checks that alert the team via Slack on failure.",
+    "outcome_metrics": [
+      "Reduced average query execution time by 40%",
+      "Decreased data incident resolution time from 4 hours to 30 minutes"
+    ],
+    "has_repo": true,
+    "repo_slug": "enterprise-dbt-migration-airflow",
+    "role": "Data Engineering Lead"
+  },
+  {
+    "id": "p04",
+    "name": "Real-Time Ad Spend Optimization Dashboard",
+    "client_industry": "Media",
+    "client_type": "agency",
+    "year": 2022,
+    "duration_weeks": 4,
+    "skills": [
+      "Python",
+      "pandas",
+      "Tableau",
+      "Google Analytics 4",
+      "Excel"
+    ],
+    "libraries": [
+      "pandas",
+      "numpy",
+      "tableau",
+      "gspread",
+      "openpyxl"
+    ],
+    "problem": "Media buyers were manually copying data from multiple ad platforms into Excel, leading to delayed reporting and calculation errors.",
+    "solution": "Developed a Python script to automatically pull GA4 and ad platform APIs into a central Google Sheet every 15 minutes. Built a Tableau dashboard that visualizes spend efficiency in near-real-time, highlighting anomalies in CTR and CPA.",
+    "outcome_metrics": [
+      "Saved 10 hours/week of manual data entry",
+      "Enabled 15-minute frequency reporting for clients"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Data Analyst"
+  },
+  {
+    "id": "p05",
+    "name": "Loan Default Risk Scoring System",
+    "client_industry": "Fintech",
+    "client_type": "enterprise",
+    "year": 2023,
+    "duration_weeks": 8,
+    "skills": [
+      "SQL",
+      "Python",
+      "Snowflake",
+      "Statistics",
+      "A/B testing"
+    ],
+    "libraries": [
+      "pandas",
+      "scikit-learn",
+      "snowflake-connector-python",
+      "statsmodels"
+    ],
+    "problem": "The lending team lacked a robust statistical model to predict which applicants would default on their loans within the first 6 months.",
+    "solution": "Constructed a logistic regression model using historical loan data in Snowflake, incorporating 25 financial and behavioral variables. Validated the model using A/B testing against the existing manual underwriting process to measure impact on approval rates and loss ratios.",
+    "outcome_metrics": [
+      "Reduced bad debt by 8% year-over-year",
+      "Maintained approval rate variance within 1.5% of baseline"
+    ],
+    "has_repo": true,
+    "repo_slug": "fintech-loan-default-model",
+    "role": "Data Scientist"
+  },
+  {
+    "id": "p06",
+    "name": "Hotel Occupancy & Revenue Per Available Room (RevPAR) Analytics",
+    "client_industry": "Hospitality",
+    "client_type": "individual",
+    "year": 2021,
+    "duration_weeks": 3,
+    "skills": [
+      "SQL",
+      "Power BI",
+      "DAX",
+      "Excel"
+    ],
+    "libraries": [
+      "Power BI Desktop",
+      "pandas",
+      "openpyxl"
+    ],
+    "problem": "The hotel manager could not distinguish between seasonal demand spikes and effective pricing strategy impacts on revenue.",
+    "solution": "Consolidated PMS data into a Power BI dataset and created DAX measures to calculate dynamic RevPAR and ADR trends. Built a drill-down report allowing the manager to compare performance across property types and seasonal periods.",
+    "outcome_metrics": [
+      "Increased average room rate by 5% through dynamic pricing insights",
+      "Reduced reporting preparation time from 2 days to 2 hours"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Freelance Analyst"
+  },
+  {
+    "id": "p07",
+    "name": "Supply Chain Delay Prediction & Route Optimization",
+    "client_industry": "Logistics",
+    "client_type": "enterprise",
+    "year": 2024,
+    "duration_weeks": 10,
+    "skills": [
+      "Python",
+      "pandas",
+      "BigQuery",
+      "Airflow",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "scipy",
+      "google-cloud-bigquery",
+      "apache-airflow",
+      "matplotlib"
+    ],
+    "problem": "The logistics firm faced frequent delivery delays due to unpredictable traffic patterns and weather conditions, impacting customer satisfaction scores.",
+    "solution": "Analyzed 3 years of GPS and delivery timestamp data in BigQuery to identify key delay drivers. Built a predictive model to flag high-risk shipments 24 hours in advance, allowing dispatchers to reroute or notify customers proactively.",
+    "outcome_metrics": [
+      "Reduced late deliveries by 18%",
+      "Improved on-time performance metric to 94%"
+    ],
+    "has_repo": true,
+    "repo_slug": "logistics-delay-prediction-gps",
+    "role": "Senior Data Analyst"
+  },
+  {
+    "id": "p08",
+    "name": "Production Line Efficiency & Downtime Analysis",
+    "client_industry": "Manufacturing",
+    "client_type": "enterprise",
+    "year": 2022,
+    "duration_weeks": 5,
+    "skills": [
+      "SQL",
+      "Tableau",
+      "Python",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "tableau",
+      "scipy",
+      "sqlalchemy"
+    ],
+    "problem": "Factory managers were unaware of the root causes behind frequent minor stoppages that collectively reduced Overall Equipment Effectiveness (OEE).",
+    "solution": "Ingested IoT sensor data from production lines into a data warehouse and used Python to cluster downtime events by duration and frequency. Created a Tableau dashboard that visualizes OEE trends and highlights the top three causes of inefficiency per shift.",
+    "outcome_metrics": [
+      "Identified 3 recurring mechanical issues causing 40% of downtime",
+      "Improved OEE by 6 points in the first month"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Consultant"
+  },
+  {
+    "id": "p09",
+    "name": "E-commerce Conversion Funnel & Cart Abandonment Analysis",
+    "client_industry": "E-commerce",
+    "client_type": "startup",
+    "year": 2023,
+    "duration_weeks": 4,
+    "skills": [
+      "Google Analytics 4",
+      "BigQuery",
+      "SQL",
+      "Power BI",
+      "A/B testing"
+    ],
+    "libraries": [
+      "google-analytics-data",
+      "google-cloud-bigquery",
+      "Power BI Desktop"
+    ],
+    "problem": "The e-commerce store had a high cart abandonment rate, but the team lacked visibility into which specific product pages or price points were driving users away.",
+    "solution": "Connected GA4 BigQuery export to Power BI to build a detailed funnel analysis, segmenting users by device type and traffic source. Designed and analyzed A/B tests for checkout page variations to reduce friction in the final purchase step.",
+    "outcome_metrics": [
+      "Reduced cart abandonment rate from 72% to 65%",
+      "Increased checkout completion rate by 12%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Growth Analyst"
+  },
+  {
+    "id": "p10",
+    "name": "Student Retention & Academic Performance Modeling",
+    "client_industry": "Education",
+    "client_type": "enterprise",
+    "year": 2021,
+    "duration_weeks": 6,
+    "skills": [
+      "Python",
+      "pandas",
+      "SQL",
+      "Statistics",
+      "Excel"
+    ],
+    "libraries": [
+      "pandas",
+      "scikit-learn",
+      "sqlalchemy",
+      "openpyxl"
+    ],
+    "problem": "The university wanted to identify at-risk students early in the semester to intervene with tutoring and advising resources.",
+    "solution": "Analyzed historical LMS data and grade records to build a classification model predicting semester failure. Created an Excel-based reporting tool for advisors that flags students with high risk scores and suggests relevant support resources.",
+    "outcome_metrics": [
+      "Identified 85% of at-risk students by week 4",
+      "Increased retention rate for flagged students by 9%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Data Analyst"
+  },
+  {
+    "id": "p11",
+    "name": "Legal Case Outcome Prediction & Document Search",
+    "client_industry": "Legal",
+    "client_type": "enterprise",
+    "year": 2024,
+    "duration_weeks": 7,
+    "skills": [
+      "Python",
+      "pandas",
+      "SQL",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "nltk",
+      "sqlalchemy",
+      "scikit-learn"
+    ],
+    "problem": "Law firms were spending excessive time manually reviewing case files to find similar precedents and predict case outcomes based on historical data.",
+    "solution": "Built a text analysis pipeline using NLP to extract key entities and themes from case documents. Developed a SQL database structure to store metadata and created a Python script that recommends similar cases based on semantic similarity scores.",
+    "outcome_metrics": [
+      "Reduced case research time by 30%",
+      "Improved accuracy of outcome predictions by 15%"
+    ],
+    "has_repo": true,
+    "repo_slug": "legal-case-nlp-search-tool",
+    "role": "Data Engineer"
+  },
+  {
+    "id": "p12",
+    "name": "Donor Lifecycle & Fundraising Efficiency Dashboard",
+    "client_industry": "Non-profit",
+    "client_type": "individual",
+    "year": 2022,
+    "duration_weeks": 3,
+    "skills": [
+      "Excel",
+      "Power BI",
+      "SQL",
+      "Statistics"
+    ],
+    "libraries": [
+      "Power BI Desktop",
+      "pandas",
+      "sqlalchemy"
+    ],
+    "problem": "The non-profit was struggling to track donor lifetime value and understand which fundraising campaigns yielded the highest long-term retention.",
+    "solution": "Consolidated donation data from multiple sources into a normalized SQL database. Built a Power BI dashboard that visualizes donor cohorts, tracks RFM scores, and highlights the most effective campaign channels for retention.",
+    "outcome_metrics": [
+      "Increased repeat donation rate by 10%",
+      "Optimized campaign budget allocation, saving $15k annually"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Freelance Analyst"
+  },
+  {
+    "id": "p13",
+    "name": "Patient No-Show Rate Reduction & Scheduling Optimization",
+    "client_industry": "Healthcare",
+    "client_type": "enterprise",
+    "year": 2025,
+    "duration_weeks": 8,
+    "skills": [
+      "SQL",
+      "Python",
+      "BigQuery",
+      "Airflow",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "google-cloud-bigquery",
+      "apache-airflow",
+      "statsmodels"
+    ],
+    "problem": "The clinic faced high no-show rates for follow-up appointments, leading to wasted staff time and reduced patient care capacity.",
+    "solution": "Analyzed appointment history and patient demographics in BigQuery to identify key predictors of no-shows. Implemented an automated Airflow pipeline that triggers personalized reminder emails and SMS messages based on risk scores.",
+    "outcome_metrics": [
+      "Reduced no-show rate by 22%",
+      "Increased appointment fill rate by 5%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Healthcare Data Analyst"
+  },
+  {
+    "id": "p14",
+    "name": "Real Estate Portfolio Valuation & Market Trend Analysis",
+    "client_industry": "Real Estate",
+    "client_type": "agency",
+    "year": 2023,
+    "duration_weeks": 5,
+    "skills": [
+      "Python",
+      "pandas",
+      "Tableau",
+      "SQL",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "tableau",
+      "sqlalchemy",
+      "scipy"
+    ],
+    "problem": "The real estate agency needed a data-driven approach to value their commercial property portfolio and identify market trends for investment decisions.",
+    "solution": "Scraped public property sale data and integrated it with internal portfolio records to build a comparative market analysis. Created a Tableau dashboard that visualizes price per square foot trends, vacancy rates, and capitalization rates across different regions.",
+    "outcome_metrics": [
+      "Improved valuation accuracy by 12%",
+      "Identified 3 underperforming properties for sale, recovering $2M in capital"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Data Consultant"
+  },
+  {
+    "id": "p15",
+    "name": "Customer Support Ticket Classification & SLA Monitoring",
+    "client_industry": "SaaS",
+    "client_type": "startup",
+    "year": 2026,
+    "duration_weeks": 4,
+    "skills": [
+      "Python",
+      "pandas",
+      "BigQuery",
+      "Power BI",
+      "Statistics"
+    ],
+    "libraries": [
+      "pandas",
+      "scikit-learn",
+      "google-cloud-bigquery",
+      "Power BI Desktop"
+    ],
+    "problem": "The support team was overwhelmed by a surge in tickets, and they lacked a system to prioritize high-impact issues and monitor SLA compliance effectively.",
+    "solution": "Built a text classification model using Python to automatically categorize tickets by urgency and topic. Created a Power BI dashboard that tracks SLA breach rates in real-time and highlights the most common issues causing delays.",
+    "outcome_metrics": [
+      "Reduced average ticket resolution time by 15%",
+      "Achieved 98% SLA compliance rate"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Support Data Analyst"
+  }
+]

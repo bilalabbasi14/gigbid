@@ -1,0 +1,14 @@
+name: fintech_ingest
+version: '1.6'
+profile: prod
+config-version: 2
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+
+models:
+  fintech_ingest:
+    +materialized: incremental
+    +incremental_strategy: merge
+    +partition_by: {field: event_date, data_type: date}
+    +cluster_by: [product_id]

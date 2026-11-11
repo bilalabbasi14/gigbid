@@ -1,0 +1,11 @@
+prod:
+  target: prod
+  outputs:
+    prod:
+      type: bigquery
+      method: service-account
+      project: fintech-analytics-12345
+      dataset: fintech_staging
+      keyfile: /path/to/service_account.json
+      threads: 4
+      timeout_seconds: 300

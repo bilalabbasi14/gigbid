@@ -1,0 +1,28 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: kpi_user
+      POSTGRES_PASSWORD: kpi_pass
+      POSTGRES_DB: kpi_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  api:
+    build: .
+    command: npm run dev
+    volumes:
+      - .:/app
+    ports:
+      - "4000:4000"
+    environment:
+      PGHOST: db
+      PGUSER: kpi_user
+      PGPASSWORD: kpi_pass
+      PGDATABASE: kpi_db
+    depends_on:
+      - db
+volumes:
+  pgdata:

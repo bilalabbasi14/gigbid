@@ -1,0 +1,4 @@
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+networkx==3.2.1
+pydantic==2.6.3

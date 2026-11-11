@@ -1,0 +1,16 @@
+/* Cohort churn rate */
+CohortChurnRate =
+VAR CohortStart = MIN('User Cohort'[CohortMonth])
+VAR CurrentMonth = MAX('Date'[Month])
+VAR CohortSize = CALCULATE(DISTINCTCOUNT('User Cohort'[UserID]), 'User Cohort'[CohortMonth] = CohortStart)
+VAR Churned = CALCULATE(DISTINCTCOUNT('Churn Events'[UserID]),
+    FILTER('Churn Events', 'Churn Events'[ChurnMonth] = CurrentMonth &&
+        'Churn Events'[CohortMonth] = CohortStart))
+RETURN DIVIDE(Churned, CohortSize, 0)
+
+/* Projected upsell revenue */
+ProjectedUpsell =
+SUMX(
+    FILTER('Predictions', 'Predictions'[ChurnScore] < 0.2),
+    'Predictions'[UpsellPotential]
+)

@@ -1,0 +1,427 @@
+[
+  {
+    "id": "p01",
+    "name": "Clinical Notes Summarizer",
+    "client_industry": "healthcare",
+    "client_type": "enterprise",
+    "year": 2020,
+    "duration_weeks": 10,
+    "skills": [
+      "NLP",
+      "summarization",
+      "MLOps"
+    ],
+    "libraries": [
+      "Python",
+      "PyTorch",
+      "Hugging Face Transformers",
+      "FastAPI",
+      "Docker",
+      "AWS SageMaker",
+      "MLflow"
+    ],
+    "problem": "Physicians spent excessive time reading lengthy patient notes.",
+    "solution": "Built a transformer‑based abstractive summarization service deployed on SageMaker with a FastAPI wrapper. Implemented CI/CD pipelines and model versioning via MLflow.",
+    "outcome_metrics": [
+      "Average reading time reduced by 62%",
+      "Summaries achieved ROUGE‑L 0.71"
+    ],
+    "has_repo": true,
+    "repo_slug": "clinical-notes-summarizer",
+    "role": "Lead AI Engineer"
+  },
+  {
+    "id": "p02",
+    "name": "Product Recommendation Engine",
+    "client_industry": "e-commerce",
+    "client_type": "startup",
+    "year": 2021,
+    "duration_weeks": 8,
+    "skills": [
+      "RAG",
+      "personalization",
+      "MLOps"
+    ],
+    "libraries": [
+      "Python",
+      "LangChain",
+      "PostgreSQL",
+      "pgvector",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Low conversion due to irrelevant product suggestions.",
+    "solution": "Created a Retrieval‑Augmented Generation pipeline that pulls product metadata from PostgreSQL and generates personalized recommendations via LangChain. Deployed as a Dockerized microservice on SageMaker.",
+    "outcome_metrics": [
+      "Click‑through rate increased from 3.2% to 7.8%",
+      "Revenue per visitor grew 15%"
+    ],
+    "has_repo": true,
+    "repo_slug": "rag-product-recommender",
+    "role": "Full‑stack ML Engineer"
+  },
+  {
+    "id": "p03",
+    "name": "Real‑Estate Document Analyzer – Phase 1",
+    "client_industry": "real estate",
+    "client_type": "enterprise",
+    "year": 2022,
+    "duration_weeks": 6,
+    "skills": [
+      "NLP",
+      "entity extraction"
+    ],
+    "libraries": [
+      "Python",
+      "spaCy",
+      "PostgreSQL",
+      "Docker"
+    ],
+    "problem": "Agents manually extracted key clauses from lease agreements.",
+    "solution": "Trained a spaCy NER model to tag dates, rent amounts, and termination clauses, storing results in PostgreSQL for downstream use.",
+    "outcome_metrics": [
+      "Manual extraction time cut from 12 min to 2 min per document",
+      "Extraction accuracy 92%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "NLP Specialist"
+  },
+  {
+    "id": "p04",
+    "name": "Real‑Estate Document Analyzer – Phase 2",
+    "client_industry": "real estate",
+    "client_type": "enterprise",
+    "year": 2022,
+    "duration_weeks": 5,
+    "skills": [
+      "RAG",
+      "search"
+    ],
+    "libraries": [
+      "Python",
+      "LangChain",
+      "pgvector",
+      "FastAPI",
+      "Docker"
+    ],
+    "problem": "Agents needed fast lookup of similar contracts across the portfolio.",
+    "solution": "Extended Phase 1 with a vector‑search layer using pgvector and LangChain, exposing a semantic search API via FastAPI.",
+    "outcome_metrics": [
+      "Search latency reduced to <200 ms",
+      "User satisfaction score rose to 4.6/5"
+    ],
+    "has_repo": true,
+    "repo_slug": "realestate-doc-search",
+    "role": "ML Engineer"
+  },
+  {
+    "id": "p05",
+    "name": "Real‑Estate Document Analyzer – Phase 3",
+    "client_industry": "real estate",
+    "client_type": "enterprise",
+    "year": 2023,
+    "duration_weeks": 4,
+    "skills": [
+      "MLOps",
+      "monitoring"
+    ],
+    "libraries": [
+      "Python",
+      "MLflow",
+      "Airflow",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "No automated monitoring for model drift after deployment.",
+    "solution": "Implemented an Airflow DAG that logs prediction distributions to MLflow and triggers retraining alerts when drift exceeds 5%.",
+    "outcome_metrics": [
+      "Retraining cycles reduced from quarterly to as needed",
+      "Model performance stability > 0.95 F1 over 6 months"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "MLOps Lead"
+  },
+  {
+    "id": "p06",
+    "name": "Automated Grading Assistant",
+    "client_industry": "education",
+    "client_type": "agency",
+    "year": 2021,
+    "duration_weeks": 7,
+    "skills": [
+      "NLP",
+      "text classification"
+    ],
+    "libraries": [
+      "Python",
+      "scikit-learn",
+      "XGBoost",
+      "FastAPI",
+      "Docker"
+    ],
+    "problem": "Instructors spent hours manually grading short‑answer responses.",
+    "solution": "Built a TF‑IDF + XGBoost classifier to score answers against rubric criteria, wrapped in a FastAPI service for batch processing.",
+    "outcome_metrics": [
+      "Grading time cut by 78%",
+      "Score correlation with human graders 0.88"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Data Scientist"
+  },
+  {
+    "id": "p07",
+    "name": "Legal Contract Review Bot",
+    "client_industry": "legal",
+    "client_type": "startup",
+    "year": 2023,
+    "duration_weeks": 9,
+    "skills": [
+      "NLP",
+      "RAG"
+    ],
+    "libraries": [
+      "Python",
+      "Hugging Face Transformers",
+      "LangChain",
+      "PostgreSQL",
+      "pgvector",
+      "Docker"
+    ],
+    "problem": "Lawyers needed quick insights on clause risk across thousands of contracts.",
+    "solution": "Deployed a RAG system that indexes contract clauses in pgvector and answers risk‑related queries using a fine‑tuned BERT model.",
+    "outcome_metrics": [
+      "Query turnaround <1 s",
+      "Risk identification precision 0.94"
+    ],
+    "has_repo": true,
+    "repo_slug": "legal-contract-bot",
+    "role": "Lead NLP Engineer"
+  },
+  {
+    "id": "p08",
+    "name": "Media Content Tagger",
+    "client_industry": "media",
+    "client_type": "enterprise",
+    "year": 2020,
+    "duration_weeks": 6,
+    "skills": [
+      "computer vision",
+      "image classification"
+    ],
+    "libraries": [
+      "Python",
+      "OpenCV",
+      "PyTorch",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Manual tagging of millions of images slowed content publishing.",
+    "solution": "Trained a ResNet‑50 model on a custom taxonomy, served via SageMaker endpoint, and integrated OpenCV preprocessing pipeline.",
+    "outcome_metrics": [
+      "Tagging throughput increased 12×",
+      "Tagging accuracy 89%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "Computer Vision Engineer"
+  },
+  {
+    "id": "p09",
+    "name": "Fraud Detection Dashboard",
+    "client_industry": "fintech",
+    "client_type": "enterprise",
+    "year": 2022,
+    "duration_weeks": 8,
+    "skills": [
+      "XGBoost",
+      "MLOps"
+    ],
+    "libraries": [
+      "Python",
+      "XGBoost",
+      "MLflow",
+      "Airflow",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Increasing transaction fraud was eroding customer trust.",
+    "solution": "Developed an XGBoost classifier with feature engineering pipelines, logged experiments in MLflow, and scheduled nightly retraining via Airflow.",
+    "outcome_metrics": [
+      "False‑positive rate dropped from 4.3% to 1.7%",
+      "Detected fraudulent volume grew 22%"
+    ],
+    "has_repo": true,
+    "repo_slug": "fintech-fraud-dashboard",
+    "role": "ML Engineer"
+  },
+  {
+    "id": "p10",
+    "name": "Volunteer Matchmaking Platform",
+    "client_industry": "non-profit",
+    "client_type": "agency",
+    "year": 2021,
+    "duration_weeks": 5,
+    "skills": [
+      "NLP",
+      "semantic search"
+    ],
+    "libraries": [
+      "Python",
+      "spaCy",
+      "pgvector",
+      "FastAPI",
+      "Docker"
+    ],
+    "problem": "Non‑profits struggled to find suitable volunteers based on skill descriptions.",
+    "solution": "Created a semantic matching engine that embeds volunteer profiles and project needs, storing vectors in pgvector and exposing a FastAPI endpoint.",
+    "outcome_metrics": [
+      "Match relevance score improved by 34%",
+      "Volunteer signup rate up 18%"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "NLP Engineer"
+  },
+  {
+    "id": "p11",
+    "name": "Predictive Maintenance for Assembly Lines",
+    "client_industry": "manufacturing",
+    "client_type": "enterprise",
+    "year": 2024,
+    "duration_weeks": 10,
+    "skills": [
+      "time‑series forecasting",
+      "MLOps"
+    ],
+    "libraries": [
+      "Python",
+      "PyTorch",
+      "MLflow",
+      "Airflow",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Unexpected equipment failures caused costly downtime.",
+    "solution": "Implemented a LSTM‑based forecasting model for sensor streams, tracked experiments with MLflow, and orchestrated data pipelines via Airflow.",
+    "outcome_metrics": [
+      "Mean time between failures increased 27%",
+      "Maintenance cost reduced $1.2 M annually"
+    ],
+    "has_repo": true,
+    "repo_slug": "assembly-maintenance-forecast",
+    "role": "Data Scientist"
+  },
+  {
+    "id": "p12",
+    "name": "Dynamic Pricing Engine",
+    "client_industry": "hospitality",
+    "client_type": "startup",
+    "year": 2023,
+    "duration_weeks": 7,
+    "skills": [
+      "regression",
+      "MLOps"
+    ],
+    "libraries": [
+      "Python",
+      "scikit-learn",
+      "MLflow",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Hotels lacked real‑time price optimization based on demand signals.",
+    "solution": "Trained a GradientBoostingRegressor on booking data, deployed via SageMaker, and set up MLflow for model monitoring.",
+    "outcome_metrics": [
+      "Revenue per available room rose 9%",
+      "Pricing adjustment latency <5 seconds"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "ML Engineer"
+  },
+  {
+    "id": "p13",
+    "name": "Route Optimization Service",
+    "client_industry": "logistics",
+    "client_type": "enterprise",
+    "year": 2025,
+    "duration_weeks": 9,
+    "skills": [
+      "graph algorithms",
+      "API development"
+    ],
+    "libraries": [
+      "Python",
+      "NetworkX",
+      "FastAPI",
+      "Docker",
+      "AWS SageMaker"
+    ],
+    "problem": "Delivery routes were planned manually, causing inefficiencies.",
+    "solution": "Built a VRP solver using NetworkX, exposed as a FastAPI microservice, and containerized for scalable SageMaker deployment.",
+    "outcome_metrics": [
+      "Average distance per route cut 14%",
+      "On‑time delivery improved to 96%"
+    ],
+    "has_repo": true,
+    "repo_slug": "logistics-route-optimizer",
+    "role": "Algorithm Engineer"
+  },
+  {
+    "id": "p14",
+    "name": "Sentiment‑aware Chatbot for Customer Support",
+    "client_industry": "e-commerce",
+    "client_type": "agency",
+    "year": 2024,
+    "duration_weeks": 6,
+    "skills": [
+      "NLP",
+      "dialogue management"
+    ],
+    "libraries": [
+      "Python",
+      "Hugging Face Transformers",
+      "LangChain",
+      "FastAPI",
+      "Docker"
+    ],
+    "problem": "Support agents were overwhelmed by high‑volume, emotionally charged tickets.",
+    "solution": "Integrated a sentiment‑aware conversational agent that routes angry customers to live agents while handling routine queries automatically.",
+    "outcome_metrics": [
+      "Ticket backlog reduced by 43%",
+      "Customer satisfaction score increased to 4.8/5"
+    ],
+    "has_repo": false,
+    "repo_slug": null,
+    "role": "AI Engineer"
+  },
+  {
+    "id": "p15",
+    "name": "Image Quality Assurance Pipeline",
+    "client_industry": "media",
+    "client_type": "individual",
+    "year": 2019,
+    "duration_weeks": 4,
+    "skills": [
+      "computer vision",
+      "automation"
+    ],
+    "libraries": [
+      "Python",
+      "OpenCV",
+      "Docker"
+    ],
+    "problem": "Photographers needed automated detection of blurry or over‑exposed shots.",
+    "solution": "Created a lightweight OpenCV script that evaluates sharpness and exposure, packaged as a Docker CLI tool for batch processing.",
+    "outcome_metrics": [
+      "Manual review time cut by 85%",
+      "Detection accuracy 92%"
+    ],
+    "has_repo": true,
+    "repo_slug": "image-quality-pipeline",
+    "role": "CV Engineer"
+  }
+]

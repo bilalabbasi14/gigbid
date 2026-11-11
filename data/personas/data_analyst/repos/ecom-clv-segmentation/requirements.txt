@@ -1,0 +1,5 @@
+pandas==2.2.1
+numpy==1.26.4
+tableauserverclient==0.28
+# Hyper API required for .hyper creation
+tableauhyperapi==0.2.5

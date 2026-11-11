@@ -1,0 +1,26 @@
+{
+  "persona_id": "ai_ml",
+  "name": "Priya Raman",
+  "headline": "AI/ML engineer: NLP, RAG systems, computer vision, MLOps",
+  "years": 6,
+  "hourly": 65,
+  "stack": [
+    "Python",
+    "PyTorch",
+    "scikit-learn",
+    "Hugging Face Transformers",
+    "LangChain",
+    "FastAPI",
+    "Docker",
+    "AWS SageMaker",
+    "PostgreSQL",
+    "pgvector",
+    "MLflow",
+    "OpenCV",
+    "spaCy",
+    "XGBoost",
+    "Airflow"
+  ],
+  "synthetic": true,
+  "generated_by": "data/scripts/gen_personas.py"
+}
