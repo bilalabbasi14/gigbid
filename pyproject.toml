@@ -13,6 +13,7 @@ dependencies = [
   "python-multipart>=0.0.9",
   "pydantic>=2.9",
   "pydantic-settings>=2.5",
+  "email-validator>=2.2",
   # agents
   "langgraph>=0.4",
   "langgraph-checkpoint-postgres>=2.0",
@@ -60,6 +61,7 @@ dev = [
   "mypy>=1.11",
   "pre-commit>=3.8",
   "respx>=0.21",
+  "aiosqlite>=0.20",
   "syrupy>=4.7",
   "types-pyyaml",
 ]

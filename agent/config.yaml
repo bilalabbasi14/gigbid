@@ -58,7 +58,7 @@ models:
     query_prefix: "Represent this sentence for searching relevant passages: "
     document_prefix: ""
   reranker:
-    model: BAAI/bge-reranker-v2-m3          # open, CPU
+    model: BAAI/bge-reranker-base            # open, CPU; v2-m3 (2.2 GB) exhausted RAM on the 8 GB dev laptop
   generation:
     temperature: 0.2
     max_output_tokens: 1200
