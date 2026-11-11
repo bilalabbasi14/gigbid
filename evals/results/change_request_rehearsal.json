@@ -1,0 +1,42 @@
+{
+  "generated_at": "2026-11-12T07:47:00Z",
+  "what": "Rehearsal of the platform policy update with a SIMULATED policy v2 (the instructor's update has not been released). Three new rules (AI-assistance disclosure, 400-word limit, no five-star review requests) and a $10 minimum hourly rate.",
+  "platform_side": {
+    "branch": "cr/simulated-policy-v2",
+    "commit": "70ad37f",
+    "file": "gigsim/seed/policy.json"
+  },
+  "attempt_1": {
+    "base_commit": "a63a4fd",
+    "gigbid_files_changed": 3,
+    "code_or_prompt_changes": 0,
+    "unit_and_contract_tests_failed": 10,
+    "cause": "graph and API tests ran against the shipped policy pack; their fake drafts lacked the new disclosure line, so drafts were blocked",
+    "fix": {
+      "commit": "b872f4e",
+      "change": "mechanics tests run against a frozen test copy of policy v1; only tests marked shipped_policy read data/policy_pack/"
+    }
+  },
+  "attempt_2": {
+    "branch": "cr/simulated-policy-v2",
+    "commit": "a699aaa",
+    "gigbid_files_changed": [
+      "data/policy_pack/policy.yaml",
+      "agent/config.yaml",
+      "data/policy_pack/marketplace_policy.md"
+    ],
+    "lines_added": 22,
+    "lines_removed": 3,
+    "code_or_prompt_changes": 0,
+    "unit_and_contract_tests_failed": 0,
+    "seconds_from_applying_the_edit_to_green_tests": 45,
+    "note": "the YAML was written in advance; the time covers applying it and running the suites, not writing the rules"
+  },
+  "reaches": {
+    "compliance_guard": "every rule, via agent/policy.py detectors",
+    "writer_and_liaison_prompts": "every rule description with text detectors (policy.rules_for_writer)",
+    "pricing": "pricing.min_hourly_usd / min_fixed_usd",
+    "drift_banner": "/health reports policy_drift while the marketplace version differs from the pack"
+  },
+  "not_yet_measured": "a live proposal drafted under v2 (needs model quota)"
+}
