@@ -43,8 +43,8 @@ async def lifespan(app: FastAPI):  # type: ignore[no-untyped-def]
     deps = DEPS_OVERRIDE
     if (
         deps is None
-        and os.environ.get("GIGBID_IN_PROCESS_MCP", "1") == "1"
-        and env.app_env != "production"
+        and os.environ.get("GIGBID_IN_PROCESS_MCP", "0" if env.app_env == "production" else "1")
+        == "1"
     ):
         from agent.deps import Deps
         from agent.mcp_client import ToolProvider, in_process_loader

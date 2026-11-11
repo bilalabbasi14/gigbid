@@ -1,19 +1,21 @@
-# GigBid full stack. `docker compose -f infra/docker-compose.yml up` (or `make up`).
-# Services are added per milestone; the ones below are the foundation.
-# Optional local LLM: `--profile local-llm` adds an Ollama service (needs ~4 GB RAM free).
+# GigBid full stack:  docker compose -f infra/docker-compose.yml up --build   (or `make up`)
+# Then:               docker compose -f infra/docker-compose.yml exec api python -m scripts.seed
+# Web on http://localhost:3000, API docs on http://localhost:8000/docs, GigSim on :8081.
+# Optional local LLM: add `--profile local-llm` and set MODEL_PROFILE=local (needs ~4 GB free RAM).
 
 name: gigbid
 
-x-env: &app-env
-  env_file: ../.env
-  environment:
-    DATABASE_URL: postgresql+psycopg://gigbid:gigbid@postgres:5432/gigbid
-    REDIS_URL: redis://redis:6379/0
-    GIGSIM_BASE_URL: http://gigsim:8081
-    OLLAMA_BASE_URL: http://ollama:11434
-    MCP_PORTFOLIO_URL: http://mcp-portfolio:8101/mcp
-    MCP_MARKETPLACE_URL: http://mcp-marketplace:8102/mcp
-    MCP_WORKSPACE_URL: http://mcp-workspace:8103/mcp
+x-backend-env: &backend-env
+  APP_ENV: production
+  DATABASE_URL: postgresql+psycopg://gigbid:gigbid@postgres:5432/gigbid
+  REDIS_URL: redis://redis:6379/0
+  GIGSIM_BASE_URL: http://gigsim:8081
+  OLLAMA_BASE_URL: http://ollama:11434
+  MCP_PORTFOLIO_URL: http://mcp:8101/mcp
+  MCP_MARKETPLACE_URL: http://mcp:8102/mcp
+  MCP_WORKSPACE_URL: http://mcp:8103/mcp
+  WEB_BASE_URL: http://localhost:3000
+  GIGBID_IN_PROCESS_MCP: "0"
 
 services:
   postgres:
@@ -45,7 +47,7 @@ services:
     build: { context: .., dockerfile: infra/docker/gigsim.Dockerfile }
     environment:
       GIGSIM_API_TOKEN: ${GIGSIM_API_TOKEN:-dev-token}
-      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      GIGSIM_CHAOS_RATE: ${GIGSIM_CHAOS_RATE:-0.02}
     ports: ["8081:8081"]
     volumes: ["gigsimdata:/data"]
     healthcheck:
@@ -53,6 +55,45 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  mcp:
+    build: { context: .., dockerfile: infra/docker/mcp.Dockerfile }
+    env_file: ../.env
+    environment: *backend-env
+    ports: ["8101:8101", "8102:8102", "8103:8103"]
+    volumes: ["models:/models", "mcpdata:/app/data/processed", "personas:/app/data/personas"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      gigsim: { condition: service_healthy }
+
+  api:
+    build: { context: .., dockerfile: infra/docker/api.Dockerfile }
+    env_file: ../.env
+    environment: *backend-env
+    ports: ["8000:8000"]
+    volumes: ["models:/models", "personas:/app/data/personas"]  # seeded from the image on first run; uploads persist
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      mcp: { condition: service_started }
+
+  worker:
+    build: { context: .., dockerfile: infra/docker/worker.Dockerfile }
+    env_file: ../.env
+    environment: *backend-env
+    volumes: ["models:/models"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      mcp: { condition: service_started }
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web.Dockerfile
+      args: { API_URL: "http://api:8000" }
+    ports: ["3000:3000"]
+    depends_on: [api]
 
   ollama:
     profiles: ["local-llm"]
@@ -64,4 +105,7 @@ volumes:
   pgdata:
   redisdata:
   gigsimdata:
+  models:
+  mcpdata:
+  personas:
   ollama:
