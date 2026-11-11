@@ -7,7 +7,11 @@ Nodes call `chat_for_node("writer")` and never name a provider or model.
 
 from __future__ import annotations
 
+import asyncio
 import logging
+import os
+import re
+import time
 from functools import lru_cache
 from typing import Any
 
@@ -93,7 +97,53 @@ def chat_for_node(node: str, *, fallback: bool = False, **kw: Any) -> BaseChatMo
     return chat_model(settings.config().model_for(node, fallback=fallback), **kw)
 
 
+class QuotaExhaustedError(RuntimeError):
+    """Every model allowed for a call has hit its provider's daily token or request cap.
+
+    Free tiers cap tokens per day per model (Groq: 200k), and the cap is not worth retrying for
+    minutes. Callers degrade (nodes fall back to heuristics); evaluation runners stop and resume
+    later instead of recording degraded rows.
+    """
+
+
+# spec -> monotonic time after which the model is worth trying again (daily cap reached)
+_EXHAUSTED: dict[str, float] = {}
+_QUOTA_FAILURES = 0
+
+
+def quota_failures() -> int:
+    """How many calls in this process failed because every allowed model was capped."""
+    return _QUOTA_FAILURES
+
+
+def strict_models() -> bool:
+    """GIGBID_STRICT_MODELS=1 disables fallback models, so a run measures only the configured
+    model for each node (evaluation runs set this; production keeps the fallback)."""
+    return os.environ.get("GIGBID_STRICT_MODELS", "0") == "1"
+
+
+def _daily_cap_wait(exc: BaseException) -> float | None:
+    """Seconds until a daily-capped model can be used again, or None if this is not a daily cap."""
+    text = str(exc).lower()
+    if not any(k in text for k in ("per day", "(tpd)", "(rpd)")):
+        return None
+    m = re.search(r"try again in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)", text)
+    if not m or not m.group(1):
+        return 3600.0
+    secs = 0.0
+    for num, unit in re.findall(r"([\d.]+)([hms])", m.group(1)):
+        secs += float(num) * {"h": 3600, "m": 60, "s": 1}[unit]
+    return max(secs, 1.0)
+
+
+def is_daily_cap(exc: BaseException) -> bool:
+    """True when the error is a provider's daily cap (or our own QuotaExhaustedError)."""
+    return isinstance(exc, QuotaExhaustedError) or _daily_cap_wait(exc) is not None
+
+
 def _is_transient(exc: BaseException) -> bool:
+    if _daily_cap_wait(exc) is not None:
+        return False  # a daily cap does not clear within a retry window
     text = f"{type(exc).__name__}: {exc}".lower()
     return any(
         k in text
@@ -113,6 +163,36 @@ def _is_transient(exc: BaseException) -> bool:
     )
 
 
+def _candidates(node: str) -> list[str]:
+    cfg = settings.config()
+    specs = [cfg.model_for(node)]
+    if not strict_models():
+        specs.append(cfg.model_for(node, fallback=True))
+    return list(dict.fromkeys(specs))
+
+
+def _capped(spec: str) -> bool:
+    until = _EXHAUSTED.get(spec)
+    return until is not None and time.monotonic() < until
+
+
+def _note_cap(spec: str, exc: BaseException) -> QuotaExhaustedError | None:
+    wait = _daily_cap_wait(exc)
+    if wait is None:
+        return None
+    _EXHAUSTED[spec] = time.monotonic() + wait
+    log.warning("model %s reached its daily cap; skipping it for %.0f s", spec, wait)
+    return QuotaExhaustedError(f"{spec} reached its daily cap (retry in {wait:.0f} s)")
+
+
+def _give_up(node: str, last: BaseException | None) -> BaseException:
+    global _QUOTA_FAILURES
+    if isinstance(last, QuotaExhaustedError) or last is None:
+        _QUOTA_FAILURES += 1
+        return last or QuotaExhaustedError(f"every model for node {node} is capped")
+    return last
+
+
 @retry(
     stop=stop_after_attempt(4),
     wait=wait_exponential_jitter(initial=2, max=40),
@@ -126,18 +206,24 @@ def _invoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # ty
 def invoke_for_node(
     node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any
 ):  # type: ignore[no-untyped-def]
-    """Invoke the node's configured model; on persistent transient failure use its fallback.
-
-    `model_kw` (temperature, max_tokens, timeout) overrides the config defaults for this call.
-    """
+    """Invoke the node's configured model; on persistent transient failure or a daily cap use its
+    fallback (unless strict). `model_kw` (temperature, max_tokens, timeout) overrides the config
+    defaults for this call."""
     model_kw = model_kw or {}
-    try:
-        return _invoke(chat_for_node(node, **model_kw), messages, **kw)
-    except Exception as exc:  # noqa: BLE001
-        if not _is_transient(exc):
-            raise
-        log.warning("node %s: primary model failed (%s); using fallback", node, type(exc).__name__)
-        return _invoke(chat_for_node(node, fallback=True, **model_kw), messages, **kw)
+    last: BaseException | None = None
+    for spec in _candidates(node):
+        if _capped(spec):
+            last = QuotaExhaustedError(f"{spec} is still at its daily cap")
+            continue
+        try:
+            return _invoke(chat_model(spec, **model_kw), messages, **kw)
+        except Exception as exc:  # noqa: BLE001
+            capped = _note_cap(spec, exc)
+            if capped is None and not _is_transient(exc):
+                raise
+            last = capped or exc
+            log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+    raise _give_up(node, last)
 
 
 async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
@@ -149,8 +235,6 @@ async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any)
             attempt += 1
             if not _is_transient(exc) or attempt >= 4:
                 raise
-            import asyncio
-
             await asyncio.sleep(min(40, 2 * 2**attempt))
 
 
@@ -158,10 +242,17 @@ async def ainvoke_for_node(
     node: str, messages: list[BaseMessage], *, model_kw: dict[str, Any] | None = None, **kw: Any
 ):  # type: ignore[no-untyped-def]
     model_kw = model_kw or {}
-    try:
-        return await _ainvoke(chat_for_node(node, **model_kw), messages, **kw)
-    except Exception as exc:  # noqa: BLE001
-        if not _is_transient(exc):
-            raise
-        log.warning("node %s: primary model failed (%s); using fallback", node, type(exc).__name__)
-        return await _ainvoke(chat_for_node(node, fallback=True, **model_kw), messages, **kw)
+    last: BaseException | None = None
+    for spec in _candidates(node):
+        if _capped(spec):
+            last = QuotaExhaustedError(f"{spec} is still at its daily cap")
+            continue
+        try:
+            return await _ainvoke(chat_model(spec, **model_kw), messages, **kw)
+        except Exception as exc:  # noqa: BLE001
+            capped = _note_cap(spec, exc)
+            if capped is None and not _is_transient(exc):
+                raise
+            last = capped or exc
+            log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+    raise _give_up(node, last)
