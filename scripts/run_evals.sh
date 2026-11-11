@@ -27,10 +27,11 @@ step() {
 
 # untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run last, after any
 # earlier full retrieval run has finished writing it
-ALL=(rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
+ALL=(tools rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
+    tools)          step tools evals.runners.tool_design_eval --sets fine,coarse,best ;;
     rag_full)       step rag_full evals.runners.rag_eval --variants v0_naive,v9_skill_graph ;;  # V2-V8 come from the full run already in progress
     rag_ctx_ingest) step rag_ctx_ingest rag.ingest.cli --persona ai_ml --persona fullstack --persona data_analyst --contextual ;;
     rag_ctx)        step rag_ctx evals.runners.rag_eval --variants v6_contextual ;;

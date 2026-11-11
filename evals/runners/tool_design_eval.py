@@ -190,6 +190,8 @@ async def ask(
             resp = await model.ainvoke(msgs)
             break
         except Exception as exc:  # noqa: BLE001
+            if llm.is_daily_cap(exc):  # not worth retrying; the run resumes from saved rows
+                raise llm.QuotaExhaustedError(str(exc)[:300]) from exc
             text = f"{type(exc).__name__} {exc}".lower()
             if (
                 "429" in text
@@ -295,7 +297,11 @@ def main() -> None:
     ][: args.limit]
     results = {}
     for kind in [k for k in args.sets.split(",") if k]:
-        results[kind] = asyncio.run(run(kind, spec, tasks))
+        try:
+            results[kind] = asyncio.run(run(kind, spec, tasks))
+        except llm.QuotaExhaustedError as exc:
+            print(f"partial: {kind} stopped at the daily cap of {spec}; rerun later ({exc})"[:300])
+            raise SystemExit(3) from exc
         r = results[kind]
         print(
             f"{kind}: selection {r['selection_accuracy']}  arguments {r['argument_accuracy']}  tokens/task {r['tokens_per_task']}"
