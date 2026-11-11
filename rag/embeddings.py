@@ -67,3 +67,10 @@ def rerank_scores(query: str, passages: list[str], batch_size: int = 8) -> list[
         show_progress_bar=False,
     )
     return [float(s) for s in np.asarray(scores).reshape(-1)]
+
+
+def warm(reranker: bool = True) -> None:
+    """Load the models once (startup), so the first node call does not pay for it."""
+    _embedder()
+    if reranker:
+        _reranker()

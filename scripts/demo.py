@@ -37,6 +37,9 @@ async def main() -> None:
     )
     args = ap.parse_args()
 
+    from rag import embeddings
+
+    embeddings.warm()  # load the CPU models once, outside any node timeout
     provider = ToolProvider(loader=in_process_loader)
     deps = Deps(tools=provider)
     job_id = args.job_id
@@ -119,6 +122,10 @@ async def run(deps: Deps, saver, job_id: str, args) -> None:  # type: ignore[no-
         print("compliance:", values.get("compliance_verdict", {}).get("reason"))
     usage = values.get("usage", {})
     print(f"\nstatus={values.get('status')} steps={values.get('steps')} tokens={usage}")
+    if values.get("errors"):
+        print("errors:", values["errors"])
+    if values.get("needs_attention_reason"):
+        print("needs attention:", values["needs_attention_reason"])
     if state.next and "approval" in state.next:
         section("waiting for human approval (interrupt)")
         payload = (

@@ -50,7 +50,7 @@ class Env(BaseSettings):
     github_mcp_url: str = "https://api.githubcopilot.com/mcp/"
     github_token: str = ""
 
-    model_profile: Literal["open", "paid"] = "open"
+    model_profile: Literal["open", "paid", "local"] = "open"
     groq_api_key: str = ""
     openrouter_api_key: str = ""
     ollama_base_url: str = "http://localhost:11434"
@@ -83,7 +83,7 @@ class ModelProfile(BaseModel):
 
 
 class ModelsConfig(BaseModel):
-    profile: Literal["open", "paid"] = "open"
+    profile: Literal["open", "paid", "local"] = "open"
     profiles: dict[str, ModelProfile]
     nodes: dict[str, Literal["small", "medium", "large"]]
     embeddings: dict[str, Any]

@@ -24,6 +24,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import os
 import random
 import re
 import sys
@@ -39,7 +40,9 @@ ROOT = Path(__file__).resolve().parents[2]
 OUT = ROOT / "data/personas"
 CACHE = OUT / "_generated_cache"
 SEED_JOBS = ROOT / "gigsim/seed/jobs.jsonl.gz"
-NODE = "portfolio_builder"  # uses the "large" tier of the active profile
+NODE = os.environ.get(
+    "GEN_PERSONAS_NODE", "portfolio_builder"
+)  # node name -> model tier from config
 
 PERSONAS: dict[str, dict[str, Any]] = {
     "ai_ml": {
@@ -47,24 +50,87 @@ PERSONAS: dict[str, dict[str, Any]] = {
         "headline": "AI/ML engineer: NLP, RAG systems, computer vision, MLOps",
         "years": 6,
         "hourly": 65,
-        "stack": ["Python", "PyTorch", "scikit-learn", "Hugging Face Transformers", "LangChain", "FastAPI", "Docker", "AWS SageMaker", "PostgreSQL", "pgvector", "MLflow", "OpenCV", "spaCy", "XGBoost", "Airflow"],
+        "stack": [
+            "Python",
+            "PyTorch",
+            "scikit-learn",
+            "Hugging Face Transformers",
+            "LangChain",
+            "FastAPI",
+            "Docker",
+            "AWS SageMaker",
+            "PostgreSQL",
+            "pgvector",
+            "MLflow",
+            "OpenCV",
+            "spaCy",
+            "XGBoost",
+            "Airflow",
+        ],
     },
     "fullstack": {
         "name": "Daniel Okafor",
         "headline": "Full-stack web developer: React/Next.js, Node, Django, Postgres",
         "years": 7,
         "hourly": 55,
-        "stack": ["TypeScript", "React", "Next.js", "Node.js", "Express", "Django", "Django REST Framework", "PostgreSQL", "Prisma", "Redis", "Stripe", "Tailwind CSS", "Docker", "GitHub Actions", "Playwright", "Supabase", "GraphQL"],
+        "stack": [
+            "TypeScript",
+            "React",
+            "Next.js",
+            "Node.js",
+            "Express",
+            "Django",
+            "Django REST Framework",
+            "PostgreSQL",
+            "Prisma",
+            "Redis",
+            "Stripe",
+            "Tailwind CSS",
+            "Docker",
+            "GitHub Actions",
+            "Playwright",
+            "Supabase",
+            "GraphQL",
+        ],
     },
     "data_analyst": {
         "name": "Mariana Costa",
         "headline": "Data analyst: SQL, Power BI, Tableau, Python, dbt, BigQuery",
         "years": 5,
         "hourly": 45,
-        "stack": ["SQL", "Power BI", "DAX", "Tableau", "Python", "pandas", "dbt", "BigQuery", "Snowflake", "Excel", "Looker Studio", "Airflow", "Google Analytics 4", "Statistics", "A/B testing"],
+        "stack": [
+            "SQL",
+            "Power BI",
+            "DAX",
+            "Tableau",
+            "Python",
+            "pandas",
+            "dbt",
+            "BigQuery",
+            "Snowflake",
+            "Excel",
+            "Looker Studio",
+            "Airflow",
+            "Google Analytics 4",
+            "Statistics",
+            "A/B testing",
+        ],
     },
 }
-INDUSTRIES = ["e-commerce", "healthcare", "fintech", "education", "real estate", "logistics", "media", "SaaS", "non-profit", "hospitality", "legal", "manufacturing"]
+INDUSTRIES = [
+    "e-commerce",
+    "healthcare",
+    "fintech",
+    "education",
+    "real estate",
+    "logistics",
+    "media",
+    "SaaS",
+    "non-profit",
+    "hospitality",
+    "legal",
+    "manufacturing",
+]
 
 SYSTEM = (
     "You write realistic, specific, honest freelancer portfolio material for a synthetic persona used "
@@ -88,12 +154,27 @@ def ask(prompt: str, *, json_mode: bool = False, max_tokens: int = 2500, tag: st
     msgs = [SystemMessage(content=SYSTEM), HumanMessage(content=prompt)]
     for attempt in range(6):
         try:
-            resp = llm.invoke_for_node(NODE, msgs, model_kw={"temperature": 0.7, "max_tokens": max_tokens, "timeout": 120})
-            text = resp.content if isinstance(resp.content, str) else "".join(str(c.get("text", "")) if isinstance(c, dict) else str(c) for c in resp.content)
+            resp = llm.invoke_for_node(
+                NODE, msgs, model_kw={"temperature": 0.7, "max_tokens": max_tokens, "timeout": 120}
+            )
+            text = (
+                resp.content
+                if isinstance(resp.content, str)
+                else "".join(
+                    str(c.get("text", "")) if isinstance(c, dict) else str(c) for c in resp.content
+                )
+            )
+            if not text.strip():
+                raise RuntimeError("empty response")
+            if json_mode:
+                extract_json(text)  # validate before caching; a bad response is retried
             break
         except Exception as exc:  # noqa: BLE001
             wait = min(90, 5 * 2**attempt)
-            print(f"  [{tag}] {type(exc).__name__}: {str(exc)[:120]} -> retry in {wait}s", file=sys.stderr)
+            print(
+                f"  [{tag}] {type(exc).__name__}: {str(exc)[:120]} -> retry in {wait}s",
+                file=sys.stderr,
+            )
             time.sleep(wait)
     else:
         raise RuntimeError(f"LLM failed repeatedly for {tag}")
@@ -115,8 +196,8 @@ def slugify(s: str) -> str:
 # ---------------------------------------------------------------------------------------------
 def gen_projects(pid: str, p: dict[str, Any], n: int, rng: random.Random) -> list[dict[str, Any]]:
     inds = rng.sample(INDUSTRIES, k=min(len(INDUSTRIES), n))
-    prompt = f"""Create a catalogue of {n} freelance projects completed by {p['name']}, {p['headline']} ({p['years']} years experience).
-Core stack: {', '.join(p['stack'])}. Spread the projects across these client industries: {', '.join(inds)}.
+    prompt = f"""Create a catalogue of {n} freelance projects completed by {p["name"]}, {p["headline"]} ({p["years"]} years experience).
+Core stack: {", ".join(p["stack"])}. Spread the projects across these client industries: {", ".join(inds)}.
 Make 3 of the projects clearly related to each other (same client, successive phases) and make 2 projects
 where the most important skill is only IMPLIED by what was built (e.g. the tool name never appears in the title).
 Return a JSON array; each item:
@@ -139,7 +220,7 @@ def gen_case_study(pid: str, p: dict[str, Any], proj: dict[str, Any], style: int
         "a narrative first-person write-up (no headings) of about 400 words, mentioning tools only where natural",
         "a terse engineering log: bullet points, decisions, numbers, commit-style notes",
     ]
-    prompt = f"""Write {styles[style % 3]} for this project by {p['name']} ({p['headline']}).
+    prompt = f"""Write {styles[style % 3]} for this project by {p["name"]} ({p["headline"]}).
 Project: {json.dumps(proj, ensure_ascii=False)}
 Start with a markdown H1 title. Include the year and client industry. Keep every claim consistent with the project data. 350-550 words. Markdown only."""
     return ask(prompt, max_tokens=1800, tag=f"{pid}/{proj['id']}/case")
@@ -152,39 +233,90 @@ Rules: README 150-300 words describing setup and architecture WITHOUT listing ev
 2 to 3 source files (Python or TypeScript as fits the stack) of 40-120 lines each with real imports of the libraries
 listed, one dependency manifest (requirements.txt or package.json). No placeholders like 'your code here'.
 Project: {json.dumps(proj, ensure_ascii=False)}
-Persona: {p['name']}, {p['headline']}."""
-    data = extract_json(ask(prompt, json_mode=True, max_tokens=4500, tag=f"{pid}/{proj['id']}/repo"))
+Persona: {p["name"]}, {p["headline"]}."""
+    data = extract_json(
+        ask(prompt, json_mode=True, max_tokens=4500, tag=f"{pid}/{proj['id']}/repo")
+    )
     files = {"README.md": data["README.md"]}
     files.update({k: v for k, v in data.get("files", {}).items() if isinstance(v, str)})
     return files
 
 
 def gen_cv(pid: str, p: dict[str, Any], projects: list[dict[str, Any]]) -> str:
-    brief = [{"name": x["name"], "year": x["year"], "skills": x["skills"][:4], "outcome": x["outcome_metrics"][:1]} for x in projects]
-    prompt = f"""Write a two-page CV in markdown for {p['name']}, {p['headline']}, {p['years']} years of freelance experience, hourly rate ${p['hourly']}.
+    brief = [
+        {
+            "name": x["name"],
+            "year": x["year"],
+            "skills": x["skills"][:4],
+            "outcome": x["outcome_metrics"][:1],
+        }
+        for x in projects
+    ]
+    prompt = f"""Write a two-page CV in markdown for {p["name"]}, {p["headline"]}, {p["years"]} years of freelance experience, hourly rate ${p["hourly"]}.
 Sections: Summary, Skills (grouped), Selected Projects (8 of these, with one metric each), Experience (2-3 roles before freelancing), Education, Certifications.
 Projects to draw from: {json.dumps(brief, ensure_ascii=False)}
 Markdown only, no front matter."""
     return ask(prompt, max_tokens=2500, tag=f"{pid}/cv")
 
 
-def gen_reviews(pid: str, p: dict[str, Any], projects: list[dict[str, Any]], n: int) -> list[dict[str, Any]]:
-    brief = [{"id": x["id"], "name": x["name"], "client_industry": x["client_industry"], "year": x["year"]} for x in projects]
-    prompt = f"""Write {n} client reviews for {p['name']} ({p['headline']}), each tied to one project id. Vary tone and length (20-90 words); ratings mostly 5, some 4, one 3 with a fair criticism.
+def gen_reviews(
+    pid: str, p: dict[str, Any], projects: list[dict[str, Any]], n: int
+) -> list[dict[str, Any]]:
+    brief = [
+        {
+            "id": x["id"],
+            "name": x["name"],
+            "client_industry": x["client_industry"],
+            "year": x["year"],
+        }
+        for x in projects
+    ]
+    prompt = f"""Write {n} client reviews for {p["name"]} ({p["headline"]}), each tied to one project id. Vary tone and length (20-90 words); ratings mostly 5, some 4, one 3 with a fair criticism.
 Return a JSON array of {{"project_id": "...", "rating": int, "client_industry": "...", "year": int, "text": "..."}}.
 Projects: {json.dumps(brief, ensure_ascii=False)}"""
     return extract_json(ask(prompt, json_mode=True, max_tokens=3000, tag=f"{pid}/reviews"))
 
 
-def gen_proposals(pid: str, p: dict[str, Any], projects: list[dict[str, Any]], jobs: list[dict[str, Any]], n: int, rng: random.Random) -> list[dict[str, Any]]:
+def gen_proposals(
+    pid: str,
+    p: dict[str, Any],
+    projects: list[dict[str, Any]],
+    jobs: list[dict[str, Any]],
+    n: int,
+    rng: random.Random,
+) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     sample = rng.sample(jobs, k=min(n, len(jobs)))
-    brief = [{"id": x["id"], "name": x["name"], "skills": x["skills"][:5], "outcome_metrics": x["outcome_metrics"][:2], "client_industry": x["client_industry"]} for x in projects]
+    brief = [
+        {
+            "id": x["id"],
+            "name": x["name"],
+            "skills": x["skills"][:5],
+            "outcome_metrics": x["outcome_metrics"][:2],
+            "client_industry": x["client_industry"],
+        }
+        for x in projects
+    ]
     for batch_start in range(0, len(sample), 6):
         batch = sample[batch_start : batch_start + 6]
-        labels = [rng.choices(["won", "replied", "ignored"], weights=[0.22, 0.33, 0.45])[0] for _ in batch]
-        job_brief = [{"job_id": j["job_id"], "title": j["title"], "description": j["description"][:900], "skills": j["skills"][:6], "payment_type": j["payment_type"], "budget": j["budget"], "hourly_min": j["hourly_min"], "hourly_max": j["hourly_max"], "target_outcome": lab} for j, lab in zip(batch, labels, strict=True)]
-        prompt = f"""Write one past proposal (cover letter) from {p['name']} ({p['headline']}) for EACH job below, as she/he actually sent it.
+        labels = [
+            rng.choices(["won", "replied", "ignored"], weights=[0.22, 0.33, 0.45])[0] for _ in batch
+        ]
+        job_brief = [
+            {
+                "job_id": j["job_id"],
+                "title": j["title"],
+                "description": j["description"][:900],
+                "skills": j["skills"][:6],
+                "payment_type": j["payment_type"],
+                "budget": j["budget"],
+                "hourly_min": j["hourly_min"],
+                "hourly_max": j["hourly_max"],
+                "target_outcome": lab,
+            }
+            for j, lab in zip(batch, labels, strict=True)
+        ]
+        prompt = f"""Write one past proposal (cover letter) from {p["name"]} ({p["headline"]}) for EACH job below, as she/he actually sent it.
 Each proposal must cite 1-3 projects from the catalogue by id in "project_ids" and only claim things those projects support.
 Match the target_outcome: "won" proposals are specific, open with the client's problem, quote a relevant metric and propose a first step;
 "replied" proposals are decent but generic in one place; "ignored" proposals open generically (e.g. "I am a passionate..."), are long, or miss the main requirement.
@@ -192,7 +324,9 @@ Return a JSON array of {{"job_id": "...", "cover_letter": "...", "bid_amount": n
 Catalogue: {json.dumps(brief, ensure_ascii=False)}
 Jobs: {json.dumps(job_brief, ensure_ascii=False)}"""
         try:
-            items = extract_json(ask(prompt, json_mode=True, max_tokens=5000, tag=f"{pid}/proposals/{batch_start}"))
+            items = extract_json(
+                ask(prompt, json_mode=True, max_tokens=5000, tag=f"{pid}/proposals/{batch_start}")
+            )
         except (json.JSONDecodeError, KeyError) as exc:
             print(f"  skipping proposal batch {batch_start}: {exc}", file=sys.stderr)
             continue
@@ -226,8 +360,16 @@ def write_pdf(md_text: str, path: Path) -> None:
         elif line.startswith("### "):
             story.append(Paragraph(line[4:], styles["Heading3"]))
         else:
-            txt = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", line.lstrip("-* ").replace("&", "&amp;").replace("<", "&lt;"))
-            story.append(Paragraph(("• " if line.lstrip().startswith(("-", "*")) else "") + txt, styles["BodyText"]))
+            txt = re.sub(
+                r"\*\*(.+?)\*\*",
+                r"<b>\1</b>",
+                line.lstrip("-* ").replace("&", "&amp;").replace("<", "&lt;"),
+            )
+            story.append(
+                Paragraph(
+                    ("• " if line.lstrip().startswith(("-", "*")) else "") + txt, styles["BodyText"]
+                )
+            )
     doc.build(story)
 
 
@@ -241,13 +383,17 @@ def build_persona(pid: str, n_projects: int, n_proposals: int, n_reviews: int, s
     print(f"== {pid}: {p['name']}")
 
     projects = gen_projects(pid, p, n_projects, rng)
-    (d / "projects.json").write_text(json.dumps(projects, indent=2, ensure_ascii=False), encoding="utf-8")
+    (d / "projects.json").write_text(
+        json.dumps(projects, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
     print(f"  projects: {len(projects)}")
 
     for i, proj in enumerate(projects):
         md = gen_case_study(pid, p, proj, style=i)
         front = f"---\nproject_id: {proj['id']}\nyear: {proj['year']}\nclient_industry: {proj['client_industry']}\nskills: {json.dumps(proj['skills'])}\nlibraries: {json.dumps(proj.get('libraries', []))}\n---\n\n"
-        (d / "case_studies" / f"cs_{i + 1:02d}.md").write_text(front + md.strip() + "\n", encoding="utf-8")
+        (d / "case_studies" / f"cs_{i + 1:02d}.md").write_text(
+            front + md.strip() + "\n", encoding="utf-8"
+        )
         print(f"  case study {proj['id']} ok")
         if proj.get("has_repo"):
             files = gen_repo(pid, p, proj)
@@ -277,10 +423,24 @@ def build_persona(pid: str, n_projects: int, n_proposals: int, n_reviews: int, s
     with (d / "proposals.jsonl").open("w", encoding="utf-8") as f:
         for it in proposals:
             f.write(json.dumps(it, ensure_ascii=False) + "\n")
-    counts = {k: sum(1 for x in proposals if x.get("outcome") == k) for k in ("won", "replied", "ignored")}
+    counts = {
+        k: sum(1 for x in proposals if x.get("outcome") == k) for k in ("won", "replied", "ignored")
+    }
     print(f"  proposals: {len(proposals)} {counts}")
 
-    (d / "profile.json").write_text(json.dumps({"persona_id": pid, **p, "synthetic": True, "generated_by": "data/scripts/gen_personas.py"}, indent=2, ensure_ascii=False), encoding="utf-8")
+    (d / "profile.json").write_text(
+        json.dumps(
+            {
+                "persona_id": pid,
+                **p,
+                "synthetic": True,
+                "generated_by": "data/scripts/gen_personas.py",
+            },
+            indent=2,
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
 
 
 def main() -> None:
