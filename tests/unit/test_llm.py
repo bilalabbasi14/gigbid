@@ -1,4 +1,5 @@
-"""Model layer: daily-cap detection, fallback order, strict mode, quota-failure accounting."""
+"""Model layer: daily caps, per-minute limits, oversize requests, fallback order, strict mode and
+failure accounting."""
 
 from __future__ import annotations
 
@@ -13,22 +14,46 @@ TPD = (
     "Limit 200000, Used 198343, Requested 2354. Please try again in 5m1.104s."
 )
 TPM = "Error code: 429 - Rate limit reached on tokens per minute (TPM). Please try again in 1.2s."
+OTPM_WAIT = (
+    "Error code: 429 - Rate limit reached for model `qwen/qwen3.8-27b` on output tokens per minute "
+    "(OTPM): Limit 1000, Used 835, Requested 990. Please try again in 49.5s."
+)
+OTPM_TOO_LARGE = (
+    "Error code: 429 - Request too large for model `qwen/qwen3.8-27b` on output tokens per minute "
+    "(OTPM): Limit 1000, Requested 1200. The request's expected output tokens exceed the enforced "
+    "limit; reduce max_tokens (or the request's expected output) and try again."
+)
 
 
 class FakeModel:
+    max_tokens = 1200
+
     def __init__(self, spec: str, script: dict[str, list[Any]]) -> None:
         self.spec, self.script = spec, script
 
     async def ainvoke(self, messages: Any, **kw: Any) -> str:
+        CALLS.append({"spec": self.spec, **kw})
         step = self.script[self.spec].pop(0)
         if isinstance(step, Exception):
             raise step
         return step
 
 
+CALLS: list[dict[str, Any]] = []
+SLEEPS: list[float] = []
+
+
 @pytest.fixture
 def models(monkeypatch: pytest.MonkeyPatch) -> dict[str, list[Any]]:
     script: dict[str, list[Any]] = {}
+    CALLS.clear()
+    SLEEPS.clear()
+
+    async def fake_sleep(secs: float) -> None:
+        SLEEPS.append(secs)
+
+    monkeypatch.setattr(llm.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(llm, "_CALL_FAILURES", 0)
     specs = {False: "test:primary", True: "test:fallback"}
     monkeypatch.setattr(llm, "_EXHAUSTED", {})
     monkeypatch.setattr(llm, "_QUOTA_FAILURES", 0)
@@ -87,3 +112,36 @@ async def test_non_transient_error_is_raised_unchanged(models: dict[str, list[An
     with pytest.raises(ValueError):
         await llm.ainvoke_for_node("critic", [])
     assert llm.quota_failures() == 0
+
+
+def test_per_minute_limits_wait_as_long_as_the_provider_says() -> None:
+    assert llm._per_minute_wait(RuntimeError(OTPM_WAIT)) == pytest.approx(49.5)
+    assert llm._per_minute_wait(RuntimeError(TPM)) == pytest.approx(1.2)
+    assert llm._per_minute_wait(RuntimeError(TPD)) is None
+    assert llm._per_minute_wait(RuntimeError(OTPM_TOO_LARGE)) is None
+
+
+async def test_output_limit_wait_is_honoured(models: dict[str, list[Any]]) -> None:
+    models["test:primary"] = [RuntimeError(OTPM_WAIT), "ok"]
+    assert await llm.ainvoke_for_node("verifier", []) == "ok"
+    assert SLEEPS == [50.0]
+
+
+async def test_oversize_request_is_retried_smaller_not_waited_on(
+    models: dict[str, list[Any]],
+) -> None:
+    models["test:primary"] = [RuntimeError(OTPM_TOO_LARGE), "ok"]
+    assert await llm.ainvoke_for_node("verifier", []) == "ok"
+    assert [c.get("max_tokens") for c in CALLS] == [None, 936]
+    assert SLEEPS == [0.0]
+    assert not llm._is_transient(RuntimeError(OTPM_TOO_LARGE))
+
+
+async def test_every_failed_call_is_counted(models: dict[str, list[Any]], monkeypatch) -> None:
+    monkeypatch.setenv("GIGBID_STRICT_MODELS", "1")
+    models["test:primary"] = [RuntimeError("503 overloaded")] * 4
+    with pytest.raises(RuntimeError):
+        await llm.ainvoke_for_node("analyst", [])
+    assert llm.call_failures() == 1 and llm.quota_failures() == 0
+    assert llm.is_provider_failure(RuntimeError("503 overloaded"))
+    assert not llm.is_provider_failure(ValueError("missing field"))

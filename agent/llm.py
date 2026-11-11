@@ -17,7 +17,6 @@ from typing import Any
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential_jitter
 
 from agent import settings
 
@@ -37,7 +36,10 @@ def chat_model(
     temperature: float | None = None,
     max_tokens: int | None = None,
     timeout: float | None = None,
+    max_retries: int = 0,
 ) -> BaseChatModel:
+    """`max_retries` is the provider client's own retry (it honours retry-after headers); keep it
+    0 for calls that go through invoke_for_node, which retries and falls back itself."""
     env = settings.env()
     gen = settings.config().models.generation
     temperature = gen.get("temperature", 0.2) if temperature is None else temperature
@@ -55,7 +57,7 @@ def chat_model(
             temperature=temperature,
             max_tokens=max_tokens,
             timeout=timeout,
-            max_retries=0,
+            max_retries=max_retries,
             **extra,
         )
     if provider == "openrouter":
@@ -68,7 +70,7 @@ def chat_model(
             temperature=temperature,
             max_tokens=max_tokens,
             timeout=timeout,
-            max_retries=0,
+            max_retries=max_retries,
         )
     if provider == "ollama":
         from langchain_ollama import ChatOllama
@@ -90,7 +92,7 @@ def chat_model(
             temperature=temperature,
             max_tokens=max_tokens,
             timeout=timeout,
-            max_retries=0,
+            max_retries=max_retries,
         )
     raise ValueError(f"unknown provider {provider!r} in {spec!r}")
 
@@ -111,11 +113,20 @@ class QuotaExhaustedError(RuntimeError):
 # spec -> monotonic time after which the model is worth trying again (daily cap reached)
 _EXHAUSTED: dict[str, float] = {}
 _QUOTA_FAILURES = 0
+_CALL_FAILURES = 0
+_RETRY_IN = re.compile(r"try again in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)")
+_LIMIT_REQUESTED = re.compile(r"limit (\d+), (?:used \d+, )?requested (\d+)")
 
 
 def quota_failures() -> int:
     """How many calls in this process failed because every allowed model was capped."""
     return _QUOTA_FAILURES
+
+
+def call_failures() -> int:
+    """How many calls in this process failed for any reason after every retry and fallback.
+    Evaluation runners discard items that saw one: their output came from heuristic fallbacks."""
+    return _CALL_FAILURES
 
 
 def strict_models() -> bool:
@@ -124,18 +135,29 @@ def strict_models() -> bool:
     return os.environ.get("GIGBID_STRICT_MODELS", "0") == "1"
 
 
+def _seconds(text: str) -> float | None:
+    m = _RETRY_IN.search(text)
+    if not m or not m.group(1):
+        return None
+    secs = 0.0
+    for num, unit in re.findall(r"([\d.]+)([hms])", m.group(1)):
+        secs += float(num) * {"h": 3600, "m": 60, "s": 1}[unit]
+    return secs
+
+
 def _daily_cap_wait(exc: BaseException) -> float | None:
     """Seconds until a daily-capped model can be used again, or None if this is not a daily cap."""
     text = str(exc).lower()
     if not any(k in text for k in ("per day", "(tpd)", "(rpd)")):
         return None
-    m = re.search(r"try again in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)", text)
-    if not m or not m.group(1):
-        return 3600.0
-    secs = 0.0
-    for num, unit in re.findall(r"([\d.]+)([hms])", m.group(1)):
-        secs += float(num) * {"h": 3600, "m": 60, "s": 1}[unit]
-    return max(secs, 1.0)
+    secs = _seconds(text)
+    return 3600.0 if secs is None else max(secs, 1.0)
+
+
+def is_provider_failure(exc: BaseException) -> bool:
+    """A failure of the model provider (limits, timeouts, 5xx), not of our code or the input."""
+    text = str(exc).lower()
+    return is_daily_cap(exc) or _is_transient(exc) or "request too large" in text
 
 
 def is_daily_cap(exc: BaseException) -> bool:
@@ -143,10 +165,39 @@ def is_daily_cap(exc: BaseException) -> bool:
     return isinstance(exc, QuotaExhaustedError) or _daily_cap_wait(exc) is not None
 
 
+def _per_minute_wait(exc: BaseException) -> float | None:
+    """Seconds a provider asks us to wait for a per-minute limit (requests, tokens or output
+    tokens per minute), or None if the error is not one."""
+    text = str(exc).lower()
+    if _daily_cap_wait(exc) is not None or "request too large" in text:
+        return None
+    if not any(k in text for k in ("per minute", "(tpm)", "(rpm)", "(otpm)")):
+        return None
+    return _seconds(text)
+
+
+def _smaller_max_tokens(exc: BaseException, current: int | None) -> int | None:
+    """For a request rejected as larger than a per-minute limit, a max_tokens that fits under it.
+    Free tiers lower output-token limits under load (Groq: 'Request too large ... output tokens
+    per minute (OTPM): Limit 1000, Requested 1200')."""
+    text = str(exc).lower()
+    if "request too large" not in text:
+        return None
+    m = _LIMIT_REQUESTED.search(text)
+    if not m:
+        return None
+    limit, requested = int(m.group(1)), int(m.group(2))
+    base = current or requested
+    new = base - (requested - limit) - 64 if "(otpm)" not in text else min(base, limit - 64)
+    return new if 128 <= new < base else None
+
+
 def _is_transient(exc: BaseException) -> bool:
     if _daily_cap_wait(exc) is not None:
         return False  # a daily cap does not clear within a retry window
     text = f"{type(exc).__name__}: {exc}".lower()
+    if "request too large" in text:
+        return False  # waiting does not help; only a smaller request does
     return any(
         k in text
         for k in (
@@ -195,14 +246,55 @@ def _give_up(node: str, last: BaseException | None) -> BaseException:
     return last
 
 
-@retry(
-    stop=stop_after_attempt(4),
-    wait=wait_exponential_jitter(initial=2, max=40),
-    retry=retry_if_exception(_is_transient),
-    reraise=True,
-)
+TRANSIENT_ATTEMPTS = 4  # timeouts, 5xx, unspecified 429s: exponential backoff
+PER_MINUTE_ATTEMPTS = 6  # per-minute limits: wait as long as the provider says (at most 65 s)
+
+
+def _next_step(exc: BaseException, attempt: int, kw: dict[str, Any], model: Any) -> float | None:
+    """How to retry after `exc`: seconds to wait (kw may be changed in place), or None to give up."""
+    current = kw.get("max_tokens") or getattr(model, "max_tokens", None)
+    smaller = _smaller_max_tokens(exc, current)
+    if smaller is not None and attempt <= 2:
+        log.info("request too large for a per-minute limit; retrying with max_tokens=%d", smaller)
+        kw["max_tokens"] = smaller
+        return 0.0
+    wait = _per_minute_wait(exc)
+    if wait is not None and attempt < PER_MINUTE_ATTEMPTS:
+        return min(65.0, wait + 0.5)
+    if _is_transient(exc) and attempt < TRANSIENT_ATTEMPTS:
+        return float(min(40, 2 * 2**attempt))
+    return None
+
+
 def _invoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
-    return model.invoke(messages, **kw)
+    attempt = 0
+    while True:
+        try:
+            return model.invoke(messages, **kw)
+        except Exception as exc:  # noqa: BLE001
+            attempt += 1
+            wait = _next_step(exc, attempt, kw, model)
+            if wait is None:
+                raise
+            time.sleep(wait)
+
+
+async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
+    attempt = 0
+    while True:
+        try:
+            return await model.ainvoke(messages, **kw)
+        except Exception as exc:  # noqa: BLE001
+            attempt += 1
+            wait = _next_step(exc, attempt, kw, model)
+            if wait is None:
+                raise
+            await asyncio.sleep(wait)
+
+
+def _failed() -> None:
+    global _CALL_FAILURES
+    _CALL_FAILURES += 1
 
 
 def invoke_for_node(
@@ -222,22 +314,12 @@ def invoke_for_node(
         except Exception as exc:  # noqa: BLE001
             capped = _note_cap(spec, exc)
             if capped is None and not _is_transient(exc):
+                _failed()
                 raise
             last = capped or exc
             log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+    _failed()
     raise _give_up(node, last)
-
-
-async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
-    attempt = 0
-    while True:
-        try:
-            return await model.ainvoke(messages, **kw)
-        except Exception as exc:  # noqa: BLE001
-            attempt += 1
-            if not _is_transient(exc) or attempt >= 4:
-                raise
-            await asyncio.sleep(min(40, 2 * 2**attempt))
 
 
 async def ainvoke_for_node(
@@ -254,7 +336,9 @@ async def ainvoke_for_node(
         except Exception as exc:  # noqa: BLE001
             capped = _note_cap(spec, exc)
             if capped is None and not _is_transient(exc):
+                _failed()
                 raise
             last = capped or exc
             log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+    _failed()
     raise _give_up(node, last)

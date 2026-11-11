@@ -61,6 +61,16 @@ def test_quota_guard_spoils_items_that_hit_a_daily_cap(monkeypatch: pytest.Monke
     assert guard.spoiled(mark) and guard.stopped
 
 
+def test_other_model_failures_discard_the_item_but_keep_going(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    guard = harness.QuotaGuard()
+    mark = guard.mark()
+    monkeypatch.setattr(llm, "_CALL_FAILURES", llm.call_failures() + 1)
+    assert guard.spoiled(mark) and not guard.stopped and guard.discarded == 1
+    assert harness.QuotaGuard().spoiled(guard.mark(), RuntimeError("Connection error."))
+
+
 def test_quota_guard_recognises_a_raw_provider_cap() -> None:
     guard = harness.QuotaGuard()
     exc = RuntimeError("Rate limit reached on tokens per day (TPD). Please try again in 3m2s.")

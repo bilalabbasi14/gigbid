@@ -165,10 +165,14 @@ async def main_async(args: argparse.Namespace) -> dict[str, Any]:
         except Exception as exc:  # noqa: BLE001
             settings.config().guardrails["enabled"] = True
             if guard.spoiled(mark, exc):
-                break
+                if guard.stopped:
+                    break
+                continue
             raise
         if guard.spoiled(mark):
-            break
+            if guard.stopped:
+                break
+            continue
         rec = {
             "job_id": row["job_id"],
             "persona": row["persona"],

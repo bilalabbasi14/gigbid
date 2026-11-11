@@ -187,6 +187,7 @@ def run_config(
     return {
         "configurable": {"thread_id": thread_id, "user_id": user_id},
         "recursion_limit": limit,
+        "max_concurrency": int(settings.config().budgets.get("max_parallel_branches", 3)),
         "tags": ["bid_graph"],
         "metadata": {"thread_id": thread_id, "user_id": user_id},
     }

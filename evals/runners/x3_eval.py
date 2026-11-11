@@ -243,7 +243,9 @@ def main() -> None:
     for p in personas:
         res = asyncio.run(run_persona(p, args.variant, store, log, guard))
         if res is None:
-            break
+            if guard.stopped:
+                break
+            continue
         per[p] = res
     log.collect(personas, guard)  # exits with status 3 if a persona is still missing
     agg = aggregate(per)

@@ -339,7 +339,13 @@ class RowLog:
         """Rows for `keys` in order; exits with status 3 if any are missing (rerun to continue)."""
         rows = [self.rows[k] for k in keys if k in self.rows]
         if len(rows) < len(keys):
-            why = "a daily model cap was reached" if guard.stopped else "some items did not finish"
+            why = (
+                "a daily model cap was reached"
+                if guard.stopped
+                else f"{guard.discarded} items hit model errors and were not saved"
+                if guard.discarded
+                else "some items did not finish"
+            )
             print(
                 f"\npartial: {len(rows)}/{len(keys)} items saved in {self.path.name}; {why}. "
                 "Rerun the same command later to continue."
@@ -349,19 +355,30 @@ class RowLog:
 
 
 class QuotaGuard:
-    """Stops a run when a daily model cap is hit. The item in flight is discarded: its output came
-    from heuristic fallbacks, not the configured models."""
+    """Keeps model failures out of the results.
+
+    A daily model cap stops the run (nothing more can succeed today). Any other model call that
+    failed after every retry discards only the item in flight: its output came from heuristic
+    fallbacks, not the configured models, so it is redone on the next run.
+    """
 
     def __init__(self) -> None:
         self.stopped = False
+        self.discarded = 0
 
     @staticmethod
-    def mark() -> int:
-        return llm.quota_failures()
+    def mark() -> tuple[int, int]:
+        return llm.quota_failures(), llm.call_failures()
 
-    def spoiled(self, mark: int, exc: BaseException | None = None) -> bool:
-        if llm.quota_failures() > mark or (exc is not None and llm.is_daily_cap(exc)):
+    def spoiled(self, mark: tuple[int, int], exc: BaseException | None = None) -> bool:
+        quota, calls = mark
+        if llm.quota_failures() > quota or (exc is not None and llm.is_daily_cap(exc)):
             if not self.stopped:
                 print("  daily model cap reached: stopping; finished items are saved")
             self.stopped = True
-        return self.stopped
+            return True
+        if llm.call_failures() > calls or (exc is not None and llm.is_provider_failure(exc)):
+            self.discarded += 1
+            print("  a model call failed after retries: item discarded, it reruns next time")
+            return True
+        return False

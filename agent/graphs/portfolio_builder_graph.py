@@ -355,6 +355,7 @@ def builder_config(thread_id: str, *, user_id: str = "local") -> dict[str, Any]:
     return {
         "configurable": {"thread_id": thread_id, "user_id": user_id},
         "recursion_limit": 40,
+        "max_concurrency": int(settings.config().budgets.get("max_parallel_branches", 3)),
         "tags": ["portfolio_builder"],
         "metadata": {"thread_id": thread_id, "user_id": user_id},
     }

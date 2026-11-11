@@ -91,6 +91,7 @@ budgets:
   max_tokens_per_thread: 40000
   per_node_timeout_seconds: 180   # first call loads the CPU embedding model
   per_node_retries: 2
+  max_parallel_branches: 3        # Send fan-out at once (free tiers cap tokens per minute)
   latency_p95_seconds_per_job: 60
   latency_p95_seconds_per_proposal: 120
   cost_usd_per_job_analysed: 0.01
