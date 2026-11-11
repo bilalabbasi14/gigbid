@@ -51,10 +51,12 @@ class FakeMarket:
     async def health(self):
         return True
 
-    policy_version = 1
+    policy_version: int | None = None  # None: the same version as GigBid's pack
 
     async def get_policy(self):
-        return {"version": self.policy_version}
+        from agent import settings
+
+        return {"version": self.policy_version or settings.config().policy_version}
 
 
 @pytest.fixture
@@ -247,7 +249,7 @@ async def test_health_flags_a_newer_marketplace_policy(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ):
     h = (await client.get("/health")).json()
-    assert h["marketplace_policy_version"] == 1 and h["policy_drift"] is False
-    monkeypatch.setattr(FakeMarket, "policy_version", 2)
+    assert h["marketplace_policy_version"] == h["policy_version"] and h["policy_drift"] is False
+    monkeypatch.setattr(FakeMarket, "policy_version", h["policy_version"] + 1)
     h = (await client.get("/health")).json()
-    assert h["marketplace_policy_version"] == 2 and h["policy_drift"] is True
+    assert h["marketplace_policy_version"] == h["policy_version"] + 1 and h["policy_drift"] is True

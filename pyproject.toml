@@ -115,4 +115,8 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 addopts = "-q"
-markers = ["integration: needs running services", "slow: slow tests"]
+markers = [
+    "integration: needs running services",
+    "slow: slow tests",
+    "shipped_policy: runs against data/policy_pack instead of the frozen test pack",
+]

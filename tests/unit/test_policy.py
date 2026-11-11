@@ -47,6 +47,7 @@ def use(monkeypatch: pytest.MonkeyPatch, text: str) -> dict[str, Any]:
     return pack
 
 
+@pytest.mark.shipped_policy
 def test_shipped_pack_is_valid_and_matches_config() -> None:
     policy.load.cache_clear()
     assert policy.version() == settings.config().policy_version
@@ -54,8 +55,7 @@ def test_shipped_pack_is_valid_and_matches_config() -> None:
     assert {"no_off_platform_contact", "no_guarantees", "no_fabrication"} <= ids
 
 
-def test_shipped_pack_catches_contact_links_and_guarantees() -> None:
-    policy.load.cache_clear()
+def test_frozen_pack_catches_contact_links_and_guarantees() -> None:
     found = policy.check("Mail me at a@b.co, see https://x.io, I guarantee it.")
     assert [v.rule_id for v in found] == [
         "no_off_platform_contact",
