@@ -1,0 +1,36 @@
+{
+  "variant": "v3_rerank",
+  "personas": {
+    "ai_ml": {
+      "recall@5": 0.7538,
+      "mrr": 0.5171,
+      "ndcg@10": 0.5618,
+      "n": 65,
+      "latency_p50_s": 34.565,
+      "latency_p95_s": 71.311
+    },
+    "fullstack": {
+      "recall@5": 0.5,
+      "mrr": 0.2756,
+      "ndcg@10": 0.358,
+      "n": 64,
+      "latency_p50_s": 38.129,
+      "latency_p95_s": 77.45
+    },
+    "data_analyst": {
+      "recall@5": 0.7065,
+      "mrr": 0.4651,
+      "ndcg@10": 0.5163,
+      "n": 64,
+      "latency_p50_s": 29.642,
+      "latency_p95_s": 47.189
+    }
+  },
+  "n_jobs": 193,
+  "overall": {
+    "recall@5": 0.654,
+    "mrr": 0.4198,
+    "ndcg@10": 0.4791
+  },
+  "timestamp": "2026-11-11T14:45:12Z"
+}

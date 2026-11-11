@@ -6,23 +6,31 @@
       "mrr": 0.4612,
       "ndcg@10": 0.5106,
       "n": 65,
-      "latency_p50_s": 0.303,
-      "latency_p95_s": 0.745
+      "latency_p50_s": 0.597,
+      "latency_p95_s": 1.406
     },
     "fullstack": {
       "recall@5": 0.6094,
       "mrr": 0.3555,
       "ndcg@10": 0.4277,
       "n": 64,
-      "latency_p50_s": 0.402,
-      "latency_p95_s": 0.842
+      "latency_p50_s": 0.697,
+      "latency_p95_s": 2.077
+    },
+    "data_analyst": {
+      "recall@5": 0.7065,
+      "mrr": 0.4802,
+      "ndcg@10": 0.52,
+      "n": 64,
+      "latency_p50_s": 0.855,
+      "latency_p95_s": 1.472
     }
   },
-  "n_jobs": 129,
+  "n_jobs": 193,
   "overall": {
-    "recall@5": 0.655,
-    "mrr": 0.4087,
-    "ndcg@10": 0.4694
+    "recall@5": 0.6721,
+    "mrr": 0.4324,
+    "ndcg@10": 0.4862
   },
-  "timestamp": "2026-11-11T04:08:14Z"
+  "timestamp": "2026-11-11T12:44:34Z"
 }
