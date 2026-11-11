@@ -7,7 +7,8 @@ the simulated client's reaction (reply and hire rate on a fixed job set).
 
 Drafting is forced for every sampled bid-labelled job (even if the decision node would skip it)
 so proposal quality is measured on the same jobs for every configuration. The evaluation never
-touches a real marketplace: --gigsim requires GIGSIM_BASE_URL to be the simulator.
+touches a real marketplace: --gigsim requires GIGSIM_BASE_URL to be the simulator. Resumable
+like decision_eval (<out>_rows.jsonl; exit status 3 = partial, rerun later).
 """
 
 from __future__ import annotations
@@ -26,6 +27,8 @@ from agent.marketplace_port import ProposalDraftIn
 from agent.nodes import pricing
 from evals.runners.harness import (
     PERSONAS,
+    QuotaGuard,
+    RowLog,
     analyse,
     cost,
     draft,
@@ -68,17 +71,24 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
         settings.config().rag["variant"] = args.variant
     deps = make_deps()
     jobs = bid_jobs(args.per_persona, args.seed, tuple(args.personas.split(",")))
+    log = RowLog(
+        args.out, extra={"gigsim": args.gigsim}, fresh=args.fresh, retry_errors=args.retry_errors
+    )
+    guard = QuotaGuard()
+    todo = [r for r in jobs if not log.get(r["job_id"])]
     adapter = None
     if args.gigsim:
         base, key = await gigsim_account()
         async with httpx.AsyncClient(timeout=15) as c:
-            await c.post(f"{base}/admin/open", json=[r["job_id"] for r in jobs])
+            await c.post(f"{base}/admin/open", json=[r["job_id"] for r in todo])
         adapter = GigSimAdapter(base_url=base, token=key)
     sem = asyncio.Semaphore(args.concurrency)
-    rows: list[dict[str, Any]] = []
 
     async def one(row: dict[str, Any]) -> None:
         async with sem:
+            if guard.stopped:
+                return
+            mark = guard.mark()
             try:
                 st, t_an = await analyse(row, deps)
                 if "price_quote" not in st:  # force a price so every sampled job gets a draft
@@ -96,14 +106,19 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
                     st["price_quote"] = q.model_dump()
                 st, t_dr = await draft(st, deps)
             except Exception as exc:  # noqa: BLE001
-                rows.append(
+                if guard.spoiled(mark, exc):
+                    return
+                log.add(
+                    row["job_id"],
                     {
                         "job_id": row["job_id"],
                         "persona": row["persona"],
                         "error": f"{type(exc).__name__}: {exc}"[:300],
-                    }
+                    },
                 )
                 return
+        if guard.spoiled(mark):
+            return
         d = st.get("proposal_draft", {})
         v = d.get("verification", {})
         claims = d.get("claims", [])
@@ -159,13 +174,13 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
                 out["gigsim_status"] = res.status
             except Exception as exc:  # noqa: BLE001
                 out["gigsim_status"] = f"error: {exc}"[:120]
-        rows.append(out)
+        log.add(row["job_id"], out)
         print(
             f"  {row['persona']:12s} claims={out['claims']:2d} unsup {out['unsupported_before']}->{out['unsupported_after']} critic={out['critic_passed']!s:5s} rev={out['revisions']} {out.get('gigsim_status', '')} {out['latency_s_proposal']:6.1f}s"
         )
 
-    await asyncio.gather(*(one(r) for r in jobs))
-    return rows
+    await asyncio.gather(*(one(r) for r in todo))
+    return log.collect([r["job_id"] for r in jobs], guard)
 
 
 def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -221,6 +236,8 @@ def main() -> None:
     )
     ap.add_argument("--concurrency", type=int, default=1)
     ap.add_argument("--out", default="proposal_eval")
+    ap.add_argument("--fresh", action="store_true", help="discard saved rows and start over")
+    ap.add_argument("--retry-errors", action="store_true", help="rerun items that errored")
     args = ap.parse_args()
     if args.gigsim and "upwork" in settings.env().gigsim_base_url:
         raise SystemExit("refusing: --gigsim must target the simulator")

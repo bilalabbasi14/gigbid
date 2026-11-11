@@ -34,7 +34,8 @@ from agent.marketplace_port import ProposalDraftIn
 from agent.nodes.compliance import check_text
 from agent.prompts import load_sections
 from evals.runners.harness import (
-    RESULTS,
+    QuotaGuard,
+    RowLog,
     analyse,
     cost,
     draft,
@@ -46,7 +47,6 @@ from evals.runners.harness import (
 from rag.retriever import build_retriever
 from rag.verify import unsupported_rate, verify_claims
 
-ROWS = RESULTS / "multiagent_rows.jsonl"
 PREFS = {"floor": 20, "min_budget": 50}
 
 
@@ -290,15 +290,16 @@ async def submit(row: dict[str, Any], out: dict[str, Any], adapter, system: str)
         return f"error: {exc}"[:80]
 
 
-async def main_async(args: argparse.Namespace) -> None:
+def row_log(args: argparse.Namespace) -> RowLog:
+    return RowLog("multiagent", extra={"gigsim": args.gigsim}, fresh=getattr(args, "fresh", False))
+
+
+async def main_async(args: argparse.Namespace) -> list[dict[str, Any]]:
     deps = make_deps()
     retriever = build_retriever("v2_hybrid")
     jobs = sample_jobs(max(1, args.jobs // 3), seed=args.seed)[: args.jobs]
-    done = set()
-    if ROWS.exists():
-        for line in ROWS.open(encoding="utf-8"):
-            r = json.loads(line)
-            done.add((r["system"], r["job_id"]))
+    systems = args.systems.split(",")
+    log, guard = row_log(args), QuotaGuard()
     base = settings.env().gigsim_base_url.rstrip("/")
     async with httpx.AsyncClient(
         timeout=15
@@ -309,7 +310,7 @@ async def main_async(args: argparse.Namespace) -> None:
         from mcp_servers.marketplace.adapters.gigsim import GigSimAdapter
 
         async with httpx.AsyncClient(timeout=15) as c:
-            for system in args.systems.split(","):
+            for system in systems:
                 key = f"eval-mac-{system}-{args.seed}"
                 await c.post(
                     f"{base}/admin/accounts",
@@ -317,9 +318,10 @@ async def main_async(args: argparse.Namespace) -> None:
                 )
                 adapters[system] = GigSimAdapter(base_url=base, token=key)
     for row in jobs:
-        for system in args.systems.split(","):
-            if (system, row["job_id"]) in done:
+        for system in systems:
+            if guard.stopped or log.get(f"{system}:{row['job_id']}"):
                 continue
+            mark = guard.mark()
             t0 = time.perf_counter()
             extra: dict[str, Any] = {}
             try:
@@ -331,9 +333,13 @@ async def main_async(args: argparse.Namespace) -> None:
                     out, usage, extra = await run_graph(row, deps)
                 err = None
             except Exception as exc:  # noqa: BLE001 - recorded, not hidden
+                if guard.spoiled(mark, exc):
+                    continue
                 out, usage, err = {}, {}, f"{type(exc).__name__}: {exc}"[:300]
             latency = time.perf_counter() - t0
             ev = await evaluate(row, out, retriever) if not err else {}
+            if guard.spoiled(mark):  # the claim judge in evaluate() also uses a model
+                continue
             status = await submit(row, out, adapters.get(system), system) if not err else None
             rec = {
                 "system": system,
@@ -351,15 +357,14 @@ async def main_async(args: argparse.Namespace) -> None:
                 "latency_s": round(latency, 2),
                 "error": err,
             }
-            with ROWS.open("a", encoding="utf-8") as f:
-                f.write(json.dumps(rec, default=str) + "\n")
+            log.add(f"{system}:{row['job_id']}", rec)
             print(
                 f"  {system:10s} {row['job_id']} gold={row.get('gold_decision')!s:5s} pred={ev.get('pred_decision')!s:5s} unsup={ev.get('unsupported', '-')} tok={rec['tokens']} {latency:5.1f}s {err or ''}"
             )
+    return log.collect([f"{s}:{r['job_id']}" for r in jobs for s in systems], guard)
 
 
-def summarise() -> dict[str, Any]:
-    rows = [json.loads(line) for line in ROWS.open(encoding="utf-8")] if ROWS.exists() else []
+def summarise(rows: list[dict[str, Any]]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for system in sorted({r["system"] for r in rows}):
         rs = [r for r in rows if r["system"] == system]
@@ -435,11 +440,11 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=21)
     ap.add_argument("--systems", default="single,supervisor,graph")
     ap.add_argument("--gigsim", action="store_true")
-    ap.add_argument("--summary-only", action="store_true")
+    ap.add_argument("--summary-only", action="store_true", help="summarise the saved rows")
+    ap.add_argument("--fresh", action="store_true", help="discard saved rows and start over")
     args = ap.parse_args()
-    if not args.summary_only:
-        asyncio.run(main_async(args))
-    summary = summarise()
+    rows = list(row_log(args).rows.values()) if args.summary_only else asyncio.run(main_async(args))
+    summary = summarise(rows)
     path = write_result("multiagent_comparison", {"config": vars(args), "systems": summary})
     for s, m in summary.items():
         print(

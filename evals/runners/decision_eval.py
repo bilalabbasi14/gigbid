@@ -3,6 +3,8 @@ inside the fair band, latency and cost per job analysed.
 
   uv run python -m evals.runners.decision_eval --per-persona 20 [--out decision_eval]
 Writes evals/results/<out>.json with per-job rows (for the failure analysis) and aggregates.
+Resumable: finished jobs are kept in <out>_rows.jsonl, so a run stopped by a daily model cap
+continues where it stopped (exit status 3 means "partial, rerun later").
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ from typing import Any
 
 from evals.runners.harness import (
     PERSONAS,
+    QuotaGuard,
+    RowLog,
     analyse,
     cost,
     make_deps,
@@ -82,20 +86,27 @@ def score(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-async def run(
-    per_persona: int, seed: int, personas: tuple[str, ...], concurrency: int = 2
-) -> list[dict[str, Any]]:
+async def run(args: argparse.Namespace, personas: tuple[str, ...]) -> list[dict[str, Any]]:
     deps = make_deps()
-    jobs = sample_jobs(per_persona, seed, personas)
-    sem = asyncio.Semaphore(concurrency)
-    out: list[dict[str, Any]] = []
+    jobs = sample_jobs(args.per_persona, args.seed, personas)
+    log = RowLog(args.out, fresh=args.fresh, retry_errors=args.retry_errors)
+    guard = QuotaGuard()
+    sem = asyncio.Semaphore(args.concurrency)
 
     async def one(row: dict[str, Any]) -> None:
+        if log.get(row["job_id"]):
+            return
         async with sem:
+            if guard.stopped:
+                return
+            mark = guard.mark()
             try:
                 st, dt = await analyse(row, deps)
             except Exception as exc:  # noqa: BLE001 - recorded, counted, not hidden
-                out.append(
+                if guard.spoiled(mark, exc):
+                    return
+                log.add(
+                    row["job_id"],
                     {
                         "job_id": row["job_id"],
                         "persona": row["persona"],
@@ -105,9 +116,11 @@ async def run(
                         "gold_injection": bool(row.get("gold_injection")),
                         "error": f"{type(exc).__name__}: {exc}"[:300],
                         "tokens": 0,
-                    }
+                    },
                 )
                 return
+        if guard.spoiled(mark):
+            return
         d = st.get("decision", {})
         risk = st.get("risk_report", {})
         pq = st.get("price_quote") or {}
@@ -116,7 +129,8 @@ async def run(
         if pq.get("amount") and band:
             in_band = float(band["low"]) <= float(pq["amount"]) <= float(band["high"]) * 1.15
         usage = st.get("usage", {})
-        out.append(
+        log.add(
+            row["job_id"],
             {
                 "job_id": row["job_id"],
                 "persona": row["persona"],
@@ -141,14 +155,14 @@ async def run(
                 "tokens": sum(usage.values()),
                 "cost_usd": cost(usage),
                 "node_errors": st.get("errors", []),
-            }
+            },
         )
         print(
             f"  {row['persona']:12s} {row['label_source']:16s} gold={row.get('gold_decision')!s:5s} pred={d.get('decision')!s:5s} scam={row.get('gold_scam')!s:5s}/{risk.get('scam_likely')!s:5s} {dt:5.1f}s"
         )
 
     await asyncio.gather(*(one(r) for r in jobs))
-    return out
+    return log.collect([r["job_id"] for r in jobs], guard)
 
 
 def main() -> None:
@@ -158,9 +172,11 @@ def main() -> None:
     ap.add_argument("--personas", default=",".join(PERSONAS))
     ap.add_argument("--concurrency", type=int, default=2)
     ap.add_argument("--out", default="decision_eval")
+    ap.add_argument("--fresh", action="store_true", help="discard saved rows and start over")
+    ap.add_argument("--retry-errors", action="store_true", help="rerun items that errored")
     args = ap.parse_args()
     personas = tuple(p for p in args.personas.split(",") if p)
-    rows = asyncio.run(run(args.per_persona, args.seed, personas, args.concurrency))
+    rows = asyncio.run(run(args, personas))
     overall = score(rows)
     by_persona = {p: score([r for r in rows if r["persona"] == p]) for p in personas}
     path = write_result(

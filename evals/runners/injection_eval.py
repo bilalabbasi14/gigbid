@@ -18,6 +18,7 @@ The Compliance Guard is on in every condition (it is policy, not injection defen
 look at the writer's output before the guard, and we also report what the guard caught.
 
   uv run python -m evals.runners.injection_eval --per-family 1
+Resumable per (job, family) in injection_rows.jsonl; exit status 3 = partial, rerun later.
 """
 
 from __future__ import annotations
@@ -32,7 +33,17 @@ from agent import settings
 from agent.nodes import pricing
 from agent.pii import contains_contact_details
 from data.scripts.inject_adversarial import INJECTIONS
-from evals.runners.harness import DATASETS, analyse, cost, draft, load_dev, make_deps, write_result
+from evals.runners.harness import (
+    DATASETS,
+    QuotaGuard,
+    RowLog,
+    analyse,
+    cost,
+    draft,
+    load_dev,
+    make_deps,
+    write_result,
+)
 
 TEXT = {i["id"]: i["text"] for i in INJECTIONS}
 
@@ -122,8 +133,11 @@ def success(clean: dict[str, Any], attacked: dict[str, Any]) -> list[str]:
     return why
 
 
-async def main_async(per_family: int) -> dict[str, Any]:
+async def main_async(args: argparse.Namespace) -> dict[str, Any]:
+    per_family = args.per_family
     deps = make_deps()
+    log = RowLog("injection", fresh=args.fresh)  # fingerprint taken with defences on
+    guard = QuotaGuard()
     gold = [
         json.loads(line) for line in (DATASETS / "adversarial_gold.jsonl").open(encoding="utf-8")
     ]
@@ -137,13 +151,24 @@ async def main_async(per_family: int) -> dict[str, Any]:
             :per_family
         ]:
             picked.append((rows_by_id[g["job_id"]], fam))
-    results = []
     for row, fam in picked:
+        key = f"{row['job_id']}:{fam}"
+        if log.get(key):
+            continue
         desc = row["job"]["description"]
         clean_desc = strip_injection(desc, fam)
-        clean = await one(row, deps, True, clean_desc)
-        attacked = await one(row, deps, False, desc)
-        defended = await one(row, deps, True, desc)
+        mark = guard.mark()
+        try:
+            clean = await one(row, deps, True, clean_desc)
+            attacked = await one(row, deps, False, desc)
+            defended = await one(row, deps, True, desc)
+        except Exception as exc:  # noqa: BLE001
+            settings.config().guardrails["enabled"] = True
+            if guard.spoiled(mark, exc):
+                break
+            raise
+        if guard.spoiled(mark):
+            break
         rec = {
             "job_id": row["job_id"],
             "persona": row["persona"],
@@ -155,10 +180,11 @@ async def main_async(per_family: int) -> dict[str, Any]:
             "success_without_defences": success(clean, attacked),
             "success_with_defences": success(clean, defended),
         }
-        results.append(rec)
+        log.add(key, rec)
         print(
             f"  {fam:18s} without={rec['success_without_defences']} with={rec['success_with_defences']} flagged={defended['injection_flagged']}"
         )
+    results = log.collect([f"{row['job_id']}:{fam}" for row, fam in picked], guard)
     n = len(results) or 1
 
     def rate(key: str, subset: list[dict[str, Any]] | None = None) -> float | None:
@@ -194,9 +220,10 @@ async def main_async(per_family: int) -> dict[str, Any]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--per-family", type=int, default=1)
+    ap.add_argument("--fresh", action="store_true", help="discard saved rows and start over")
     args = ap.parse_args()
-    res = asyncio.run(main_async(args.per_family))
-    path = write_result("injection", {"config": vars(args), **res})
+    res = asyncio.run(main_async(args))
+    path = write_result("injection", {"config": {"per_family": args.per_family}, **res})
     print(
         f"attack success: without defences {res['attack_success_rate_without_defences']}, with {res['attack_success_rate_with_defences']} (n={res['n']}) -> {path}"
     )

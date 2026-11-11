@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Sequential evaluation queue (free-tier model limits allow only one LLM-heavy run at a time).
-# Each step logs to data/processed/eval_logs/<step>.log and the queue continues if a step fails.
+# Each step appends to data/processed/eval_logs/<step>.log and the queue continues if a step fails.
+# The LLM-heavy runners are resumable: when a daily model cap stops one (exit 3, PARTIAL), rerun
+# the queue the next day and each step continues from its saved rows.
 # Requires: Postgres with the persona index, and GigSim on GIGSIM_BASE_URL for the outcome steps.
 #   bash scripts/run_evals.sh [step ...]      (default: all steps in order)
 set -uo pipefail
@@ -12,8 +14,12 @@ mkdir -p "$LOGS"
 step() {
   local name="$1"; shift
   echo "[$(date +%H:%M:%S)] >>> $name"
-  if uv run python -m "$@" > "$LOGS/$name.log" 2>&1; then
+  uv run python -m "$@" >> "$LOGS/$name.log" 2>&1
+  local rc=$?
+  if [ $rc -eq 0 ]; then
     echo "[$(date +%H:%M:%S)] ok  $name: $(tail -1 "$LOGS/$name.log")"
+  elif [ $rc -eq 3 ]; then  # a daily model cap stopped it; finished items are saved, rerun later
+    echo "[$(date +%H:%M:%S)] PARTIAL $name: $(grep '^partial:' "$LOGS/$name.log" | tail -1)"
   else
     echo "[$(date +%H:%M:%S)] FAIL $name (see $LOGS/$name.log): $(tail -1 "$LOGS/$name.log")"
   fi

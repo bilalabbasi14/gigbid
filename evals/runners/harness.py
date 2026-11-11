@@ -9,13 +9,16 @@ then only against the simulator.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+import os
 import random
 import statistics
 import time
 from pathlib import Path
 from typing import Any
 
+from agent import llm, settings
 from agent.deps import Deps
 from agent.mcp_client import ToolProvider, in_process_loader
 from agent.nodes import (
@@ -31,6 +34,9 @@ from agent.nodes import (
 )
 from agent.settings import ROOT
 from agent.state import BidState
+
+# Evaluations measure the configured model of each node: no fallback models (agent/llm.py).
+os.environ.setdefault("GIGBID_STRICT_MODELS", "1")
 
 DATASETS = ROOT / "evals/datasets"
 RESULTS = ROOT / "evals/results"
@@ -200,3 +206,109 @@ def write_result(name: str, payload: dict[str, Any]) -> Path:
     path = RESULTS / f"{name}.json"
     path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
     return path
+
+
+# ---------------------------------------------------------------------------------------------
+# Resumable runs. Free-tier models cap tokens per day, so a long evaluation can stop half-way.
+# Each finished item is appended to evals/results/<name>_rows.jsonl; a rerun skips those items.
+# Rows are tagged with a fingerprint of everything that decides behaviour (config.yaml, prompts,
+# policy pack, run options), so results from an older configuration are never mixed in.
+
+
+def fingerprint(extra: dict[str, Any] | None = None) -> str:
+    h = hashlib.sha1()  # noqa: S324 - identity, not security
+    files = sorted((ROOT / "agent/prompts").glob("*.md"))
+    files += sorted(f for f in (ROOT / "data/policy_pack").rglob("*") if f.is_file())
+    for f in files:
+        h.update(f.relative_to(ROOT).as_posix().encode())
+        h.update(f.read_bytes().replace(b"\r\n", b"\n"))
+    cfg = settings.config()
+    profile = os.environ.get("MODEL_PROFILE") or cfg.models.profile
+    runtime = {  # the config sections that change what the agents do (not marketplace polling)
+        "models": cfg.models.profiles[profile].model_dump(),
+        "nodes": cfg.models.nodes,
+        "generation": cfg.models.generation,
+        "embeddings": cfg.models.embeddings,
+        "reranker": cfg.models.reranker,
+        "policy_version": cfg.policy_version,
+        **{k: getattr(cfg, k) for k in ("rag", "budgets", "thresholds", "pricing", "guardrails")},
+        "extra": extra or {},
+    }
+    h.update(json.dumps(runtime, sort_keys=True, default=str).encode())
+    return h.hexdigest()[:12]
+
+
+class RowLog:
+    """Append-only item results for one evaluation, keyed by item id."""
+
+    def __init__(
+        self,
+        name: str,
+        *,
+        extra: dict[str, Any] | None = None,
+        fresh: bool = False,
+        retry_errors: bool = False,
+    ) -> None:
+        self.path = RESULTS / f"{name}_rows.jsonl"
+        self.fp = fingerprint(extra)
+        self.rows: dict[str, dict[str, Any]] = {}
+        if fresh and self.path.exists():
+            self.path.unlink()
+        if not self.path.exists():
+            return
+        kept, stale = [], 0
+        for line in self.path.open(encoding="utf-8"):
+            r = json.loads(line)
+            if r.get("fingerprint") != self.fp:
+                stale += 1
+                continue
+            kept.append(line)
+            if not (retry_errors and r.get("error")):
+                self.rows[r["key"]] = r
+        if stale:  # drop rows of an older configuration so the file only holds comparable rows
+            self.path.write_text("".join(kept), encoding="utf-8")
+            print(f"  {self.path.name}: dropped {stale} rows from a different configuration")
+        if self.rows:
+            print(f"  {self.path.name}: resuming with {len(self.rows)} finished items")
+
+    def get(self, key: str) -> dict[str, Any] | None:
+        return self.rows.get(key)
+
+    def add(self, key: str, row: dict[str, Any]) -> dict[str, Any]:
+        row = {"key": key, "fingerprint": self.fp, **row}
+        RESULTS.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(row, default=str) + "\n")
+        self.rows[key] = row
+        return row
+
+    def collect(self, keys: list[str], guard: QuotaGuard) -> list[dict[str, Any]]:
+        """Rows for `keys` in order; exits with status 3 if any are missing (rerun to continue)."""
+        rows = [self.rows[k] for k in keys if k in self.rows]
+        if len(rows) < len(keys):
+            why = "a daily model cap was reached" if guard.stopped else "some items did not finish"
+            print(
+                f"\npartial: {len(rows)}/{len(keys)} items saved in {self.path.name}; {why}. "
+                "Rerun the same command later to continue."
+            )
+            raise SystemExit(3)
+        return rows
+
+
+class QuotaGuard:
+    """Stops a run when a daily model cap is hit. The item in flight is discarded: its output came
+    from heuristic fallbacks, not the configured models."""
+
+    def __init__(self) -> None:
+        self.stopped = False
+
+    @staticmethod
+    def mark() -> int:
+        return llm.quota_failures()
+
+    def spoiled(self, mark: int, exc: BaseException | None = None) -> bool:
+        if llm.quota_failures() > mark or (exc is not None and llm.is_daily_cap(exc)):
+            if not self.stopped:
+                print("  daily model cap reached: stopping; finished items are saved")
+            self.stopped = True
+        return self.stopped

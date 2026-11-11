@@ -16,6 +16,8 @@ The builder runs through its real graph up to the review interrupt (the evaluati
 drafts with the original project ids so retrieval can be scored at project level).
 
   uv run python -m evals.runners.x3_eval [--personas ai_ml,fullstack,data_analyst] [--variant v2_hybrid]
+The builder output per persona is kept in x3_eval_rows.jsonl, so a run stopped by a daily model
+cap resumes with the next persona (exit status 3 = partial, rerun later).
 """
 
 from __future__ import annotations
@@ -33,7 +35,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from agent import settings
 from agent.deps import Deps
 from agent.graphs import portfolio_builder_graph as pbg
-from evals.runners.harness import cost, write_result
+from evals.runners.harness import QuotaGuard, RowLog, cost, write_result
 from evals.runners.rag_eval import load_dev, metrics
 from rag.index.pg import ChunkStore
 from rag.ingest.cli import ingest_persona
@@ -160,9 +162,20 @@ def retrieval(
     return out
 
 
-async def run_persona(persona: str, variant: str, store: ChunkStore) -> dict[str, Any]:
+async def run_persona(
+    persona: str, variant: str, store: ChunkStore, log: RowLog, guard: QuotaGuard
+) -> dict[str, Any] | None:
+    """None when a daily model cap stopped the builder (the persona is redone on the next run)."""
     base, repo_pid = prepare_base(persona)
-    drafts, usage = await build_drafts(persona, PERSONAS_ROOT / persona / "repos")
+    saved = log.get(persona)
+    if saved:  # the builder output is the expensive part; retrieval scoring is local and cheap
+        drafts, usage = saved["drafts"], saved["usage"]
+    else:
+        mark = guard.mark()
+        drafts, usage = await build_drafts(persona, PERSONAS_ROOT / persona / "repos")
+        if guard.spoiled(mark):
+            return None
+        log.add(persona, {"persona": persona, "drafts": drafts, "usage": usage})
     print(f"  {persona}: {len(drafts)} case studies drafted from {len(repo_pid)} repositories")
     built = write_built(persona, base, drafts, repo_pid)
     for d in (base, built):
@@ -221,11 +234,18 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--personas", default="ai_ml,fullstack,data_analyst")
     ap.add_argument("--variant", default="v2_hybrid")
+    ap.add_argument("--fresh", action="store_true", help="discard saved builder output")
     args = ap.parse_args()
     store = ChunkStore()
+    log, guard = RowLog("x3_eval", fresh=args.fresh), QuotaGuard()
+    personas = [x for x in args.personas.split(",") if x]
     per = {}
-    for p in [x for x in args.personas.split(",") if x]:
-        per[p] = asyncio.run(run_persona(p, args.variant, store))
+    for p in personas:
+        res = asyncio.run(run_persona(p, args.variant, store, log, guard))
+        if res is None:
+            break
+        per[p] = res
+    log.collect(personas, guard)  # exits with status 3 if a persona is still missing
     agg = aggregate(per)
     path = write_result("x3_eval", {"config": vars(args), "overall": agg, "personas": per})
     print(json.dumps(agg, indent=2))
