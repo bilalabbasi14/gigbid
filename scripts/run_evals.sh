@@ -39,7 +39,7 @@ step() {
 # human labels can start, and the comparison runs last. Sample sizes are stated with every result.
 # Larger runs: pass step names, e.g. `bash scripts/run_evals.sh decisions_full proposals_best`.
 # The untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run alone.
-ALL=(tools decisions x3 proposals_v2 proposals_v0 judge_export injection judge multiagent panel_export failures tables)
+ALL=(tools decisions proposals_v2 proposals_v0 injection judge_export judge multiagent x3 panel_export failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
