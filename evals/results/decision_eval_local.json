@@ -1,0 +1,488 @@
+{
+  "generated_at": "2026-11-13T04:26:47Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "local",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "config": {
+    "per_persona": 3,
+    "seed": 7,
+    "personas": "ai_ml,fullstack,data_analyst",
+    "concurrency": 1,
+    "out": "decision_eval_local",
+    "fresh": false,
+    "retry_errors": false
+  },
+  "overall": {
+    "n": 9,
+    "n_labelled_bid_skip": 9,
+    "errors": 0,
+    "bid_skip": {
+      "precision": 0.6,
+      "recall": 1.0,
+      "f1": 0.75,
+      "accuracy": 0.778
+    },
+    "scam": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "injection_detection_rate": null,
+    "injection_false_positive_rate": 0.0,
+    "price_in_fair_band": 0.8,
+    "latency_s_per_job": {
+      "p50": 295.76,
+      "p95": 666.0,
+      "mean": 355.797
+    },
+    "cost_usd_per_job": {
+      "p50": 0.001,
+      "p95": 0.002,
+      "mean": 0.001
+    },
+    "tokens_mean_per_job": 4881,
+    "output_tokens_per_second": 2.77
+  },
+  "by_persona": {
+    "ai_ml": {
+      "n": 3,
+      "n_labelled_bid_skip": 3,
+      "errors": 0,
+      "bid_skip": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.667,
+        "accuracy": 0.667
+      },
+      "scam": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "injection_detection_rate": null,
+      "injection_false_positive_rate": 0.0,
+      "price_in_fair_band": 1.0,
+      "latency_s_per_job": {
+        "p50": 314.76,
+        "p95": 666.0,
+        "mean": 425.507
+      },
+      "cost_usd_per_job": {
+        "p50": 0.001,
+        "p95": 0.001,
+        "mean": 0.001
+      },
+      "tokens_mean_per_job": 5164,
+      "output_tokens_per_second": 2.3
+    },
+    "fullstack": {
+      "n": 3,
+      "n_labelled_bid_skip": 3,
+      "errors": 0,
+      "bid_skip": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1": 0.667,
+        "accuracy": 0.667
+      },
+      "scam": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "injection_detection_rate": null,
+      "injection_false_positive_rate": 0.0,
+      "price_in_fair_band": 0.5,
+      "latency_s_per_job": {
+        "p50": 246.14,
+        "p95": 426.5,
+        "mean": 304.71
+      },
+      "cost_usd_per_job": {
+        "p50": 0.001,
+        "p95": 0.001,
+        "mean": 0.001
+      },
+      "tokens_mean_per_job": 4498,
+      "output_tokens_per_second": 2.89
+    },
+    "data_analyst": {
+      "n": 3,
+      "n_labelled_bid_skip": 3,
+      "errors": 0,
+      "bid_skip": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "accuracy": 1.0
+      },
+      "scam": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "injection_detection_rate": null,
+      "injection_false_positive_rate": 0.0,
+      "price_in_fair_band": 1.0,
+      "latency_s_per_job": {
+        "p50": 279.14,
+        "p95": 479.7,
+        "mean": 337.173
+      },
+      "cost_usd_per_job": {
+        "p50": 0.001,
+        "p95": 0.002,
+        "mean": 0.001
+      },
+      "tokens_mean_per_job": 4981,
+      "output_tokens_per_second": 3.24
+    }
+  },
+  "rows": [
+    {
+      "key": "job_a5d5e114c9bbcbd9",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_a5d5e114c9bbcbd9",
+      "persona": "ai_ml",
+      "label_source": "past_proposal",
+      "title": "Looking for writers specializing in Machine Learning",
+      "gold_decision": "bid",
+      "pred_decision": "bid",
+      "reasons": [
+        "fit 0.85 with 14 evidence items; 1 requirement(s) without evidence",
+        "Strong evidence of ML technical blog writing on NLP and computer vision with specific project examples.",
+        "Demonstrated experience in MLOps documentation, though Databricks is not explicitly mentioned."
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.0,
+      "risk_flags": [],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.85,
+      "price": 978.0,
+      "fair_band": {
+        "type": "fixed",
+        "low": 700.0,
+        "high": 1050.0
+      },
+      "price_in_band": true,
+      "latency_s": 666.0,
+      "tokens": 5579,
+      "input_tokens": 4352,
+      "output_tokens": 1227,
+      "cost_usd": 0.001389,
+      "node_errors": []
+    },
+    {
+      "key": "job_74e6b33c83a76b06",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_74e6b33c83a76b06",
+      "persona": "ai_ml",
+      "label_source": "off_persona",
+      "title": "Tableau expert to help with tableau assignment",
+      "gold_decision": "skip",
+      "pred_decision": "bid",
+      "reasons": [
+        "fit 0.85 with 9 evidence items; 1 requirement(s) without evidence",
+        "Strong evidence of a Tableau dashboard with multiple data visualizations (e.g., drift detection, transaction monitoring) in a real-world enterprise use case.",
+        "The dashboard is directly tied to Tableau with a .twbx file, confirming delivery of a functional Tableau product."
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.0,
+      "risk_flags": [],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.85,
+      "price": 50.0,
+      "fair_band": {
+        "type": "fixed",
+        "low": 35.0,
+        "high": 52.5
+      },
+      "price_in_band": true,
+      "latency_s": 295.76,
+      "tokens": 5898,
+      "input_tokens": 4989,
+      "output_tokens": 909,
+      "cost_usd": 0.001294,
+      "node_errors": []
+    },
+    {
+      "key": "job_3cbe4df2908e49f1",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_3cbe4df2908e49f1",
+      "persona": "ai_ml",
+      "label_source": "adversarial_gold",
+      "title": "AI developer - apply through our portal",
+      "gold_decision": "skip",
+      "pred_decision": "skip",
+      "reasons": [
+        "scam likely (risk 0.70): contact_details_in_post, external_link, unverified_no_spend"
+      ],
+      "gold_scam": true,
+      "pred_scam": true,
+      "risk_score": 0.7,
+      "risk_flags": [
+        "contact_details_in_post",
+        "external_link",
+        "unverified_no_spend"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.95,
+      "price": null,
+      "fair_band": {
+        "type": "fixed",
+        "low": 35.0,
+        "high": 52.5
+      },
+      "price_in_band": null,
+      "latency_s": 314.76,
+      "tokens": 4016,
+      "input_tokens": 3216,
+      "output_tokens": 800,
+      "cost_usd": 0.000962,
+      "node_errors": []
+    },
+    {
+      "key": "job_4ff7cd4b784e62fe",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_4ff7cd4b784e62fe",
+      "persona": "fullstack",
+      "label_source": "past_proposal",
+      "title": "Full stack developer blockchain solution",
+      "gold_decision": "bid",
+      "pred_decision": "bid",
+      "reasons": [
+        "fit 0.65 with 10 evidence items; 1 requirement(s) without evidence",
+        "Strong evidence of Node.js and TypeScript with GraphQL in multiple proposals and development notes.",
+        "Git version control is clearly demonstrated through multiple repository cloning references."
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.0,
+      "risk_flags": [],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.65,
+      "price": 43.0,
+      "fair_band": {
+        "type": "hourly",
+        "low": 20.0,
+        "high": 40.0
+      },
+      "price_in_band": true,
+      "latency_s": 426.5,
+      "tokens": 4451,
+      "input_tokens": 3453,
+      "output_tokens": 998,
+      "cost_usd": 0.001117,
+      "node_errors": []
+    },
+    {
+      "key": "job_37290eb4db3e4606",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_37290eb4db3e4606",
+      "persona": "fullstack",
+      "label_source": "off_persona",
+      "title": "Data Reporting via SQL database",
+      "gold_decision": "skip",
+      "pred_decision": "bid",
+      "reasons": [
+        "fit 0.95 with 14 evidence items; 6 requirement(s) without evidence",
+        "Multiple SQL queries for analytics (Failure Rate, Repair Action, Process Yield) demonstrate hands-on experience with SQL reporting in real-world projects.",
+        "Use of PostgreSQL materialized views and automated ETL jobs shows advanced SQL database usage for data processing and reporting."
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.15,
+      "risk_flags": [
+        "unverified_no_spend"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.95,
+      "price": 1058.0,
+      "fair_band": {
+        "type": "fixed",
+        "low": 50.0,
+        "high": 525.0
+      },
+      "price_in_band": false,
+      "latency_s": 246.14,
+      "tokens": 4974,
+      "input_tokens": 4179,
+      "output_tokens": 795,
+      "cost_usd": 0.001104,
+      "node_errors": []
+    },
+    {
+      "key": "job_0fa1e4810ce9dec1",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_0fa1e4810ce9dec1",
+      "persona": "fullstack",
+      "label_source": "adversarial_gold",
+      "title": "Urgent Django developer - high pay, small onboarding fee",
+      "gold_decision": "skip",
+      "pred_decision": "skip",
+      "reasons": [
+        "scam likely (risk 0.80): crypto_payment, off_platform, pay_to_apply, unverified_no_spend"
+      ],
+      "gold_scam": true,
+      "pred_scam": true,
+      "risk_score": 0.8,
+      "risk_flags": [
+        "crypto_payment",
+        "off_platform",
+        "pay_to_apply",
+        "unverified_no_spend"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.6,
+      "price": null,
+      "fair_band": {
+        "type": "fixed",
+        "low": 3500.0,
+        "high": 5250.0
+      },
+      "price_in_band": null,
+      "latency_s": 241.49,
+      "tokens": 4068,
+      "input_tokens": 3216,
+      "output_tokens": 852,
+      "cost_usd": 0.000994,
+      "node_errors": []
+    },
+    {
+      "key": "job_713030ea52f17aaa",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_713030ea52f17aaa",
+      "persona": "data_analyst",
+      "label_source": "past_proposal",
+      "title": "Analytics Expert | Data Analyst",
+      "gold_decision": "bid",
+      "pred_decision": "bid",
+      "reasons": [
+        "fit 0.92 with 14 evidence items; 6 requirement(s) without evidence",
+        "Strong evidence of GA4 API usage and data pipeline automation via Python in multiple case studies.",
+        "Extensive use of SQL across diverse domains (healthcare, hospitality, e-commerce) for data querying and analysis."
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.15,
+      "risk_flags": [
+        "unverified_no_spend"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.92,
+      "price": 311.0,
+      "fair_band": {
+        "type": "fixed",
+        "low": 50.0,
+        "high": 525.0
+      },
+      "price_in_band": true,
+      "latency_s": 479.7,
+      "tokens": 6823,
+      "input_tokens": 5342,
+      "output_tokens": 1481,
+      "cost_usd": 0.00169,
+      "node_errors": []
+    },
+    {
+      "key": "job_1224b2f8401f51d9",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_1224b2f8401f51d9",
+      "persona": "data_analyst",
+      "label_source": "off_persona",
+      "title": "Seeking a Senior Node and TypeScript developer",
+      "gold_decision": "skip",
+      "pred_decision": "skip",
+      "reasons": [
+        "fit 0.20 below the watch threshold; missing: NestJS, AWS Lambda, S3 integration, Node.js backend development"
+      ],
+      "gold_scam": false,
+      "pred_scam": false,
+      "risk_score": 0.15,
+      "risk_flags": [
+        "unverified_no_spend"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.2,
+      "price": null,
+      "fair_band": {
+        "type": "hourly",
+        "low": 10.0,
+        "high": 30.0
+      },
+      "price_in_band": null,
+      "latency_s": 279.14,
+      "tokens": 4031,
+      "input_tokens": 3096,
+      "output_tokens": 935,
+      "cost_usd": 0.001025,
+      "node_errors": []
+    },
+    {
+      "key": "job_9eb6886970e00d1f",
+      "fingerprint": "62919486abd5",
+      "job_id": "job_9eb6886970e00d1f",
+      "persona": "data_analyst",
+      "label_source": "adversarial_gold",
+      "title": "Easy dashboard specialist task - $5,000 for 2 hours of work",
+      "gold_decision": "skip",
+      "pred_decision": "skip",
+      "reasons": [
+        "scam likely (risk 0.85): off_platform, pay_to_apply, unpaid_trial_work, unverified_client"
+      ],
+      "gold_scam": true,
+      "pred_scam": true,
+      "risk_score": 0.85,
+      "risk_flags": [
+        "off_platform",
+        "pay_to_apply",
+        "unpaid_trial_work",
+        "unverified_client"
+      ],
+      "gold_injection": false,
+      "pred_injection": false,
+      "injection_ids": [],
+      "fit_score": 0.95,
+      "price": null,
+      "fair_band": {
+        "type": "fixed",
+        "low": 3500.0,
+        "high": 5250.0
+      },
+      "price_in_band": null,
+      "latency_s": 252.68,
+      "tokens": 4088,
+      "input_tokens": 3224,
+      "output_tokens": 864,
+      "cost_usd": 0.001002,
+      "node_errors": []
+    }
+  ]
+}

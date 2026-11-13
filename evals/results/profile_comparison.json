@@ -1,0 +1,135 @@
+{
+  "generated_at": "2026-11-13T04:27:34Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "a": "decision_eval",
+  "b": "decision_eval_local",
+  "n_shared_jobs": 9,
+  "profiles": {
+    "decision_eval": {
+      "model_profile": "open",
+      "hardware": {
+        "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+        "logical_cpus": 8,
+        "ram_gb": 7.8,
+        "gpu": null,
+        "os": "Windows 10.0.26200"
+      },
+      "bid_skip": {
+        "precision": 0.5,
+        "recall": 0.667,
+        "f1": 0.571,
+        "accuracy": 0.667
+      },
+      "scam": {
+        "precision": 1.0,
+        "recall": 0.333,
+        "f1": 0.5
+      },
+      "price_in_fair_band": 1.0,
+      "latency_s_per_job": {
+        "p50": 92.15,
+        "p95": 150.49,
+        "mean": 101.839
+      },
+      "tokens_mean_per_job": 6032,
+      "output_tokens_per_second": 12.32
+    },
+    "decision_eval_local": {
+      "model_profile": "local",
+      "hardware": {
+        "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+        "logical_cpus": 8,
+        "ram_gb": 7.8,
+        "gpu": null,
+        "os": "Windows 10.0.26200"
+      },
+      "bid_skip": {
+        "precision": 0.6,
+        "recall": 1.0,
+        "f1": 0.75,
+        "accuracy": 0.778
+      },
+      "scam": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0
+      },
+      "price_in_fair_band": 0.8,
+      "latency_s_per_job": {
+        "p50": 295.76,
+        "p95": 666.0,
+        "mean": 355.797
+      },
+      "tokens_mean_per_job": 4881,
+      "output_tokens_per_second": 2.77
+    }
+  },
+  "decision_agreement": 0.444,
+  "per_job": [
+    {
+      "job_id": "job_0fa1e4810ce9dec1",
+      "gold": "skip",
+      "decision_eval": "skip",
+      "decision_eval_local": "skip"
+    },
+    {
+      "job_id": "job_1224b2f8401f51d9",
+      "gold": "skip",
+      "decision_eval": "skip",
+      "decision_eval_local": "skip"
+    },
+    {
+      "job_id": "job_37290eb4db3e4606",
+      "gold": "skip",
+      "decision_eval": "skip",
+      "decision_eval_local": "bid"
+    },
+    {
+      "job_id": "job_3cbe4df2908e49f1",
+      "gold": "skip",
+      "decision_eval": "bid",
+      "decision_eval_local": "skip"
+    },
+    {
+      "job_id": "job_4ff7cd4b784e62fe",
+      "gold": "bid",
+      "decision_eval": "bid",
+      "decision_eval_local": "bid"
+    },
+    {
+      "job_id": "job_713030ea52f17aaa",
+      "gold": "bid",
+      "decision_eval": "bid",
+      "decision_eval_local": "bid"
+    },
+    {
+      "job_id": "job_74e6b33c83a76b06",
+      "gold": "skip",
+      "decision_eval": "skip",
+      "decision_eval_local": "bid"
+    },
+    {
+      "job_id": "job_9eb6886970e00d1f",
+      "gold": "skip",
+      "decision_eval": "bid",
+      "decision_eval_local": "skip"
+    },
+    {
+      "job_id": "job_a5d5e114c9bbcbd9",
+      "gold": "bid",
+      "decision_eval": "watch",
+      "decision_eval_local": "bid"
+    }
+  ]
+}
