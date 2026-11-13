@@ -34,6 +34,7 @@ from agent.marketplace_port import (
 )
 from mcp_servers.common.audit import AuditLog
 from mcp_servers.common.auth import make_token_verifier, token_auth_settings, user_from_context
+from mcp_servers.common.descriptions import tool_description
 from mcp_servers.common.ratelimit import UserRateLimiter
 
 READ = ToolAnnotations(
@@ -150,7 +151,9 @@ def build_server(
         return result
 
     # ---------------- read tools ----------------
-    @mcp.tool(annotations=READ, title="Search open jobs")
+    @mcp.tool(
+        annotations=READ, title="Search open jobs", description=tool_description("search_jobs")
+    )
     async def search_jobs(
         ctx: Context,
         query: str | None = Field(
@@ -184,12 +187,16 @@ def build_server(
         )
         return SearchJobsResult(query=query, count=len(items), items=items)
 
-    @mcp.tool(annotations=READ, title="Get one job")
+    @mcp.tool(annotations=READ, title="Get one job", description=tool_description("get_job"))
     async def get_job(ctx: Context, job_id: str = Field(min_length=3, max_length=64)) -> JobSummary:
         """Full job post with screening questions, Connects cost and a client summary."""
         return await guarded(ctx, "get_job", {"job_id": job_id}, lambda: mkt.get_job(job_id))
 
-    @mcp.tool(annotations=READ, title="Get client history")
+    @mcp.tool(
+        annotations=READ,
+        title="Get client history",
+        description=tool_description("get_client_history"),
+    )
     async def get_client_history(
         ctx: Context, client_id: str = Field(min_length=3, max_length=64)
     ) -> ClientHistory:
@@ -201,17 +208,27 @@ def build_server(
             lambda: mkt.get_client_history(client_id),
         )
 
-    @mcp.tool(annotations=READ, title="Get Connects balance")
+    @mcp.tool(
+        annotations=READ,
+        title="Get Connects balance",
+        description=tool_description("get_connects_balance"),
+    )
     async def get_connects_balance(ctx: Context) -> ConnectsBalance:
         """Current Connects balance for the connected account."""
         return await guarded(ctx, "get_connects_balance", {}, mkt.get_connects_balance)
 
-    @mcp.tool(annotations=READ, title="List message threads")
+    @mcp.tool(
+        annotations=READ, title="List message threads", description=tool_description("list_threads")
+    )
     async def list_threads(ctx: Context) -> ThreadsResult:
         """Conversation threads with clients, newest message and unread count."""
         return ThreadsResult(items=await guarded(ctx, "list_threads", {}, mkt.list_threads))
 
-    @mcp.tool(annotations=READ, title="List messages in a thread")
+    @mcp.tool(
+        annotations=READ,
+        title="List messages in a thread",
+        description=tool_description("list_messages"),
+    )
     async def list_messages(
         ctx: Context, thread_id: str = Field(min_length=3, max_length=64)
     ) -> MessagesResult:
@@ -223,7 +240,11 @@ def build_server(
             ),
         )
 
-    @mcp.tool(annotations=READ, title="List marketplace events")
+    @mcp.tool(
+        annotations=READ,
+        title="List marketplace events",
+        description=tool_description("list_events"),
+    )
     async def list_events(ctx: Context, since_id: int = Field(default=0, ge=0)) -> EventsResult:
         """Proposal and message events after `since_id`, for the pipeline board."""
         return EventsResult(
@@ -232,7 +253,11 @@ def build_server(
             )
         )
 
-    @mcp.tool(annotations=READ, title="Marketplace health and policy")
+    @mcp.tool(
+        annotations=READ,
+        title="Marketplace health and policy",
+        description=tool_description("marketplace_health"),
+    )
     async def marketplace_health(ctx: Context) -> HealthResult:
         """Whether the marketplace is reachable and which policy version it enforces."""
         reachable = await mkt.health()
@@ -245,7 +270,11 @@ def build_server(
         return HealthResult(marketplace=mkt.name, reachable=reachable, policy_version=version)
 
     # ---------------- write tools ----------------
-    @mcp.tool(annotations=WRITE_DRAFT, title="Create proposal draft (no Connects spent)")
+    @mcp.tool(
+        annotations=WRITE_DRAFT,
+        title="Create proposal draft (no Connects spent)",
+        description=tool_description("create_proposal_draft"),
+    )
     async def create_proposal_draft(ctx: Context, draft: ProposalDraftIn) -> ProposalResult:
         """Prepare a proposal without submitting it. Returns exactly what submit_proposal would send and
         what it costs. Idempotent on `idempotency_key`."""
@@ -256,7 +285,11 @@ def build_server(
             lambda: mkt.create_proposal_draft(draft),
         )
 
-    @mcp.tool(annotations=WRITE_SUBMIT, title="Submit proposal (spends Connects)")
+    @mcp.tool(
+        annotations=WRITE_SUBMIT,
+        title="Submit proposal (spends Connects)",
+        description=tool_description("submit_proposal"),
+    )
     async def submit_proposal(ctx: Context, draft: ProposalDraftIn) -> ProposalResult:
         """Submit an approved proposal. Spends Connects. Only call after the human approved it in GigBid.
         Retrying with the same idempotency_key never submits or charges twice. dry_run=true previews only."""
@@ -267,7 +300,11 @@ def build_server(
             lambda: mkt.submit_proposal(draft),
         )
 
-    @mcp.tool(annotations=WRITE_SUBMIT, title="Send message to a client")
+    @mcp.tool(
+        annotations=WRITE_SUBMIT,
+        title="Send message to a client",
+        description=tool_description("send_message"),
+    )
     async def send_message(ctx: Context, message: MessageIn) -> MessageResult:
         """Send an approved reply in a thread. Idempotent on `idempotency_key`; dry_run=true previews only."""
         return await guarded(

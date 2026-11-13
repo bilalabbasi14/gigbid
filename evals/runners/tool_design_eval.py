@@ -1,7 +1,8 @@
 """R&D question A: does tool granularity change agent behaviour?
 
-Three tool sets over the same 18 capabilities, built from the committed MCP schema snapshots:
-  A fine    - one tool per capability (the shipped MCP tools, their own descriptions)
+Three tool sets over the same 18 capabilities, built from the MCP schema snapshots frozen in
+evals/datasets/tool_surface_docstrings/ (the surface as measured):
+  A fine    - one tool per capability (the MCP tools with their docstring descriptions)
   B coarse  - three tools (marketplace, portfolio, workspace) taking {operation, arguments}
   C best    - the fine-grained tools with rewritten descriptions (evals/datasets/tool_descriptions_v2.yaml)
 
@@ -29,7 +30,8 @@ from agent import llm, settings
 from evals.runners.harness import write_result
 
 ROOT = settings.ROOT
-SNAP = ROOT / "tests/contract/snapshots"
+# the tool surface as it was measured (docstring descriptions); the servers now publish set C
+SNAP = ROOT / "evals/datasets/tool_surface_docstrings"
 SERVERS = ("marketplace", "portfolio", "workspace")
 SYSTEM = "You operate a freelancer's marketplace, portfolio and calendar through tools. For the user's request, make exactly one tool call with the correct arguments. Do not answer in prose."
 

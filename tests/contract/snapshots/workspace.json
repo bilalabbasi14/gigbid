@@ -8,7 +8,7 @@
       "openWorldHint": false,
       "readOnlyHint": false
     },
-    "description": "Save an email as a draft for the human to review and send. Never sends.",
+    "description": "Save an EMAIL as a draft (never sends): `to`, `subject`, `body`, `idempotency_key`.",
     "inputSchema": {
       "properties": {
         "body": {
@@ -93,7 +93,7 @@
       "openWorldHint": false,
       "readOnlyHint": false
     },
-    "description": "Block a tentative slot for an interview. Idempotent on `idempotency_key`.",
+    "description": "Book a TENTATIVE calendar hold for an interview: `start`, `end` (ISO-8601 UTC), `title`, `idempotency_key`.",
     "inputSchema": {
       "properties": {
         "end": {
@@ -223,7 +223,7 @@
       "openWorldHint": false,
       "readOnlyHint": true
     },
-    "description": "Free interview slots on working days within the next `days` days (UTC).",
+    "description": "List FREE calendar slots for interviews (`days` ahead, `slot_minutes` long, `max_slots`). Use for availability questions. Does not book anything.",
     "inputSchema": {
       "properties": {
         "days": {
@@ -325,7 +325,7 @@
       "openWorldHint": false,
       "readOnlyHint": true
     },
-    "description": "All interview holds and email drafts.",
+    "description": "List existing interview holds and email drafts.",
     "inputSchema": {
       "properties": {},
       "title": "list_workspace_itemsArguments",

@@ -23,6 +23,7 @@ from pydantic import BaseModel, Field
 
 from agent import settings
 from mcp_servers.common.auth import make_token_verifier, token_auth_settings
+from mcp_servers.common.descriptions import tool_description
 
 READ = ToolAnnotations(
     readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False
@@ -124,7 +125,11 @@ def build_server(store: WorkspaceStore | None = None, *, http_auth: bool = False
         **kwargs,
     )
 
-    @mcp.tool(annotations=READ, title="List free calendar slots")
+    @mcp.tool(
+        annotations=READ,
+        title="List free calendar slots",
+        description=tool_description("get_free_slots"),
+    )
     def get_free_slots(
         days: int = Field(default=5, ge=1, le=14),
         slot_minutes: int = Field(default=30, ge=15, le=120),
@@ -136,7 +141,11 @@ def build_server(store: WorkspaceStore | None = None, *, http_auth: bool = False
         slots = ws.free_slots(days, slot_minutes, work_start_hour, work_end_hour)[:max_slots]
         return FreeSlotsResult(days=days, slot_minutes=slot_minutes, slots=slots)
 
-    @mcp.tool(annotations=WRITE, title="Create a tentative interview hold")
+    @mcp.tool(
+        annotations=WRITE,
+        title="Create a tentative interview hold",
+        description=tool_description("create_interview_hold"),
+    )
     def create_interview_hold(
         start: str = Field(description="ISO-8601 start, UTC"),
         end: str = Field(description="ISO-8601 end, UTC"),
@@ -174,7 +183,11 @@ def build_server(store: WorkspaceStore | None = None, *, http_auth: bool = False
             ws.save()
             return hold
 
-    @mcp.tool(annotations=WRITE, title="Create an email draft")
+    @mcp.tool(
+        annotations=WRITE,
+        title="Create an email draft",
+        description=tool_description("create_email_draft"),
+    )
     def create_email_draft(
         to: str = Field(min_length=3, max_length=200),
         subject: str = Field(min_length=1, max_length=200),
@@ -199,7 +212,11 @@ def build_server(store: WorkspaceStore | None = None, *, http_auth: bool = False
             ws.save()
             return d
 
-    @mcp.tool(annotations=READ, title="List holds and drafts")
+    @mcp.tool(
+        annotations=READ,
+        title="List holds and drafts",
+        description=tool_description("list_workspace_items"),
+    )
     def list_workspace_items() -> dict[str, Any]:
         """All interview holds and email drafts."""
         return {

@@ -15,6 +15,7 @@ from mcp.types import ToolAnnotations
 from pydantic import Field
 
 from mcp_servers.common.auth import make_token_verifier, token_auth_settings
+from mcp_servers.common.descriptions import tool_description
 from mcp_servers.portfolio.prompts import register_prompts
 from mcp_servers.portfolio.resources import register_resources
 from mcp_servers.portfolio.tools import (
@@ -46,7 +47,11 @@ def build_server(service: PortfolioService | None = None, *, http_auth: bool = F
         **kwargs,
     )
 
-    @mcp.tool(annotations=READ_ONLY, title="Search portfolio evidence")
+    @mcp.tool(
+        annotations=READ_ONLY,
+        title="Search portfolio evidence",
+        description=tool_description("search_evidence"),
+    )
     def search_evidence(
         requirement: str = Field(
             description="One requirement from a job post, e.g. 'build a RAG chatbot over PDFs with citation'",
@@ -65,7 +70,11 @@ def build_server(service: PortfolioService | None = None, *, http_auth: bool = F
         Returns ranked items with type, source path, date and past-proposal outcome. Use one call per requirement."""
         return svc.search_evidence(requirement, persona, k=k, filters=filters)
 
-    @mcp.tool(annotations=READ_ONLY, title="Get a full case study")
+    @mcp.tool(
+        annotations=READ_ONLY,
+        title="Get a full case study",
+        description=tool_description("get_case_study"),
+    )
     def get_case_study(
         id: str = Field(
             description="Project id such as p03 (from search_evidence results)", pattern=r"^p\d{2}$"
@@ -78,7 +87,11 @@ def build_server(service: PortfolioService | None = None, *, http_auth: bool = F
             raise ValueError(f"unknown project id {id!r} for persona {persona!r}")
         return cs
 
-    @mcp.tool(annotations=READ_ONLY, title="List skills with evidence counts")
+    @mcp.tool(
+        annotations=READ_ONLY,
+        title="List skills with evidence counts",
+        description=tool_description("list_skills"),
+    )
     def list_skills(persona: str = Field(default=DEFAULT_PERSONA)) -> list[SkillEntry]:
         """List every skill and library the portfolio evidences, with project ids, evidence count, last year used and how many winning proposals mention it."""
         return svc.list_skills(persona)

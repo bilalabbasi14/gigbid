@@ -15,7 +15,7 @@
       "openWorldHint": false,
       "readOnlyHint": true
     },
-    "description": "Return everything the portfolio holds about one project: metadata, the case study text, README, code file list, reviews and proposals that cited it.",
+    "description": "Open ONE portfolio project by project id (p01, p02, ...): full case study, results, stack, reviews. Use whenever the user names a project id.",
     "inputSchema": {
       "properties": {
         "id": {
@@ -165,7 +165,7 @@
       "openWorldHint": false,
       "readOnlyHint": true
     },
-    "description": "List every skill and library the portfolio evidences, with project ids, evidence count, last year used and how many winning proposals mention it.",
+    "description": "List all skills and technologies the portfolio can evidence, with counts. Use for \"what skills / technologies do I have\" questions. Takes no required arguments.",
     "inputSchema": {
       "properties": {
         "persona": {
@@ -247,7 +247,7 @@
       "openWorldHint": false,
       "readOnlyHint": true
     },
-    "description": "Find portfolio evidence (case studies, code, reviews, past proposals) that supports one requirement.\n        Returns ranked items with type, source path, date and past-proposal outcome. Use one call per requirement.",
+    "description": "Search the freelancer's PORTFOLIO for evidence supporting one requirement (case studies, code, reviews, past proposals). Use for \"do I have evidence / experience of X\". Put the skill or deliverable in `requirement`; `k` = how many items; `filters` can restrict doc_types (e.g. [\"code\"]) or outcome (won|replied|ignored).",
     "inputSchema": {
       "$defs": {
         "SearchFilters": {
