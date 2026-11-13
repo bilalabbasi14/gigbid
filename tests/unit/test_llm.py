@@ -222,3 +222,10 @@ def test_only_groq_models_have_several_routes(monkeypatch: pytest.MonkeyPatch) -
     monkeypatch.setattr(llm, "groq_keys", lambda: ("main", "k2"))
     assert llm._routes("ollama:qwen3:4b-instruct") == [0]
     assert llm._routes("groq:x") == [1, 0]
+
+
+def test_oversize_retry_shrinks_again_when_the_provider_counts_more() -> None:
+    first = RuntimeError(OTPM_TOO_LARGE)  # Limit 1000, Requested 1200
+    assert llm._smaller_max_tokens(first, 1200) == 936
+    again = RuntimeError(OTPM_TOO_LARGE.replace("Requested 1200", "Requested 1018"))
+    assert llm._smaller_max_tokens(again, 936) == 854

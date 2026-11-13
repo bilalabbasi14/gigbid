@@ -236,7 +236,11 @@ def _smaller_max_tokens(exc: BaseException, current: int | None) -> int | None:
         return None
     limit, requested = int(m.group(1)), int(m.group(2))
     base = current or requested
-    new = base - (requested - limit) - 64 if "(otpm)" not in text else min(base, limit - 64)
+    # the provider counts a little more than max_tokens ("Requested 1018" for 936), so shrink by
+    # the overshoot as well as to the limit, whichever is smaller
+    new = base - (requested - limit) - 64
+    if "(otpm)" in text:
+        new = min(new, limit - 64)
     return new if 128 <= new < base else None
 
 
@@ -309,7 +313,7 @@ def _next_step(
     `waited` is the time already spent waiting on per-minute limits for this call."""
     current = kw.get("max_tokens") or getattr(model, "max_tokens", None)
     smaller = _smaller_max_tokens(exc, current)
-    if smaller is not None and attempt <= 2:
+    if smaller is not None and attempt <= 3:
         log.info("request too large for a per-minute limit; retrying with max_tokens=%d", smaller)
         kw["max_tokens"] = smaller
         return 0.0
