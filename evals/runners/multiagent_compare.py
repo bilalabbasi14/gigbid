@@ -37,6 +37,7 @@ from evals.runners.harness import (
     QuotaGuard,
     RowLog,
     analyse,
+    client_reaction,
     cost,
     draft,
     make_deps,
@@ -285,7 +286,7 @@ async def submit(row: dict[str, Any], out: dict[str, Any], adapter, system: str)
                 idempotency_key=f"mac-{system}-{row['job_id']}",
             )
         )
-        return r.status
+        return await client_reaction(adapter, r)
     except Exception as exc:  # noqa: BLE001
         return f"error: {exc}"[:80]
 

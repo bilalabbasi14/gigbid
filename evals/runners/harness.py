@@ -86,6 +86,29 @@ def sample_jobs(
     return out
 
 
+async def client_reaction(adapter: Any, result: Any, wait_s: float = 900.0) -> str:
+    """The simulated client's reaction to a submitted proposal. In GigSim's LLM mode the client
+    reads the proposal in the background, so this waits until GigSim reports it decided."""
+    pid = getattr(result, "proposal_id", None)
+    if not pid or (result.raw.get("proposal") or {}).get("decided", True):
+        return result.status
+    import httpx
+
+    t0 = time.monotonic()
+    async with httpx.AsyncClient(timeout=15) as c:
+        while time.monotonic() - t0 < wait_s:
+            r = await c.get(
+                f"{adapter.base_url}/proposals/{pid}",
+                headers={"Authorization": f"Bearer {adapter.token}"},
+            )
+            r.raise_for_status()
+            p = r.json()
+            if p.get("decided", True):
+                return p["status"]
+            await asyncio.sleep(3)
+    return "undecided"
+
+
 def make_deps() -> Deps:
     return Deps(tools=ToolProvider(loader=in_process_loader))
 

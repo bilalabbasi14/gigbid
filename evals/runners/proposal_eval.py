@@ -30,6 +30,7 @@ from evals.runners.harness import (
     QuotaGuard,
     RowLog,
     analyse,
+    client_reaction,
     cost,
     draft,
     load_dev,
@@ -171,7 +172,7 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
                         idempotency_key=f"eval-{row['job_id']}-{args.seed}",
                     )
                 )
-                out["gigsim_status"] = res.status
+                out["gigsim_status"] = await client_reaction(adapter, res)
             except Exception as exc:  # noqa: BLE001
                 out["gigsim_status"] = f"error: {exc}"[:120]
         log.add(row["job_id"], out)
