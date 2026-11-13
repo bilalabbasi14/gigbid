@@ -1,0 +1,37 @@
+# Production stack for one small Linux VM (docs/RUNBOOK.md, section 3).
+# The single-container app (web, API, worker, MCP servers, GigSim, Redis) sits behind Caddy, which
+# obtains and renews the HTTPS certificate for SITE_ADDRESS. Postgres is external (Neon).
+#   cd /opt/gigbid && docker compose -f infra/vm/docker-compose.yml --env-file .env.production up -d --build
+services:
+  app:
+    build:
+      context: ../..
+      dockerfile: infra/docker/space.Dockerfile
+    env_file: ../../.env.production
+    restart: unless-stopped
+    expose: ["7860"]
+    volumes:
+      - appdata:/app/data/processed   # GigSim's database, BM25 indexes and the client-decision cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:7860/api/health', timeout=10)"]
+      interval: 60s
+      timeout: 15s
+      start_period: 600s
+      retries: 3
+
+  caddy:
+    image: caddy:2.8
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in .env.production}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+
+volumes:
+  appdata: {}
+  caddy_data: {}
+  caddy_config: {}

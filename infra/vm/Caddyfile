@@ -1,0 +1,8 @@
+# HTTPS for the public address (certificates from Let's Encrypt, renewed automatically).
+{$SITE_ADDRESS} {
+	encode gzip
+	reverse_proxy app:7860 {
+		# stream server-sent events (the run timeline) as they happen
+		flush_interval -1
+	}
+}
