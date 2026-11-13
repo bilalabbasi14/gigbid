@@ -26,7 +26,7 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 350   # GitHub-hosted maximum is 360; a 4B model on CPU needs minutes per job
     services:
       postgres:
         image: pgvector/pgvector:pg16

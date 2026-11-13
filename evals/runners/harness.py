@@ -221,10 +221,12 @@ def cost(usage: dict[str, int]) -> float:
 
 
 def hardware() -> dict[str, Any]:
-    """CPU, cores and RAM of the machine that ran the evaluation (local-model numbers need it)."""
-    import platform
-
-    cpu, ram_gb = platform.processor(), None
+    """CPU, cores and RAM of the machine that ran the evaluation (local-model numbers need it).
+    Never queries WMI on Windows (platform.processor() does, and it times out under memory
+    pressure); every lookup is best effort."""
+    cpu: str | None = os.environ.get("PROCESSOR_IDENTIFIER")
+    ram_gb: float | None = None
+    os_name = sys.platform
     try:
         if sys.platform == "win32":
             import ctypes
@@ -252,7 +254,12 @@ def hardware() -> dict[str, Any]:
             m.dwLength = ctypes.sizeof(_Mem)
             ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
             ram_gb = round(m.ullTotalPhys / 2**30, 1)
+            v = sys.getwindowsversion()
+            os_name = f"Windows {v.major}.{v.minor}.{v.build}"
         else:
+            import platform
+
+            os_name = platform.platform()
             info = Path("/proc/meminfo").read_text().split()
             ram_gb = round(int(info[info.index("MemTotal:") + 1]) / 2**20, 1)
             for line in Path("/proc/cpuinfo").read_text().splitlines():
@@ -266,7 +273,7 @@ def hardware() -> dict[str, Any]:
         "logical_cpus": os.cpu_count(),
         "ram_gb": ram_gb,
         "gpu": None,
-        "os": platform.platform(),
+        "os": os_name,
     }
 
 
