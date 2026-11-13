@@ -127,7 +127,16 @@ variants (V1 decomposition, V7 HyDE, `best`), V6 contextual and V9 skill graph, 
 verification before and after (`proposal_eval_*.json`) and the judge calibration
 (`judge_calibration.json`) are pending.
 
-## 5. R&D question C: single agent, supervisor, graph (*pending: `multiagent_comparison.json`*)
+## 5. R&D question C: single agent, supervisor, graph (*results pending: `multiagent_comparison.json`*)
+
+**Setup.** The same dev jobs go through three systems with the same models and the same tools:
+(a) one ReAct agent holding every tool, prompted to analyse, decide, price and draft
+(`agent/prompts/baseline_single_agent.md`); (b) a prebuilt `langgraph-supervisor` with analyst,
+risk, writer and critic workers (`baseline_supervisor.md`); (c) GigBid's hand-built graph. Each
+draft is scored by the same claim verifier and Compliance Guard, and bids go to GigSim for the
+simulated client's reaction (`evals/runners/multiagent_compare.py`). The brief asks for 50 jobs;
+the free tier allowed a much smaller sample, stated with the results, so this section reports
+direction, not significance.
 
 ## 6. The change request
 
@@ -154,14 +163,41 @@ and the suites passed 45 seconds after the edit was applied.
 with the existing detector types. A new kind of check costs one function in `agent/policy.py`.
 The real update will be measured the same way when it arrives.
 
-## 7. Signature extension: Portfolio builder (*pending: `x3_eval.json`*)
+## 7. Signature extension: Portfolio builder (*results pending: `x3_eval.json`*)
 
 The builder reads a freelancer's repositories through the GitHub MCP server, extracts facts
 (languages, dependencies, tests, CI, commit history), drafts one case study per repository in
 which every claim cites a fact, verifies and repairs the claims, and saves only what the user
 approves (`docs/EXTENSION.md`).
 
-## 8. Failure analysis (*pending: rows from the decision and proposal runs*)
+**How it is measured.** For each persona with repositories, three indexes: *original* (every
+project written up by hand), *base* (the case studies of repository projects removed, a freelancer
+who has code but never wrote it up) and *built* (base plus the builder's case studies). Retrieval
+is scored on the dev jobs whose gold evidence includes a repository project. Each case study is
+also scored for claims, unsupported rate before and after repair, facts cited, and library recall
+and precision against the project's own metadata.
+
+**A finding before the result.** The first run looked complete but 7 of 25 case studies had no
+verified claims: the medium model's output-per-minute limit was rejecting every verifier call and
+the nodes fell back to heuristics without failing (commit `78f47bd`, ADR 0003). That run was
+discarded; evaluations now discard any item that saw a failed model call.
+
+## 8. Failure analysis (*results pending: `failure_taxonomy.json`*)
+
+Every failed dev job from the decision, proposal and injection runs is classified by the earliest
+stage that went wrong: tool error, injection, missed scam, missed evidence, wrong skip, wrong bid,
+mispriced, unsupported claim, generic opening, compliance miss or block
+(`evals/runners/failure_analysis.py`). The fix tried for each group and whether it worked is
+recorded below.
+
+Fixes already made from failures found during development (each with its commit):
+
+| Failure | Group | Fix | Worked? |
+|---|---|---|---|
+| Claim verifier crashed on drafts with partly supported claims (invalid action label) | tool error | label set fixed, regression test (`52db615`) | yes |
+| Verification silently skipped under per-minute output limits | tool error | per-prompt output budgets, oversize retry, failed-call accounting (`78f47bd`, `a2acca7`) | yes (no failed calls in the re-profile) |
+| Pricing ignored the platform's minimum hourly rate | mispriced | pricing reads the policy pack's minimums (`452747b`) | yes (unit test) |
+| Inbox showed "awaiting approval" before the job record existed | tool error | status written only after the record sync (`a51da09`) | yes |
 
 ## 9. Safety and platform respect
 
@@ -179,3 +215,11 @@ requests, off-platform requests that avoid every keyword, and claims the verifie
 partly supported.
 
 ## 10. Hidden test results (*pending: after the deadline run*)
+
+**Budgets before the hidden run** (`evals/results/budget_check.json`; cost at Groq list prices,
+the free plan itself costs nothing). Cost is within budget: about $0.008 per analysed job and
+$0.033 per proposal at p95, against $0.01 and $0.05. Latency is not: p95 82 s per job against 60
+and 365 s per proposal against 120, measured on the development laptop with the free tier's rate
+limits. Most of the proposal time is Critic send-backs (zero to two per proposal), so the
+optimisation that matters is a draft that passes the Critic the first time, not a faster model.
+The hidden-run numbers will be reported against the same budgets without adjustment.
