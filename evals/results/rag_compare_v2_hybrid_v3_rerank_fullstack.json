@@ -1,0 +1,334 @@
+{
+  "generated_at": "2026-11-13T04:46:24Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "a": "v2_hybrid",
+  "b": "v3_rerank",
+  "n_queries": 64,
+  "b_better": 5,
+  "b_worse": 10,
+  "unchanged": 49,
+  "top5_doc_type_share_a": {
+    "proposal": 0.963,
+    "case_study": 0.022,
+    "readme": 0.009,
+    "cv": 0.006
+  },
+  "top5_doc_type_share_b": {
+    "proposal": 0.912,
+    "case_study": 0.034,
+    "cv": 0.025,
+    "readme": 0.025,
+    "code": 0.003
+  },
+  "top5_doc_types_of_b_on_its_losses": {
+    "proposal": 46,
+    "case_study": 2,
+    "readme": 1,
+    "cv": 1
+  },
+  "b_worse_jobs": [
+    {
+      "job_id": "job_5bea41d684f701ec",
+      "title": "Full Stack Developer (Vue, Node, Typescript)",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p02"
+      ],
+      "gold_found_a": [
+        "p02"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_5d434918b6b2832e",
+      "title": "Convert existing Python/Django GUI project to PHP that serves as the front end to our Aste",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p04"
+      ],
+      "gold_found_a": [
+        "p04"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 2,
+        "readme": 1,
+        "case_study": 2
+      }
+    },
+    {
+      "job_id": "job_638233b4f111c06c",
+      "title": "Full Stack Ruby on Rails, React Developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p09"
+      ],
+      "gold_found_a": [
+        "p09"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 4,
+        "cv": 1
+      }
+    },
+    {
+      "job_id": "job_694550e22d4c0ff7",
+      "title": "Experienced LMS Web Developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p01"
+      ],
+      "gold_found_a": [
+        "p01"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_73e22778b262e559",
+      "title": "Long Term WordPress developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p12"
+      ],
+      "gold_found_a": [
+        "p12"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_aa1f8fb40352e2c5",
+      "title": "JS Node/MongoDB/React full stack engineers Full Site",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p01"
+      ],
+      "gold_found_a": [
+        "p01"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_ae6f4f6dccbe3623",
+      "title": "MERN stack developer needed",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p12"
+      ],
+      "gold_found_a": [
+        "p12"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_b29b20ab088aa104",
+      "title": "React+Laravel Developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p07"
+      ],
+      "gold_found_a": [
+        "p07"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_d5837e7f0eae8054",
+      "title": "Full Stack Developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p09"
+      ],
+      "gold_found_a": [
+        "p09"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_f3502d56776a504c",
+      "title": "Java Developer",
+      "recall_a": 1.0,
+      "recall_b": 0.0,
+      "gold": [
+        "p11"
+      ],
+      "gold_found_a": [
+        "p11"
+      ],
+      "gold_found_b": [],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    }
+  ],
+  "b_better_jobs": [
+    {
+      "job_id": "job_4747a9d8526a9ed5",
+      "title": "Full Stack Developer",
+      "recall_a": 0.0,
+      "recall_b": 1.0,
+      "gold": [
+        "p10"
+      ],
+      "gold_found_a": [],
+      "gold_found_b": [
+        "p10"
+      ],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_679752542f8797cc",
+      "title": "Full-Stack React Developer with Django Experience",
+      "recall_a": 0.0,
+      "recall_b": 0.5,
+      "gold": [
+        "p02",
+        "p06"
+      ],
+      "gold_found_a": [],
+      "gold_found_b": [
+        "p06"
+      ],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 4,
+        "cv": 1
+      }
+    },
+    {
+      "job_id": "job_887730be2da36090",
+      "title": "React Frontend Developer",
+      "recall_a": 0.0,
+      "recall_b": 1.0,
+      "gold": [
+        "p03"
+      ],
+      "gold_found_a": [],
+      "gold_found_b": [
+        "p03"
+      ],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_cecbbfb0338f0480",
+      "title": "Build and Maintain Web Application (Angular, Node.js, AWS)",
+      "recall_a": 0.0,
+      "recall_b": 1.0,
+      "gold": [
+        "p07"
+      ],
+      "gold_found_a": [],
+      "gold_found_b": [
+        "p07"
+      ],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    },
+    {
+      "job_id": "job_e8a3c6a520095200",
+      "title": "\u00f0\u0178\u203a\u00a0\u00ef\u00b8\ufffd Full Stack Ruby On Rails For SaaS Company",
+      "recall_a": 0.0,
+      "recall_b": 1.0,
+      "gold": [
+        "p04"
+      ],
+      "gold_found_a": [],
+      "gold_found_b": [
+        "p04"
+      ],
+      "top5_types_a": {
+        "proposal": 5
+      },
+      "top5_types_b": {
+        "proposal": 5
+      }
+    }
+  ]
+}

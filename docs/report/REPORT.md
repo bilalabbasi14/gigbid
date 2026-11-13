@@ -121,8 +121,15 @@ Persona columns are Recall@5. Source: `evals/results/rag_summary.json`.
 over V0), and costs fullstack 0.023. The reranker is a negative result: it is the best variant
 for ai_ml and the second worst for fullstack, so it does not ship as a global stage. The
 corrective loop shows the same split, which fits the fact that it grades with the same
-cross-encoder. Why the cross-encoder demotes fullstack evidence is not yet established; a
-per-query comparison of V2 and V3 on the fullstack jobs is pending. The LLM-based
+cross-encoder. A per-query comparison on the 64 fullstack jobs
+(`evals/results/rag_compare_v2_hybrid_v3_rerank_fullstack.json`) shows why: the reranker wins 5
+jobs and loses 10, and in both variants 91 to 96% of the top five evidence items are past
+proposals rather than case studies or code, because past proposals are written in the language of
+job posts. The cross-encoder ranks by how closely that language matches the new job, so it
+promotes proposals written for similar-sounding jobs whether or not they cite the right project;
+46 of the 50 top-five items in its losing queries are past proposals. A second finding follows:
+for fullstack jobs, retrieval leans almost entirely on past proposals, so the persona's case
+studies and code are rarely seen by the Writer. The LLM-based
 variants (V1 decomposition, V7 HyDE, `best`), V6 contextual and V9 skill graph were not run:
 on the free tier their per-query model calls did not fit next to the proposal runs.
 
