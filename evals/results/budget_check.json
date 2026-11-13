@@ -1,0 +1,69 @@
+{
+  "generated_at": "2026-11-13T04:28:34Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "sources": [
+    "token_profile_baseline.json",
+    "token_profile_budgets.json",
+    "decision_eval.json",
+    "proposal_eval_v2_hybrid.json"
+  ],
+  "prices_usd_per_million": {
+    "openai/gpt-oss-20b": [
+      0.075,
+      0.3
+    ],
+    "openai/gpt-oss-120b": [
+      0.15,
+      0.6
+    ],
+    "qwen/qwen3.8-27b": [
+      0.8,
+      4.0
+    ]
+  },
+  "declared_p95": {
+    "latency_s_per_job": 60,
+    "latency_s_per_proposal": 120,
+    "cost_usd_per_job": 0.01,
+    "cost_usd_per_proposal": 0.05
+  },
+  "measured": {
+    "latency_s_per_job": {
+      "n": 66,
+      "p50": 61.3,
+      "p95": 145.3
+    },
+    "latency_s_per_proposal": {
+      "n": 12,
+      "p50": 139.8,
+      "p95": 189.1
+    },
+    "cost_usd_per_job": {
+      "n": 6,
+      "p50": 0.007,
+      "p95": 0.008
+    },
+    "cost_usd_per_proposal": {
+      "n": 6,
+      "p50": 0.02,
+      "p95": 0.033
+    }
+  },
+  "within_budget_at_p95": {
+    "latency_s_per_job": false,
+    "latency_s_per_proposal": false,
+    "cost_usd_per_job": true,
+    "cost_usd_per_proposal": true
+  }
+}

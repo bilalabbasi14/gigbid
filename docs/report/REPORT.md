@@ -232,9 +232,9 @@ partly supported.
 
 **Budgets before the hidden run** (`evals/results/budget_check.json`; cost at Groq list prices,
 the free plan itself costs nothing). Cost is within budget: about $0.008 per analysed job and
-$0.033 per proposal at p95, against $0.01 and $0.05. Latency is not: p95 82 s per job against 60
-and 365 s per proposal against 120, measured on the development laptop with the free tier's rate
-limits. Most of the proposal time is Critic send-backs (zero to two per proposal), so the
+$0.033 per proposal at p95, against $0.01 and $0.05. Latency is not: p50 61 s and p95 145 s per
+job (66 jobs) against 60, and p50 140 s and p95 189 s per proposal (12 proposals) against 120,
+measured on the development laptop under the free tier's rate limits. Most of the proposal time is Critic send-backs (zero to two per proposal), so the
 optimisation that matters is a draft that passes the Critic the first time, not a faster model.
 The hidden-run numbers will be reported against the same budgets without adjustment.
 
