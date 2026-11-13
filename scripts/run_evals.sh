@@ -48,7 +48,7 @@ for s in "${STEPS[@]}"; do
     rag_ctx_ingest) step rag_ctx_ingest rag.ingest.cli --persona ai_ml --persona fullstack --persona data_analyst --contextual ;;
     rag_ctx)        step rag_ctx evals.runners.rag_eval --variants v6_contextual ;;
     rag_subset)     step rag_subset evals.runners.rag_eval --variants v0_naive,v2_hybrid,v3_rerank,v1_decompose,v7_hyde,best --limit 20 --tag _subset20 ;;
-    decisions)      step decisions evals.runners.decision_eval --per-persona 8 ;;
+    decisions)      step decisions evals.runners.decision_eval --per-persona 20 ;;
     decisions_full) step decisions evals.runners.decision_eval --per-persona 20 ;;
     proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 2 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
     proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 2 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
@@ -56,7 +56,7 @@ for s in "${STEPS[@]}"; do
     panel_export)   step panel_export evals.runners.blind_panel export --a proposal_eval_v0_naive --b proposal_eval_v2_hybrid --n 6 ;;
     x3)             step x3 evals.runners.x3_eval ;;
     injection)      step injection evals.runners.injection_eval --per-family 1 --families force_bid,force_contact,subtle_claim,subtle_override ;;
-    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 3 --gigsim ;;
+    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 6 --gigsim ;;
     judge_export)   step judge_export evals.runners.judge_calibration export --n 30 ;;
     judge)          step judge evals.runners.judge_calibration judge ;;
     failures)       step failures evals.runners.failure_analysis ;;
