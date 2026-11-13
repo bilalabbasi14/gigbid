@@ -198,6 +198,11 @@ def kappa() -> None:
             "exact_agreement": round(sum(1 for x, y in pairs if x == y) / len(pairs), 3)
             if pairs
             else None,
+            "within_one_agreement": round(sum(abs(x - y) <= 1 for x, y in pairs) / len(pairs), 3)
+            if pairs
+            else None,
+            "judge_higher": sum(y > x for x, y in pairs),
+            "judge_lower": sum(y < x for x, y in pairs),
             "mean_human": round(sum(h) / len(h), 2) if h else None,
             "mean_judge": round(sum(j) / len(j), 2) if j else None,
         }

@@ -8,7 +8,7 @@ Throughout my career, I have utilized a wide range of tools including SQL, Pytho
 I understand that you are looking for someone who can create client-facing dashboards. I am confident that my background in data visualization and my attention to detail will allow me to contribute effectively to your team. I am highly adaptable and ready to learn any new tools required by the organization. I believe my diverse skill set and my passion for data storytelling make me a strong candidate for this position. I look forward to the opportunity to discuss how I can help your agency achieve its goals.
 
 Sincerely,
-Mariana Costa",,,,,,,
+Mariana Costa",2,2,3,3,1,1,"Template opener; no Looker/GA4/GTM; ~238 words, too long"
 j02,job_5ff689caa23bb320,"Full Stack Web Developer with WordPress, Shopify, and PHP Experience","We are seeking a talented Full Stack Web Developer to join our team. The ideal candidate should have experience with WordPress, Shopify, and PHP. As a Full Stack Web Developer, you will be responsible for designing, developing, and maintaining web applications, integrating APIs, and building web services for our clients.
 
 Key Responsibilities:
@@ -31,7 +31,7 @@ Requirements:
 - Ability to work in a fast-paced environment and meet tight deadlines
 
 Excellent communication and teamwork skills
-If you're passionate about web development and have experience with WordPress, Shopify, and PHP, we encourage you to apply. This is a full-time position with competitive compensation and benefits. We offer a flexible work schedule and a fun, collaborative work environment.","Hello, I’m a passionate full‑stack developer with 5 years of experience in PHP, WordPress and Shopify. I recently delivered a custom WordPress plugin for a media client (project p13) that cut publishing time by 60 %. My approach is to first audit the existing codebase, then set up a CI pipeline to run automated tests before any deployment. I can start this week and will keep you updated daily.",,,,,,,
+If you're passionate about web development and have experience with WordPress, Shopify, and PHP, we encourage you to apply. This is a full-time position with competitive compensation and benefits. We offer a flexible work schedule and a fun, collaborative work environment.","Hello, I’m a passionate full‑stack developer with 5 years of experience in PHP, WordPress and Shopify. I recently delivered a custom WordPress plugin for a media client (project p13) that cut publishing time by 60 %. My approach is to first audit the existing codebase, then set up a CI pipeline to run automated tests before any deployment. I can start this week and will keep you updated daily.",3,3,3,2,2,2,Too short (69 words); thin next step
 j03,job_0ce1f328f3068e83,Advanced Computer Vision and Machine Learning POC Development,"We are seeking a highly skilled professional to develop a POC for Advanced Computer Vision and Machine Learning project aimed at protecting pedestrians crossing the road. The ideal candidate should have a strong background in Software Development with a proficiency in Advanced Computer Vision and Machine Learning. The POC should be capable of showcasing the potential of our proposed project and demonstrating its performance.Skills required:- Advanced Computer Vision- Machine Learning- Software Development- Expertise in real-time image processing, object detection, and classification, and timeseries analysis for video.- Hardware integration- Automotive experience is a plus","Hi,
 
 You need a proof‑of‑concept that can demonstrate real‑time pedestrian protection using advanced computer‑vision. In my Media Content Tagger project (p08) we built a high‑throughput image classification pipeline that processed 1 M frames per day with sub‑30 ms latency on a single GPU, achieving 89% tagging accuracy. The same architecture—YOLOv8 for object detection, TensorRT optimization, and a lightweight Flask wrapper—can be adapted to detect pedestrians and crossing intent.
@@ -46,13 +46,13 @@ If the latency and detection metrics meet your safety thresholds we will extend 
 Looking forward to turning this into a working demo.
 
 Best,
-Priya Raman",,,,,,,
+Priya Raman",5,4,4,5,5,4,Strong concrete 1-week plan; targets ambitious but plausible
 j04,job_af884a6c2a057d68,Help us onboard/configure our Tableau with Salesforce,We have recently purchased Tableau and are looking for assistance to get up and running. We have a good idea of the dashboards we are looking to create but need assistance connecting/configuring and building. All data resides in Salesforce but our interaction with Salesforce is mostly through AppExchange applications that we run our business off of versus traditional Sales or Service Cloud. Strong Salesforce experience will be helpful. Likely will continue to engage on a smaller basis as needed once everything is built and configured.,"Hello,
 
 I am a passionate data analyst with a strong focus on data visualization and dashboard creation. I have read your job post and I am very interested in helping you configure your Tableau environment. I have experience with various data sources and I am confident I can help you get up and running quickly. I believe my skills in data analysis and dashboard design would be a great fit for your team. I am looking forward to the opportunity to work with you and help build the dashboards you are looking for. Please let me know if you have any questions or if you would like to schedule a call to discuss my qualifications further. I am available for an interview at your earliest convenience.
 
 Sincerely,
-Mariana Costa",,,,,,,
+Mariana Costa",2,1,2,2,2,1,Generic template; no Salesforce/Tableau specifics
 j05,job_0bf0fa3a66e5a556,Full stack Developer with Python Experience for startup MVP,"I am seeking a highly skilled and experienced Python web developer to join me for the development of a Minimum Viable Product for a Software as a Service idea I have, and currently building. The ideal candidate will have a strong background in back-end development, with a particular focus on Python-based frameworks such as Django. A plus would also be having a front-end skill set and experience with java script / react or equivalent (although this is not required for the first stage).I am looking for:- Proven experience in web development, with a strong portfolio showcasing completed projects.- Expertise in Python and web frameworks such as Django or Flask.- Strong knowledge of front-end technologies such as React,- Experience with database design and management.-  Knowledge of security best practices and experience implementing security measures in web applications.- Excellent problem-solving skills and the ability to work independently or as part of a team.- Strong communication skills and proficiency in English.","Hi there,
 
 I see you need a Python‑centric MVP and the first step is to lock down a secure, scalable back‑end. In my recent **Compliance Document Generator** (project p08) we reduced contract drafting time from 4 hours to 15 minutes by building a Django REST API with fine‑grained permission checks and PostgreSQL encryption. I can apply the same security‑first approach to your SaaS idea and deliver a minimal set of core endpoints within two weeks.
@@ -62,7 +62,7 @@ My plan: 1) Draft a data model and API spec in a shared Google Doc, 2) Spin up a
 Looking forward to discussing the scope.
 
 Best,
-Daniel Okafor",,,,,,,
+Daniel Okafor",4,4,4,4,5,4,Clear 3-step plan; slightly short
 j06,job_654782d73aaa0ee7,Backend developer to build API for swift ios app,"Looking for a backend developer to create the API and an admin panel. All of these including endpoints will be used by a ios swift developer to create the mobile app
 
 Required:
@@ -81,13 +81,13 @@ My experience with Laravel and Vue/Nuxt gives me a solid understanding of PHP‑
 Let’s connect to outline the exact feature set and timeline.
 
 Thanks,
-Daniel Okafor",,,,,,,
+Daniel Okafor",3,4,3,4,4,3,"Stack mismatch (Node, not Laravel); claims Laravel exp unsupported"
 j07,job_22e3e8100980add2,"Full Stack Developer - Node.js, Express, and EJS Expert","We are seeking a skilled Full Stack Developer proficient in Node.js, Express, and EJS to implement a company website dashboard. As a Full Stack Developer, you will be responsible for developing robust and efficient solutions that meet our company's requirements for a dynamic dashboard interface.Responsibilities:Collaborate with the design and development team to understand project requirements and objectives.Design and develop the backend logic and API endpoints using Node.js and Express framework.Implement dynamic and responsive frontend components using EJS templating engine.Ensure cross-browser compatibility and optimize application performance.Write clean, maintainable, and scalable code following best practices and coding standards.Integrate third-party APIs and services as required.Troubleshoot and debug issues to ensure smooth functionality.Perform code reviews and provide constructive feedback to team members.Stay updated with the latest technologies and trends in web development.Requirements:Proficiency in Node.js, Express, and EJS.Strong understanding of web development concepts such as RESTful APIs, MVC architecture, and asynchronous programming.Experience with frontend technologies including HTML5, CSS3, JavaScript, and jQuery.Familiarity with version control systems such as Git.Experience with database systems like MongoDB or MySQL.Excellent problem-solving skills and attention to detail.Ability to work independently and in a team environment.Good communication s","I am an experienced full‑stack developer with a solid track record of delivering robust web applications. My expertise includes Node.js, Express, and building dynamic front‑ends using templating engines. I have successfully led multiple projects from concept to production, ensuring clean code and scalable architecture. I am comfortable working in fast‑paced environments and enjoy collaborating with designers and product owners to bring ideas to life. I would be thrilled to bring my skills to your company and help build a high‑performing dashboard.
 
 Looking forward to the possibility of working together.
 
 Best regards,
-Daniel Okafor",,,,,,,
+Daniel Okafor",3,1,2,2,1,1,"Generic, no project, no next step"
 j08,job_770c44e80c5a7c0d,AI Kiosk,"The system is designed for retail stores.We feed the description of all the products in the inventory to the system and  teach AI all about the products, ideally we just point the system to the e-commerce website of the store which has all product data.Customer comes up to kiosk and explains verbally what they're looking for. The system makes recommendation based off of that and speaks to them.Also the system will likely ask some more questions to fine tune the recommendations, such as age, gender(from their driver license) and level expertise the user has with the product as well as the customer's budget.Here's the store e-commerce website: https://treeshollywood.com/","Hello,
 
 Your vision of a voice‑driven retail kiosk that recommends products from an e‑commerce catalog matches a problem I solved in the Product Recommendation Engine project (p02). There we integrated a RAG‑based retriever with a fine‑tuned BERT model, raising click‑through rate from 3.2% to 7.8% and lifting revenue per visitor by 15%. I can replicate that architecture – ingesting your product feed, building a semantic index, and adding a speech‑to‑text front‑end – within the $3,000 budget.
@@ -95,7 +95,7 @@ Your vision of a voice‑driven retail kiosk that recommends products from an e�
 I would start by creating a small prototype that pulls a few hundred items from treeshollywood.com, builds the vector store, and demonstrates a spoken query flow.
 
 Looking forward to your thoughts,
-Priya",,,,,,,
+Priya",4,4,3,3,4,4,"Good match incl. budget and prototype; short, skips ID/age questions"
 j09,job_5b9831847505791f,Adtech Developer - Troubleshoot Amazon Unified Ad Marketplace + Prebid (Headerbidding),"Dear Full Stack Developers,
 
 Job Description
@@ -115,7 +115,7 @@ I propose a two‑day audit: (1) reproduce the failure locally, (2) compare the 
 Feel free to share the code snippet you attached; I can start immediately.
 
 Regards,
-Daniel Okafor",,,,,,,
+Daniel Okafor",3,2,2,4,4,2,Telehealth example irrelevant to ad tech; comparing to SDK used in p06 is odd
 j10,job_a5d5e114c9bbcbd9,Looking for writers specializing in Machine Learning,"Looking for writers who specialize in machine learning and can write technical documentation, blogs, surveys. 
 
 Some of our content will be video- blog format others will be more involved asks. We are looking for specialists for each data modality type and especially interested in NLP, unstructured and CV (images) at this time. 
@@ -127,7 +127,7 @@ We would like to start with a test and find regular writers for our team. Please
 I can produce high‑quality technical documentation, deep‑dive articles, and tutorial videos that explain complex ML concepts to both engineers and product teams. My rates are $0.15 per word for long‑form pieces and $30 per hour for editorial work.
 
 I would be happy to complete a test article on ""Best Practices for Monitoring LLMs in Production"" and discuss a long‑term partnership.
-",,,,,,,
+",5,4,2,4,4,3,Publication/5k reads/newsletter claim looks invented; no sample links
 j11,job_4c3ce0b3e19f0c8a,AI Developer to build a Chatbot for our ecommerce store,"We're looking for an AI expert to build a Chatbot for our ecommerce store. The chatbot will answer all the FAQs and relevant questions related to our store, products, shipping etc.
 
 we'll prefer the candidates who are dedicated, can follow along the instructions and commit on longterm work.
@@ -141,7 +141,7 @@ My approach would be to start with a Retrieval‑Augmented Generation (RAG) pipe
 I’m happy to share the codebase and discuss a phased rollout.
 
 Best regards,
-Priya Raman",,,,,,,
+Priya Raman",4,3,3,3,3,3,"Reasonable approach, generic next step; short"
 j12,job_887730be2da36090,React Frontend Developer,i'm looking for a nn additional frontend developer for various new and ongoing projects. I myself will work with you and develop all the backend API's and databases.,"Hello,
 
 You need an extra React developer to accelerate your frontend work. In the Property Listings Portal – Phase 1 (project p03) we delivered a Next.js/TypeScript site with Tailwind CSS that boosted lead generation by 30% within two months and pushed target keywords to page 1 on Google.
@@ -151,7 +151,7 @@ My first step would be to review your existing component library, set up Storybo
 I’m available to start immediately and can work at the $25/hr rate you indicated.
 
 Best regards,
-Daniel Okafor",,,,,,,
+Daniel Okafor",4,4,3,4,4,4,Concrete and on-brief; lead-gen claim from frontend work a bit stretched
 j13,job_4f5f63b80bd9e4da,Full Stack Developer,"Need Working as a member of a team or on their own to deliver high-quality and maintainable software solutions within deadlines.
 - Mobile App Development experience in Ionic Framework (Version 4 Latest Version).
 - Strong knowledge of application design patterns.
@@ -175,7 +175,7 @@ I enjoy working both independently and as part of a team, and I’m comfortable 
 I would love to discuss how my skill set aligns with your needs.
 
 Sincerely,
-Daniel Okafor",,,,,,,
+Daniel Okafor",3,2,2,3,1,2,Template opener; admits no Ionic project; no next step
 j14,job_af5488e43ed869a2,AI / Chat GPT Software Developer,"We are seeking an expert in AI/Chat GPT software development to advise us on the feasibility of creating a chat-based GPT to answer urbanistic Spanish law questions. This tool will provide information on current laws, past sentences, and litigations, serving as a resource for urbanistic lawyers in Spain.
 
 We understand we would have to gather every piece of information out there to feed to the chat, so it can give accurate answers. 
@@ -194,7 +194,7 @@ If the results meet your expectations we can scale to full production and define
 Looking forward to a call to discuss details.
 
 Best,
-Priya Raman",,,,,,,
+Priya Raman",5,4,3,4,5,4,Strong plan; 2M docs in 2 weeks ambitious
 j15,job_0992ae2b09a57d04,Connect chatgpt3 to google dialogflow,"Job Description:
 
 We are seeking an experienced NLP Engineer to help us connect the OpenAI GPT-3 API to Google Dialogflow for our customer service chatbot. As our NLP Engineer, you will be responsible for designing and implementing the integration between GPT-3 and Dialogflow, and for training the chatbot to recognize and respond to user queries using natural language.
@@ -220,20 +220,20 @@ I see you need to bridge GPT‑3 with Dialogflow for a customer‑service bot. I
 Let me know a convenient time to start.
 
 Best,
-Priya Raman",,,,,,,
+Priya Raman",5,4,4,4,5,4,"Direct match, concrete 1-day prototype"
 j16,job_79dd3cc435958ef4,Excel % of Completion Formulas Needed to Monthly Spreadsheet,"I'm looking for a formula for percentage of completion.
 
 I have a team of bookkeepers that each have 5-10 clients. Once a bookkeeper completes the month end close for a client, they will change the status to complete. 
 
 Understanding the percentage of completion is based on the number of clients and using 10 clients as an example, I would like the dashboard view to say 100% by their name if they completed the close for all 10. If they have only completed 5 clients month end close, I would like the dashboard to say 50%.","Hi there,
 
-I am a senior data analyst specializing in enterprise-scale data warehousing and advanced statistical modeling. My primary focus is on cloud-native architectures using BigQuery and dbt. I recently led a project (p03) involving a full migration of a data warehouse, which required complex ETL pipeline development using Airflow and Python. This resulted in a 40% reduction in query execution times. I also have experience with predictive modeling, such as in project p05 where I built a loan default risk scoring system that reduced bad debt by 8%. While I am proficient in SQL and data visualization, my expertise is deeply rooted in backend data infrastructure and machine learning rather than specific Excel formula debugging. I believe I can bring significant value to your data strategy by helping you structure your data more efficiently for future scalability. I would be happy to discuss how my experience in data governance can benefit your team in the long term. Best regards, Mariana",,,,,,,
+I am a senior data analyst specializing in enterprise-scale data warehousing and advanced statistical modeling. My primary focus is on cloud-native architectures using BigQuery and dbt. I recently led a project (p03) involving a full migration of a data warehouse, which required complex ETL pipeline development using Airflow and Python. This resulted in a 40% reduction in query execution times. I also have experience with predictive modeling, such as in project p05 where I built a loan default risk scoring system that reduced bad debt by 8%. While I am proficient in SQL and data visualization, my expertise is deeply rooted in backend data infrastructure and machine learning rather than specific Excel formula debugging. I believe I can bring significant value to your data strategy by helping you structure your data more efficiently for future scalability. I would be happy to discuss how my experience in data governance can benefit your team in the long term. Best regards, Mariana",1,2,3,3,1,1,Admits not suited to Excel formulas; ignores the actual ask
 j17,job_45f20439e6e84ffa,Data analysis for a warehousing system,"I have a data from a warehouse and I need it to be cleaned, ordered and analyze possible changes in the system to optimize it. You have to be a proactive person who wants to work.","Hi,
 
 I understand you need to clean and optimize your warehouse data. I have extensive experience in data analysis and have worked with large datasets before. In a previous project, I helped reduce query execution time by 40% by restructuring the database schema (Project p03). I am proactive and eager to help you sort out your data issues. I can work with Excel and SQL to get your data in order. Let me know if you want to discuss further.
 
 Best,
-Mariana",,,,,,,
+Mariana",3,2,3,3,1,2,"Vague, short; 40% query claim unrelated to cleaning data; no next step"
 j18,job_9ff7b2b57be5e629,Creation of advanced Power BI dashboard,"I am after someone that can communicate and understand English and advanced skills in Power BI.Someone that can understand data, and the relationship between the data.Someone that understands Net Promoter Score, how to create a dashboard.I would like to arrange a screen share and learn as you tell me how to create the dashboard, along with guidance","Hello,
 
 I see you are looking for a Power BI expert to create a dashboard focused on Net Promoter Score (NPS) and data relationships. I have extensive experience with Power BI and DAX.
@@ -243,7 +243,7 @@ In a recent project, I developed a Subscription Revenue Attribution model (p02) 
 I am a passionate data analyst with strong communication skills in English. I look forward to hearing from you.
 
 Best,
-Mariana",,,,,,,
+Mariana",4,2,3,3,2,2,Vague results claim; passionate boilerplate; weak next step
 j19,job_8fa0c44dbad45098,"Data scientist/developer for trend analysis, feature selection, and integration into website","We're looking for a data scientist/developer to help us with some development tasks in our machine learning and recommendation system.
 
 - We currently track sales data for over 3 million products and want to be able to predict future sales based on our historical data. Our history is currently 6-12 months in size and so currently should be based on current trends of the data, however, in the future, we also want to identify seasonal sales trends with multiple years of sales data.
@@ -267,7 +267,7 @@ I can start with an exploratory analysis this week and deliver a prototype withi
 Looking forward to collaborating.
 
 Kind regards,
-Priya Raman",,,,,,,
+Priya Raman",5,4,3,5,4,4,Tailored plan; good structure
 j20,job_713030ea52f17aaa,Analytics Expert | Data Analyst,"Spiralyze is a data-driven A/B testing company headquartered in the United States with clients from major brands such as Pepsi, Netflix, General Electric, Abbott, American Express, Dream Host, TechSmith, VWO, and many more. We use design and optimization to help our clients generate more revenue from their website traffic.About the Role:We seek a highly skilled and detail-oriented Digital Analytics Expert to join our team. The ideal candidate will possess a deep understanding of Google Analytics and a natural curiosity that drives them to delve into data and identify underlying issues and opportunities.Key Responsibilities:Conduct in-depth analyses of Google Analytics, Adobe Analytics, and Amplitude data to identify trends, anomalies, and areas for improvement.To uncover insights and potential issues, perform forensic analysis of web traffic, conversions, and user behavior.Collaborate with PMs to understand client’s traffic, conversions, and problems.Create detailed reports and presentations to communicate findings and recommendations to the PM team.Stay up-to-date with the latest Google Analytics features and best practices.Tools Knowledge and Experience:Google Analytics, GTM, AdWordsAdobe AnalyticsAmplitudeSegmentHeap & MixPanel are a plusRole Requirements:Proven experience in Google Analytics, Adobe Analytics, and Amplitude with a strong understanding of digital analytics and web traffic metrics.Exceptional attention to detail and a strong analytical mindset.Curious and in","Hi Spiralyze team,
 
 I saw your request for a Digital Analytics Expert and wanted to reach out. I am a data analyst with strong experience in SQL, Python, and visualization tools like Power BI and Tableau.
@@ -277,7 +277,7 @@ In my previous role, I worked on an E-commerce Conversion Funnel analysis (p09) 
 I am comfortable working with large datasets and can help your team uncover insights that drive revenue growth. I look forward to the possibility of working together.
 
 Best regards,
-Mariana Costa",,,,,,,
+Mariana Costa",4,4,4,4,2,3,Relevant GA4 example; only vague closing
 j21,job_14922aa3599f3432,Skilled and experienced developer,"We are seeking a skilled and experienced developer to connect a custom GPT model to Instagram DMs in an automated way. The successful candidate will be responsible for integrating the Instagram API and the OpenAI API to create a web application that can handle incoming messages from Instagram, process them using the GPT model, and send the appropriate response back to Instagram.
 
 Responsibilities:
@@ -299,8 +299,8 @@ You need a reliable way to pipe Instagram DMs through a custom GPT model. In my 
 Looking forward to delivering a production‑grade solution within the 2‑week timeline.
 
 Regards,
-Priya Raman",,,,,,,
-j22,job_572f4256cd42861e,"Python, ChatGPT, Spyder, Colab Tutor","At this time this is for short term in-person one on one tutoring from Feb 19-25, 2024.Possibility of longer term remote work.Help me develop and tutor me in development of prediction algorithm in Python for time series data. Currently I am using ChatGPT, Spyder and Colab.Good conversational English needed.","I am a passionate AI/ML engineer with experience tutoring Python and data‑science workflows. I have helped several clients move from notebook‑only prototypes to production‑ready pipelines. In the **Automated Grading Assistant** (p06) I guided a university team through building a text‑classification model with scikit‑learn and TensorFlow, cutting grading time by 78% and achieving a 0.88 correlation with human graders. I can provide one‑on‑one sessions on Spy‑der, Colab, and time‑series forecasting, and I will tailor the lessons to your current codebase. Let me know your preferred schedule and I will prepare a short agenda for the first session.",,,,,,,
+Priya Raman",5,4,3,4,5,4,On-target; <300ms with OpenAI call optimistic
+j22,job_572f4256cd42861e,"Python, ChatGPT, Spyder, Colab Tutor","At this time this is for short term in-person one on one tutoring from Feb 19-25, 2024.Possibility of longer term remote work.Help me develop and tutor me in development of prediction algorithm in Python for time series data. Currently I am using ChatGPT, Spyder and Colab.Good conversational English needed.","I am a passionate AI/ML engineer with experience tutoring Python and data‑science workflows. I have helped several clients move from notebook‑only prototypes to production‑ready pipelines. In the **Automated Grading Assistant** (p06) I guided a university team through building a text‑classification model with scikit‑learn and TensorFlow, cutting grading time by 78% and achieving a 0.88 correlation with human graders. I can provide one‑on‑one sessions on Spy‑der, Colab, and time‑series forecasting, and I will tailor the lessons to your current codebase. Let me know your preferred schedule and I will prepare a short agenda for the first session.",4,3,2,3,4,3,Tutoring claim sounds invented; typo Spy-der; ignores in-person dates
 j23,job_541a008b6594d61d,Multivariate time series prediction with recurrent neural network,"This job require developing a multivariate time-series model using Recurrent Neural Network (RNN) and GRU using Python programming language. This is a many-to-many problem. I'll provide an example time-series dataset in csv format. This is a relatively quick job and I can help explain the required model and dataset in details.
 
 The final outcomes will be:
@@ -318,8 +318,8 @@ For your dataset I will:
 The total effort is about 12 hours; my rate is $100 fixed as per your budget.
 
 Thanks,
-Priya Raman",,,,,,,
-j24,job_b7008948b6d90e6e,Power Bi Dashboard built from excel data set,Import the necessary data into Excel. No data his is a Private Job Set up your workbook Add raw data to a table Data analysis Determine the visuals Create your Excel dashboard other details will also shared,"Hello, Your need to transition from Excel to Power BI is a common bottleneck I have solved for several clients. In a recent project for a hospitality client (p06), I reduced reporting preparation time from 2 days to 2 hours by automating the data ingestion and DAX modeling process. I propose we start with a 2-hour call to audit your current Excel structure and identify which metrics can be automated in Power BI without losing fidelity. I am available to begin this assessment next Tuesday.",,,,,,,
+Priya Raman",5,4,3,4,4,4,Matches deliverables; $1.2M claim lofty; budget fit
+j24,job_b7008948b6d90e6e,Power Bi Dashboard built from excel data set,Import the necessary data into Excel. No data his is a Private Job Set up your workbook Add raw data to a table Data analysis Determine the visuals Create your Excel dashboard other details will also shared,"Hello, Your need to transition from Excel to Power BI is a common bottleneck I have solved for several clients. In a recent project for a hospitality client (p06), I reduced reporting preparation time from 2 days to 2 hours by automating the data ingestion and DAX modeling process. I propose we start with a 2-hour call to audit your current Excel structure and identify which metrics can be automated in Power BI without losing fidelity. I am available to begin this assessment next Tuesday.",4,3,3,3,4,3,Concrete audit call; short; job brief vague
 j25,job_dc26e7ea052c475c,WordPress Plugin Developer(ChatGPT & OpenAI),"We are seeking a highly skilled WordPress Plugin Developer to join our team. The ideal candidate will have experience in developing custom WordPress plugins and be able to work independently to develop and maintain our ChatGPT and OpenAI plugins.
 
 Responsibilities:
@@ -342,7 +342,7 @@ Requirements:
 If you are a talented WordPress Plugin Developer with a passion for creating innovative solutions, we encourage you to apply for this exciting opportunity.","I am a passionate AI/ML engineer with a strong background in building production‑grade software. Over the past four years I have delivered end‑to‑end NLP pipelines, MLOps automation, and custom integrations for clients across healthcare, e‑commerce and legal domains. My experience includes developing robust REST APIs in PHP and Python, containerising services with Docker, and writing unit‑tested code that follows WordPress coding standards. I have also built several AI‑powered plugins that surface contextual answers from large language models, which gives me a solid foundation for creating a ChatGPT/OpenAI WordPress plugin that is both performant and easy to maintain. I would love to discuss how my skill set can help accelerate your product roadmap.
 
 Regards,
-Priya Raman",,,,,,,
+Priya Raman",3,1,2,3,1,1,"Template, no project or next step"
 j26,job_0043e981fd580ea7,OpenAI Chatbot proof of concept,"Responsibilities: 
 • Design and develop a prototype chatbot using OpenAI’s API and other related technologies.
 • Test and debug the chatbot to ensure it meets all requirements.
@@ -369,7 +369,7 @@ I have 3+ years building chatbot prototypes with OpenAI’s API. In the Sentimen
 Let me know a good time to discuss requirements.
 
 Thanks,
-Priya Raman",,,,,,,
+Priya Raman",3,3,3,3,3,3,"Short, little HRIS/integration detail"
 j27,job_6c5be160e5596b72,Migrate Database Tables from WordPress to Joomla,"Hi!  Thanks for checking out our project!We have been developing PHP solutions for over 20 years so are very familiar with what is _actually_ required for PHP/DB/API development and how long it takes to complete.Reasonable and realistic quotes and timelines only, thank you!*** This project is divided into several sub-projects representing various development steps. ****** Separate jobs will be posted for the various sub-project steps ***A not-for-profit organization has a WordPress-based platform solution that we looking to move away from.  We want something that can be more customized and that can also integrated with a 3rd party Joomla-integrated database, for user management.  Also let us know what your favourite flavour of ice cream is.Part of the redevelopment involves recreating 2 API's that an iOS and Android app rely on for user interactions.  You will be able to review our existing custom WordPress REST API's, to easily recreate.Feel free to ask any questions you like.Coders who provide a fair budget, complete this project on-time, AND provide an essentially bug-free solution will be short-listed for future long-term work on subsequent development phases.*** Development, Part 4:  Database and User-Specific Data Integration and Migration ***1.  Create the database on the new server.  Your database structure will efficiently and logically accommodate future server development phases and features.2.  While user credentials will be stored on and retrieved from “the Brain","Hi there,
 
 I see you need to move a WordPress‑based platform to a custom Joomla integration while rebuilding two mobile APIs. In my recent **Compliance Document Generator** project (p08) we recreated a full REST API layer for a legal SaaS product and cut contract drafting time from 4 hours to 15 minutes – a 96% reduction in processing latency. That experience directly translates to moving your existing endpoints to a clean, versioned API that your iOS and Android apps can consume without breaking changes.
@@ -381,7 +381,7 @@ My hourly rate fits within your range ($30/hr) and I’m comfortable with NGINX,
 Looking forward to discussing the timeline.
 
 Best,
-Daniel Okafor",,,,,,,
+Daniel Okafor",5,4,2,4,5,4,"Strong plan, answered ice cream; ""96% latency"" claim is nonsensical"
 j28,job_d3f13c725b2cdffd,Python Developer for image processing for our roofing business,"Hello,
 
 We are looking to hire a professional Python Machine Learning Developer who can help with back end for our roofing software.
@@ -397,7 +397,7 @@ For your roofing application I would start by collecting a diverse set of roof�
 I look forward to discussing the scope and timeline.
 
 Best regards,
-Priya Raman",,,,,,,
+Priya Raman",4,3,3,4,3,3,"Passionate opener; decent technical plan, vague next step"
 j29,job_b6aa1c745f974fe1,Laravel Inertia Tailwind Web App Developer,"We are seeking a skilled Laravel Inertia Tailwind Web App Developer to join our team. The successful candidate will be responsible for developing and maintaining web applications using Laravel, Inertia, and Tailwind CSS. The ideal candidate should have a strong understanding of PHP, Laravel framework, and frontend development with Inertia and Tailwind CSS. This is a remote position, and the candidate should be able to collaborate effectively in a remote environment.Skills required:- Laravel- Inertia- Tailwind CSS- PHP- Frontend development","Hello,
 
 Your Laravel Inertia project caught my eye. Although my recent work has been centered on JavaScript frameworks, I delivered the **Property Listings Portal – Phase 2 (Booking Engine) (p04)** using Django REST, React and PostgreSQL, which increased booking requests by 50% and cut admin work by 20 hours per month. This experience shows I can integrate a robust back‑end API with a modern front‑end UI and handle complex data flows.
@@ -407,7 +407,7 @@ I’m confident I can translate that expertise to Laravel/Inertia, setting up a 
 Looking forward to collaborating.
 
 Best,
-Daniel Okafor",,,,,,,
+Daniel Okafor",3,3,4,4,5,3,Honest about no Laravel; concrete first step but skill gap
 j30,job_93eeff477867dd56,Bookkeeper - Advanced QuickBooks,"We are seeking an experienced Expert Bookkeeper to assist with closing the books on a monthly basis, with a primary focus on completing the year-end book close for 2023 and providing ancillary support with tax preparation. The ideal candidate will have a strong background in bookkeeping and accounting, with the ability to efficiently reconcile accounts, generate financial reports, and ensure compliance with US accounting regulations. This is a temporary position with the potential for a full-time role after a trial period.Closing the Books for 2023:- Assist in the year-end closing process for the fiscal year 2023, including reviewing and reconciling all financial transactions.- Adjust journal entries as needed for accruals, prepayments, and depreciation to finalize year-end financial statements.- Compile supporting schedules and documentation for year-end financial statement disclosures.Closing the Books on a Monthly Basis:- Review and reconcile financial transactions for each month, ensuring accuracy and completeness of general ledger accounts.- Prepare month-end adjusting entries and accruals to reflect accurate financial data.- Conduct a thorough review of financial records to identify and resolve any discrepancies on a monthly basis.Financial Reporting (after March):- Generate monthly financial statements, including balance sheets, income statements, and cash flow statements. Provide analysis based on the financial statements month over month.Communication and Collaborati","Hi there,
 
 I noticed you are struggling with the 2023 year-end close and need someone who can handle the reconciliation and journal entry adjustments without back-and-forth.
@@ -417,4 +417,4 @@ While my background is in data analytics, I have extensive experience with struc
 I can start by auditing your current trial balance and identifying the top 5 accounts with the highest variance to begin the reconciliation process immediately.
 
 Best,
-Mariana Costa",,,,,,,
+Mariana Costa",3,2,3,4,4,2,Not a bookkeeper; governance example weakly related
