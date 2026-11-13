@@ -113,7 +113,11 @@ budgets:
   per_node_timeout_seconds: 180   # first call loads the CPU embedding model
   per_node_retries: 2
   max_parallel_branches: 3        # Send fan-out at once (free tiers cap tokens per minute)
-  max_concurrent_calls_per_model: 2   # model calls in flight per model (agent/llm.py)
+  # model calls in flight per model (agent/llm.py). Qwen's output-per-minute limit drops to 1,000
+  # under load, which fits about one call at a time.
+  max_concurrent_calls_per_model:
+    default: 2
+    groq:qwen/qwen3.8-27b: 1
   latency_p95_seconds_per_job: 60
   latency_p95_seconds_per_proposal: 120
   cost_usd_per_job_analysed: 0.01

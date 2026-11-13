@@ -114,7 +114,7 @@ class QuotaExhaustedError(RuntimeError):
 _EXHAUSTED: dict[str, float] = {}
 _QUOTA_FAILURES = 0
 _CALL_FAILURES = 0
-_RETRY_IN = re.compile(r"try again in ((?:\d+h)?(?:\d+m)?(?:[\d.]+s)?)")
+_RETRY_IN = re.compile(r"try again in ((?:[\d.]+(?:ms|h|m|s))+)")
 _LIMIT_REQUESTED = re.compile(r"limit (\d+), (?:used \d+, )?requested (\d+)")
 
 
@@ -139,9 +139,9 @@ def _seconds(text: str) -> float | None:
     m = _RETRY_IN.search(text)
     if not m or not m.group(1):
         return None
-    secs = 0.0
-    for num, unit in re.findall(r"([\d.]+)([hms])", m.group(1)):
-        secs += float(num) * {"h": 3600, "m": 60, "s": 1}[unit]
+    secs = 0.0  # Groq writes "1m2.5s", "45.2s" or "779.99ms"
+    for num, unit in re.findall(r"([\d.]+)(ms|h|m|s)", m.group(1)):
+        secs += float(num) * {"h": 3600, "m": 60, "s": 1, "ms": 0.001}[unit]
     return secs
 
 
@@ -247,11 +247,14 @@ def _give_up(node: str, last: BaseException | None) -> BaseException:
 
 
 TRANSIENT_ATTEMPTS = 4  # timeouts, 5xx, unspecified 429s: exponential backoff
-PER_MINUTE_ATTEMPTS = 10  # per-minute limits: wait as long as the provider says (at most 65 s)
+PER_MINUTE_WAIT_S = 600  # per-minute limits: keep waiting as long as the provider says, up to this
 
 
-def _next_step(exc: BaseException, attempt: int, kw: dict[str, Any], model: Any) -> float | None:
-    """How to retry after `exc`: seconds to wait (kw may be changed in place), or None to give up."""
+def _next_step(
+    exc: BaseException, attempt: int, waited: float, kw: dict[str, Any], model: Any
+) -> float | None:
+    """How to retry after `exc`: seconds to wait (kw may be changed in place), or None to give up.
+    `waited` is the time already spent waiting on per-minute limits for this call."""
     current = kw.get("max_tokens") or getattr(model, "max_tokens", None)
     smaller = _smaller_max_tokens(exc, current)
     if smaller is not None and attempt <= 2:
@@ -259,36 +262,38 @@ def _next_step(exc: BaseException, attempt: int, kw: dict[str, Any], model: Any)
         kw["max_tokens"] = smaller
         return 0.0
     wait = _per_minute_wait(exc)
-    if wait is not None and attempt < PER_MINUTE_ATTEMPTS:
-        return min(65.0, wait + 0.5)
+    if wait is not None and waited < PER_MINUTE_WAIT_S:
+        return min(65.0, wait + 0.25)
     if _is_transient(exc) and attempt < TRANSIENT_ATTEMPTS:
         return float(min(40, 2 * 2**attempt))
     return None
 
 
 def _invoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
-    attempt = 0
+    attempt, waited = 0, 0.0
     while True:
         try:
             return model.invoke(messages, **kw)
         except Exception as exc:  # noqa: BLE001
             attempt += 1
-            wait = _next_step(exc, attempt, kw, model)
+            wait = _next_step(exc, attempt, waited, kw, model)
             if wait is None:
                 raise
+            waited += wait
             time.sleep(wait)
 
 
 async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any):  # type: ignore[no-untyped-def]
-    attempt = 0
+    attempt, waited = 0, 0.0
     while True:
         try:
             return await model.ainvoke(messages, **kw)
         except Exception as exc:  # noqa: BLE001
             attempt += 1
-            wait = _next_step(exc, attempt, kw, model)
+            wait = _next_step(exc, attempt, waited, kw, model)
             if wait is None:
                 raise
+            waited += wait
             await asyncio.sleep(wait)
 
 
@@ -300,8 +305,9 @@ def _slot(spec: str) -> asyncio.Semaphore:
     free tiers cap tokens per minute per model, and a burst of parallel calls only buys 429s."""
     key = (id(asyncio.get_running_loop()), spec)
     if key not in _SLOTS:
-        n = int(settings.config().budgets.get("max_concurrent_calls_per_model", 2))
-        _SLOTS[key] = asyncio.Semaphore(max(1, n))
+        cap = settings.config().budgets.get("max_concurrent_calls_per_model", 2)
+        n = cap.get(spec, cap.get("default", 2)) if isinstance(cap, dict) else cap
+        _SLOTS[key] = asyncio.Semaphore(max(1, int(n)))
     return _SLOTS[key]
 
 

@@ -11,6 +11,15 @@ export PYTHONUNBUFFERED=1 HF_HUB_DISABLE_SYMLINKS_WARNING=1 OMP_NUM_THREADS=4 LA
 LOGS=data/processed/eval_logs
 mkdir -p "$LOGS"
 
+# One queue at a time: two queues share the same per-minute model limits and starve each other.
+LOCK="$LOGS/.queue.lock"
+if ! mkdir "$LOCK" 2> /dev/null; then
+  echo "another evaluation queue is running (remove $LOCK if it is not)"; exit 1
+fi
+trap 'rmdir "$LOCK" 2> /dev/null' EXIT
+# To stop the queue, stop this script's process tree, not only the current step: a stopped step
+# just lets the queue start the next one.
+
 step() {
   local name="$1"; shift
   echo "[$(date +%H:%M:%S)] >>> $name"

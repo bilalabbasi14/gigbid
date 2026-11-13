@@ -124,7 +124,7 @@ def test_per_minute_limits_wait_as_long_as_the_provider_says() -> None:
 async def test_output_limit_wait_is_honoured(models: dict[str, list[Any]]) -> None:
     models["test:primary"] = [RuntimeError(OTPM_WAIT), "ok"]
     assert await llm.ainvoke_for_node("verifier", []) == "ok"
-    assert SLEEPS == [50.0]
+    assert SLEEPS == [49.75]
 
 
 async def test_oversize_request_is_retried_smaller_not_waited_on(
@@ -177,3 +177,11 @@ async def test_calls_per_model_are_capped(monkeypatch: pytest.MonkeyPatch) -> No
 def test_failure_log_hides_account_ids() -> None:
     msg = llm._brief(RuntimeError("Rate limit for org_01kym7na02e2sbmg99cs7242ey on TPM"))
     assert "org_01" not in msg and "TPM" in msg
+
+
+def test_waits_in_milliseconds_are_understood() -> None:
+    otpm = (
+        "Rate limit reached for model `qwen/qwen3.8-27b` on output tokens per minute (OTPM): "
+        "Limit 1000, Used 313, Requested 700. Please try again in 779.99999ms."
+    )
+    assert llm._per_minute_wait(RuntimeError(otpm)) == pytest.approx(0.78, abs=0.01)
