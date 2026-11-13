@@ -89,7 +89,7 @@ models:
       contextual_chunk: 200
 
 rag:
-  variant: v0_naive          # set to the measured best after Part B evaluation
+  variant: v2_hybrid         # shipped: best Recall@5 overall in evals/results/rag_summary.json, no LLM or reranker cost
   k: 5
   chunk_size: 512
   chunk_overlap: 64
