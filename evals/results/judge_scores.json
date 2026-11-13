@@ -1,0 +1,392 @@
+{
+  "j01": {
+    "relevance": 2,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 2,
+    "overall": 2,
+    "reason": "Missing key tools (Looker, GA4, GTM) and no concrete first step, so unlikely to get a reply.",
+    "usage": {
+      "input_tokens": 943,
+      "output_tokens": 199
+    }
+  },
+  "j02": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 2,
+    "next_step": 4,
+    "overall": 3,
+    "reason": "Clear relevance and specifics but too brief for required length, lowering overall score.",
+    "usage": {
+      "input_tokens": 949,
+      "output_tokens": 161
+    }
+  },
+  "j03": {
+    "relevance": 5,
+    "specificity": 5,
+    "credibility": 5,
+    "clarity": 4,
+    "next_step": 5,
+    "overall": 5,
+    "reason": "Strong, concrete, relevant proposal with clear next steps",
+    "usage": {
+      "input_tokens": 940,
+      "output_tokens": 153
+    }
+  },
+  "j04": {
+    "relevance": 2,
+    "specificity": 1,
+    "credibility": 1,
+    "clarity": 3,
+    "next_step": 2,
+    "overall": 2,
+    "reason": "The proposal is generic, lacks Salesforce/Tableau specifics, offers no concrete past work, and only suggests a vague call.",
+    "usage": {
+      "input_tokens": 825,
+      "output_tokens": 136
+    }
+  },
+  "j05": {
+    "relevance": 5,
+    "specificity": 5,
+    "credibility": 4,
+    "clarity": 5,
+    "next_step": 5,
+    "overall": 5,
+    "reason": "Strong, specific, relevant proposal with clear next steps",
+    "usage": {
+      "input_tokens": 932,
+      "output_tokens": 152
+    }
+  },
+  "j06": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 5,
+    "next_step": 5,
+    "overall": 4,
+    "reason": "Relevant and clear with concrete next step, but past work uses different stack and lacks verifiable evidence.",
+    "usage": {
+      "input_tokens": 887,
+      "output_tokens": 180
+    }
+  },
+  "j07": {
+    "relevance": 3,
+    "specificity": 2,
+    "credibility": 2,
+    "clarity": 2,
+    "next_step": 1,
+    "overall": 2,
+    "reason": "Generic claim without concrete examples, no clear next step, and too brief to meet length guidelines.",
+    "usage": {
+      "input_tokens": 1062,
+      "output_tokens": 144
+    }
+  },
+  "j08": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "Relevant and clear with concrete next step, but claims lack verifiable detail.",
+    "usage": {
+      "input_tokens": 876,
+      "output_tokens": 143
+    }
+  },
+  "j09": {
+    "relevance": 4,
+    "specificity": 2,
+    "credibility": 2,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 2,
+    "reason": "Relevant but uses unrelated examples, low specificity and credibility despite clear next step.",
+    "usage": {
+      "input_tokens": 878,
+      "output_tokens": 155
+    }
+  },
+  "j10": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 5,
+    "next_step": 5,
+    "overall": 4,
+    "reason": "Strong relevance and clear next step, with decent specific examples, but some claims lack verifiable detail.",
+    "usage": {
+      "input_tokens": 906,
+      "output_tokens": 162
+    }
+  },
+  "j11": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "The proposal is relevant, fairly specific with past results, credible, clear and offers a concrete next step, making a reply likely.",
+    "usage": {
+      "input_tokens": 830,
+      "output_tokens": 170
+    }
+  },
+  "j12": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 3,
+    "clarity": 3,
+    "next_step": 5,
+    "overall": 3,
+    "reason": "Good relevance and concrete next step, but brevity below ideal length and some unverified claims lower credibility.",
+    "usage": {
+      "input_tokens": 765,
+      "output_tokens": 201
+    }
+  },
+  "j13": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 3,
+    "next_step": 2,
+    "overall": 3,
+    "reason": "Relevant but lacks concrete examples, detailed next step, and is slightly short of ideal length.",
+    "usage": {
+      "input_tokens": 949,
+      "output_tokens": 169
+    }
+  },
+  "j14": {
+    "relevance": 5,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 5,
+    "next_step": 5,
+    "overall": 4,
+    "reason": "Strong relevant plan with concrete steps, but some claims lack verifiable evidence.",
+    "usage": {
+      "input_tokens": 908,
+      "output_tokens": 149
+    }
+  },
+  "j15": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 3,
+    "clarity": 3,
+    "next_step": 5,
+    "overall": 4,
+    "reason": "Relevant and concrete first step, but brevity and unverified metrics lower clarity and credibility.",
+    "usage": {
+      "input_tokens": 1005,
+      "output_tokens": 184
+    }
+  },
+  "j16": {
+    "relevance": 1,
+    "specificity": 1,
+    "credibility": 2,
+    "clarity": 3,
+    "next_step": 1,
+    "overall": 1,
+    "reason": "The proposal focuses on data warehousing and ML, not the simple Excel percentage formula requested, offers vague past work and no concrete next step.",
+    "usage": {
+      "input_tokens": 895,
+      "output_tokens": 133
+    }
+  },
+  "j17": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 2,
+    "overall": 3,
+    "reason": "Generic claims, lacks concrete next step, modest credibility.",
+    "usage": {
+      "input_tokens": 724,
+      "output_tokens": 147
+    }
+  },
+  "j18": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 3,
+    "overall": 3,
+    "reason": "Shows relevant skills and offers screen share, but lacks detailed results and a concrete initial action plan.",
+    "usage": {
+      "input_tokens": 785,
+      "output_tokens": 179
+    }
+  },
+  "j19": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 3,
+    "reason": "Relevant and clear with concrete next step, but past work claims are vague and somewhat unsubstantiated.",
+    "usage": {
+      "input_tokens": 1117,
+      "output_tokens": 171
+    }
+  },
+  "j20": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 4,
+    "clarity": 4,
+    "next_step": 2,
+    "overall": 3,
+    "reason": "Good relevance and clarity but lacks a concrete next step and limited specificity.",
+    "usage": {
+      "input_tokens": 1231,
+      "output_tokens": 140
+    }
+  },
+  "j21": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "Strong relevant experience, concrete example and clear first step, though not directly Instagram-focused.",
+    "usage": {
+      "input_tokens": 1026,
+      "output_tokens": 156
+    }
+  },
+  "j22": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 2,
+    "next_step": 4,
+    "overall": 3,
+    "reason": "Clear relevance and specifics but too brief for required length, reducing overall appeal.",
+    "usage": {
+      "input_tokens": 801,
+      "output_tokens": 182
+    }
+  },
+  "j23": {
+    "relevance": 5,
+    "specificity": 4,
+    "credibility": 3,
+    "clarity": 2,
+    "next_step": 2,
+    "overall": 3,
+    "reason": "Relevant and specific but brevity hurts clarity and lacks a concrete first step, and credibility is unverified.",
+    "usage": {
+      "input_tokens": 894,
+      "output_tokens": 188
+    }
+  },
+  "j24": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "Strong relevant, specific, credible, clear proposal with concrete next step.",
+    "usage": {
+      "input_tokens": 728,
+      "output_tokens": 136
+    }
+  },
+  "j25": {
+    "relevance": 4,
+    "specificity": 2,
+    "credibility": 2,
+    "clarity": 2,
+    "next_step": 1,
+    "overall": 2,
+    "reason": "Relevant but vague, lacks concrete examples, short and no concrete next step.",
+    "usage": {
+      "input_tokens": 961,
+      "output_tokens": 157
+    }
+  },
+  "j26": {
+    "relevance": 4,
+    "specificity": 4,
+    "credibility": 3,
+    "clarity": 5,
+    "next_step": 5,
+    "overall": 4,
+    "reason": "Good relevance and clear next step, but claims lack verifiable evidence lowering credibility.",
+    "usage": {
+      "input_tokens": 1041,
+      "output_tokens": 159
+    }
+  },
+  "j27": {
+    "relevance": 4,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "Relevant and clear with concrete first step, but past work description is vague and lacks detailed evidence.",
+    "usage": {
+      "input_tokens": 1250,
+      "output_tokens": 164
+    }
+  },
+  "j28": {
+    "relevance": 5,
+    "specificity": 4,
+    "credibility": 4,
+    "clarity": 2,
+    "next_step": 4,
+    "overall": 4,
+    "reason": "Relevant and specific with plausible experience, but too brief for required length, affecting clarity.",
+    "usage": {
+      "input_tokens": 817,
+      "output_tokens": 168
+    }
+  },
+  "j29": {
+    "relevance": 2,
+    "specificity": 3,
+    "credibility": 3,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 2,
+    "reason": "Limited Laravel experience reduces relevance despite clear writing and concrete next step.",
+    "usage": {
+      "input_tokens": 875,
+      "output_tokens": 153
+    }
+  },
+  "j30": {
+    "relevance": 2,
+    "specificity": 2,
+    "credibility": 2,
+    "clarity": 4,
+    "next_step": 4,
+    "overall": 2,
+    "reason": "Low relevance to bookkeeping and QuickBooks, vague specifics, limited credibility, though clear and offers a concrete first step.",
+    "usage": {
+      "input_tokens": 1132,
+      "output_tokens": 177
+    }
+  }
+}

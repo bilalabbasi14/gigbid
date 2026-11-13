@@ -75,7 +75,10 @@ def proposals(n: int, seed: int) -> list[dict[str, Any]]:
     return out[:n]
 
 
-def export(n: int, seed: int) -> None:
+def export(n: int, seed: int, force: bool = False) -> None:
+    if SHEET.exists() and not force:  # never overwrite human labels in progress
+        print(f"{SHEET} already exists; keeping it (pass --force to replace it)")
+        return
     LABEL_DIR.mkdir(parents=True, exist_ok=True)
     jobs = {
         r["job_id"]: r["job"] for p in ("ai_ml", "fullstack", "data_analyst") for r in load_dev(p)
@@ -205,9 +208,10 @@ def main() -> None:
     ap.add_argument("cmd", choices=["export", "judge", "kappa"])
     ap.add_argument("--n", type=int, default=30)
     ap.add_argument("--seed", type=int, default=5)
+    ap.add_argument("--force", action="store_true", help="export: replace an existing sheet")
     args = ap.parse_args()
     if args.cmd == "export":
-        export(args.n, args.seed)
+        export(args.n, args.seed, args.force)
     elif args.cmd == "judge":
         asyncio.run(judge_all())
     else:
