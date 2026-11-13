@@ -9,8 +9,10 @@
        uv run python -m evals.runners.judge_calibration kappa
      -> evals/results/judge_calibration.json (quadratic-weighted and unweighted Cohen's kappa per criterion)
 
-The judge prompt is agent/prompts/judge.md (node "judge", large tier). Proposals come from
-evals/results/proposal_eval*.json rows, which keep the cover letter and the job id.
+The judge prompt is agent/prompts/judge.md (node "judge", large tier). Items are the proposals
+GigBid wrote in evals/results/proposal_eval*.json; when there are fewer than --n, the sheet is
+filled with the personas' past proposals (data/personas/*/proposals.jsonl), drawn evenly from
+won, replied and ignored ones so the items span the quality range. The `source` column says which.
 """
 
 from __future__ import annotations
@@ -33,6 +35,28 @@ JUDGED = ROOT / "evals/results/judge_scores.json"
 CRITERIA = ["relevance", "specificity", "credibility", "clarity", "next_step", "overall"]
 
 
+def _past_proposals(seed: int) -> list[dict[str, Any]]:
+    """Personas' past proposals, interleaved won / replied / ignored."""
+    by_outcome: dict[str, list[dict[str, Any]]] = {}
+    for f in sorted((ROOT / "data/personas").glob("*/proposals.jsonl")):
+        if f.parent.name.startswith(("_", "x3_")):
+            continue
+        for line in f.open(encoding="utf-8"):
+            r = json.loads(line)
+            if r.get("cover_letter") and r.get("job_id"):
+                r = {**r, "source": f"past_proposal:{f.parent.name}:{r.get('outcome')}"}
+                by_outcome.setdefault(str(r.get("outcome")), []).append(r)
+    rng = random.Random(seed)
+    for rows in by_outcome.values():
+        rng.shuffle(rows)
+    out = []
+    while any(by_outcome.values()):
+        for k in sorted(by_outcome):
+            if by_outcome[k]:
+                out.append(by_outcome[k].pop())
+    return out
+
+
 def proposals(n: int, seed: int) -> list[dict[str, Any]]:
     rows = []
     for f in sorted((ROOT / "evals/results").glob("proposal_eval*.json")):
@@ -41,6 +65,7 @@ def proposals(n: int, seed: int) -> list[dict[str, Any]]:
             if r.get("cover_letter"):
                 rows.append({"source": f.name, **r})
     random.Random(seed).shuffle(rows)
+    rows += _past_proposals(seed)
     seen, out = set(), []
     for r in rows:
         key = (r["job_id"], r["cover_letter"][:80])
@@ -61,6 +86,7 @@ def export(n: int, seed: int) -> None:
         w.writerow(
             [
                 "item_id",
+                "source",
                 "job_id",
                 "job_title",
                 "job_description",
@@ -74,6 +100,7 @@ def export(n: int, seed: int) -> None:
             w.writerow(
                 [
                     f"j{i:02d}",
+                    r["source"],
                     r["job_id"],
                     job.get("title", r.get("title", "")),
                     (job.get("description") or "")[:1500],

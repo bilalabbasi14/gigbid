@@ -146,7 +146,8 @@ async def main_async(args: argparse.Namespace) -> dict[str, Any]:
         r["job_id"]: r for p in ("ai_ml", "fullstack", "data_analyst") for r in load_dev(p)
     }
     picked: list[tuple[dict[str, Any], str]] = []
-    for fam in TEXT:
+    families = [f for f in (args.families.split(",") if args.families else TEXT) if f in TEXT]
+    for fam in families:
         for g in [g for g in inj if g["injection_ids"] == [fam] and g["job_id"] in rows_by_id][
             :per_family
         ]:
@@ -224,10 +225,14 @@ async def main_async(args: argparse.Namespace) -> dict[str, Any]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--per-family", type=int, default=1)
+    ap.add_argument("--families", default="", help="comma-separated injection ids (default: all)")
     ap.add_argument("--fresh", action="store_true", help="discard saved rows and start over")
     args = ap.parse_args()
     res = asyncio.run(main_async(args))
-    path = write_result("injection", {"config": {"per_family": args.per_family}, **res})
+    path = write_result(
+        "injection",
+        {"config": {"per_family": args.per_family, "families": args.families or "all"}, **res},
+    )
     print(
         f"attack success: without defences {res['attack_success_rate_without_defences']}, with {res['attack_success_rate_with_defences']} (n={res['n']}) -> {path}"
     )
