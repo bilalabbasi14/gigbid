@@ -66,6 +66,27 @@ models:
     request_timeout_seconds: 60
     max_retries: 3
     local_context_tokens: 6144     # Ollama num_ctx; its default is too small for writer prompts
+    # Output budget per prompt. Free tiers count the requested max_tokens against per-minute output
+    # limits, so each prompt asks for what it needs: about 1.5x the longest answer measured in
+    # evals/results/token_profile_baseline.json. An answer cut off at its budget is retried once
+    # with twice the budget (agent/structured.py).
+    max_output_tokens_by_prompt:
+      analyst: 700
+      risk: 550
+      fit_requirements: 250
+      fit_assess: 900
+      verifier_split: 900
+      verifier_judge: 900
+      verifier_rewrite: 600
+      writer: 900
+      critic: 500
+      compliance_rewrite: 600
+      liaison_intent: 300
+      liaison_reply: 500
+      judge: 500
+      portfolio_builder: 900
+      hyde: 400
+      contextual_chunk: 200
 
 rag:
   variant: v0_naive          # set to the measured best after Part B evaluation
