@@ -62,12 +62,38 @@ rate-limited per user and are logged to an append-only audit table (`docs/TOOLS.
 Stores: pgvector chunks and BM25 indexes for evidence; app tables for users, runs and the
 pipeline; the LangGraph checkpointer for state; the LangGraph store for promoted memory only.
 
-## 3. R&D question A: tool granularity (*pending: `evals/results/tool_design.json`*)
+## 3. R&D question A: tool granularity
 
-Hypothesis: fine-grained tools with precise descriptions raise selection and argument accuracy
-over a few coarse tools, at a token cost per task. Setup: 40 tasks (`evals/datasets/tool_tasks.jsonl`),
-three tool sets (fine, coarse, best), one model, exactly one call per task. Interim rows are in
-`evals/results/tool_design_rows.jsonl`.
+**Hypothesis.** One tool per capability with a precise description beats a few coarse tools on
+tool selection and arguments, and the price is tokens: every tool schema is sent with every call.
+
+**Setup.** 40 single-call tasks covering all 18 capabilities of our three MCP servers
+(`evals/datasets/tool_tasks.jsonl`), one model (gpt-oss-20b, no fallback), three tool sets built
+from the committed schema snapshots: *fine* (the shipped tools and descriptions), *coarse*
+(three tools, one per server, taking an operation name and arguments) and *best* (the fine tools
+with descriptions rewritten as what it does, when to use it, when not to and what to use instead;
+`evals/datasets/tool_descriptions_v2.yaml`). Source: `evals/results/tool_design.json`.
+
+| Tool set | Tools | Right tool | Right arguments | Tokens per task |
+|---|---|---|---|---|
+| Coarse | 3 | 0.75 | 0.35 | 565 |
+| Fine | 18 | 0.95 | 0.825 | 2,023 |
+| Best | 18 | 0.975 | 0.875 | 2,391 |
+
+**Findings.** Granularity matters most for arguments: with one generic `arguments` object the
+model filled them correctly on barely a third of the tasks, against 83% with typed schemas.
+Coarse tools also mixed up near neighbours (search vs list, threads vs messages). Rewriting the
+descriptions added 3 points of selection and 5 of argument accuracy for 18% more tokens. Two of
+the three fine-grained misses are one task: a request to see what a submission would send was
+answered with `create_proposal_draft`, which returns the same preview without spending Connects;
+the gold label wanted `submit_proposal` with `dry_run`. We count it as a miss but it is the safer
+reading.
+
+**What ships.** The fine-grained tools, now publishing the rewritten descriptions
+(`mcp_servers/tool_descriptions.yaml`; the measured docstring surface is frozen in
+`evals/datasets/tool_surface_docstrings/`). About 1,800 extra input tokens per call is the price
+of correct arguments. Inside GigBid the graph nodes call tools by name, so they do not pay it; it
+falls on model-driven callers such as the single-agent baseline and external MCP clients.
 
 ## 4. R&D question B: retrieval and claim verification (*partly pending*)
 
