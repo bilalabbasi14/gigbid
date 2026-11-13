@@ -1,0 +1,164 @@
+{
+  "generated_at": "2026-11-13T03:26:34Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "label": "before",
+  "n_jobs": 402,
+  "n_scams": 45,
+  "scam_recall": 0.378,
+  "precision": 0.607,
+  "false_alarm_rate": 0.031,
+  "false_alarms": 11,
+  "by_kind": {
+    "off_platform": {
+      "n": 9,
+      "caught": 9
+    },
+    "phishing": {
+      "n": 9,
+      "caught": 0
+    },
+    "too_good": {
+      "n": 9,
+      "caught": 3
+    },
+    "pay_to_apply": {
+      "n": 9,
+      "caught": 0
+    },
+    "free_work": {
+      "n": 9,
+      "caught": 5
+    }
+  },
+  "false_alarm_jobs": [
+    {
+      "job_id": "job_ab82cd5faffe0be8",
+      "persona": "ai_ml",
+      "score": 0.9,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_a0b539d3403b4031",
+      "persona": "ai_ml",
+      "score": 0.75,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post"
+      ]
+    },
+    {
+      "job_id": "job_dda186d13d79f38b",
+      "persona": "ai_ml",
+      "score": 1.0,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "prompt_injection",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_c12cbc5fbc980d95",
+      "persona": "ai_ml",
+      "score": 0.75,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post"
+      ]
+    },
+    {
+      "job_id": "job_60f650a70eaa53c6",
+      "persona": "ai_ml",
+      "score": 0.8,
+      "hard": [],
+      "flags": [
+        "contact_details_in_post",
+        "prompt_injection",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_848801d566733fa1",
+      "persona": "ai_ml",
+      "score": 0.75,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post"
+      ]
+    },
+    {
+      "job_id": "job_9f958c0d4e460b82",
+      "persona": "fullstack",
+      "score": 0.9,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_09216b556ebf7add",
+      "persona": "fullstack",
+      "score": 0.9,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_4747a9d8526a9ed5",
+      "persona": "fullstack",
+      "score": 0.9,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_54982f1095c49847",
+      "persona": "data_analyst",
+      "score": 0.9,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post",
+        "unverified_no_spend"
+      ]
+    },
+    {
+      "job_id": "job_50620204449704ab",
+      "persona": "data_analyst",
+      "score": 0.75,
+      "hard": [],
+      "flags": [
+        "off_platform",
+        "contact_details_in_post"
+      ]
+    }
+  ]
+}
