@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-11-13T19:29:28Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "source": "decision_eval.json",
+  "n_fit_driven": 48,
+  "note": "evidence-count rule assumed met when the fit threshold is lowered",
+  "sweep": [
+    {
+      "bid_min_fit_score": 0.4,
+      "shipped": false,
+      "decisions_changed": 6,
+      "precision": 0.71,
+      "recall": 0.667,
+      "f1": 0.688
+    },
+    {
+      "bid_min_fit_score": 0.45,
+      "shipped": false,
+      "decisions_changed": 5,
+      "precision": 0.733,
+      "recall": 0.667,
+      "f1": 0.698
+    },
+    {
+      "bid_min_fit_score": 0.5,
+      "shipped": false,
+      "decisions_changed": 2,
+      "precision": 0.741,
+      "recall": 0.606,
+      "f1": 0.667
+    },
+    {
+      "bid_min_fit_score": 0.55,
+      "shipped": false,
+      "decisions_changed": 2,
+      "precision": 0.741,
+      "recall": 0.606,
+      "f1": 0.667
+    },
+    {
+      "bid_min_fit_score": 0.6,
+      "shipped": true,
+      "decisions_changed": 0,
+      "precision": 0.72,
+      "recall": 0.545,
+      "f1": 0.621
+    },
+    {
+      "bid_min_fit_score": 0.65,
+      "shipped": false,
+      "decisions_changed": 0,
+      "precision": 0.72,
+      "recall": 0.545,
+      "f1": 0.621
+    },
+    {
+      "bid_min_fit_score": 0.7,
+      "shipped": false,
+      "decisions_changed": 7,
+      "precision": 0.667,
+      "recall": 0.364,
+      "f1": 0.471
+    }
+  ]
+}
