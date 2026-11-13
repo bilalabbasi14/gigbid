@@ -42,10 +42,12 @@ Clients are reconstructed from the 60k rows' public client fields (country, paym
 total spent, rating, review count); rows that share those fields are treated as one client. Posts
 without client fields receive a seeded synthetic history. Each client also receives **hidden
 preferences** (must-have skills drawn from the post, a budget ceiling, dislike of generic
-openings, concision, whether screening answers matter) that drive the deterministic decision
-engine in `gigsim/clients.py`. Hidden preferences are never exposed through the API. Outcome
-metrics (reply rate, hire rate) therefore measure consistency with these rules, not real human
-behaviour; see the report for the caveat.
+openings, concision, whether screening answers matter) that drive the decision engine in
+`gigsim/clients.py`. In LLM mode an open model (`qwen3:4b-instruct` by default) also reads each
+proposal as that client and its interest is blended with the rule score. Hidden preferences are
+never exposed through the API. Outcome metrics (reply rate, hire rate) therefore measure how
+simulated clients with these preferences react, not real human behaviour; see the report for the
+caveat.
 
 ## 4. Persona corpora (synthetic, LLM-generated)
 

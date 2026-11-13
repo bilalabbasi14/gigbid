@@ -176,3 +176,80 @@ def test_rate_limit_shape():
     assert b.take("k")[0] and b.take("k")[0]
     ok, retry = b.take("k")
     assert not ok and retry > 0
+
+
+# ---------- LLM-driven clients ----------
+from gigsim import client_llm  # noqa: E402
+from gigsim import clients as sim_clients  # noqa: E402
+
+PREFS = {"must_have_skills": ["Django"], "budget_ceiling": 1000, "reply_warmth": 0.8}
+JOB = {"job_id": "j1", "title": "Django API", "description": "Build a Django REST API"}
+
+
+def test_llm_interest_moves_the_reply_probability():
+    letter = "Your Django REST API needs auth and tests; I would start with the models."
+    cold = sim_clients.decide(JOB, PREFS, "k", letter, 500, [], llm_view={"interest": 0.0})
+    warm = sim_clients.decide(JOB, PREFS, "k", letter, 500, [], llm_view={"interest": 1.0})
+    rules = sim_clients.decide(JOB, PREFS, "k", letter, 500, [])
+    assert (
+        cold["breakdown"]["p_reply"] < rules["breakdown"]["p_reply"] < warm["breakdown"]["p_reply"]
+    )
+    assert warm["breakdown"]["mode"] == "llm" and rules["breakdown"]["mode"] == "rules"
+    assert warm["breakdown"]["rule_score"] == rules["breakdown"]["score"]
+
+
+def test_scam_posters_never_reply_even_if_the_model_likes_the_letter():
+    prefs = {**PREFS, "never_replies": True}
+    d = sim_clients.decide(JOB, prefs, "k", "Great letter", 500, [], llm_view={"interest": 1.0})
+    assert d["breakdown"]["p_reply"] == 0.0 and d["message"] is None
+
+
+def test_llm_mode_decides_in_the_background(client, monkeypatch):
+    monkeypatch.setenv("GIGSIM_CLIENT_MODE", "llm")
+    monkeypatch.setenv("GIGSIM_DECIDE_INLINE", "1")
+    seen = []
+
+    def fake_judge(job, prefs, letter, bid, answers):
+        seen.append(job["job_id"])
+        return {"interest": 0.9, "concerns": [], "reply": "Sounds good, when can you start?"}
+
+    monkeypatch.setattr(client_llm, "judge", fake_judge)
+    applied = {p["job_id"] for p in client.get("/proposals", headers=H).json()["items"]}
+    jobs = client.get("/jobs", headers=H, params={"limit": 50}).json()["items"]
+    job = next(j for j in jobs if j["job_id"] not in applied)
+    r = client.post(
+        "/proposals",
+        headers=H,
+        json={
+            "job_id": job["job_id"],
+            "cover_letter": f"Your {job['title']} needs a clear first milestone.",
+            "bid_amount": 400.0 if job["payment_type"] == "fixed" else 30.0,
+            "bid_type": job["payment_type"],
+            "screening_answers": [
+                "An answer of reasonable length." for _ in job["screening_questions"]
+            ],
+            "idempotency_key": "llm-mode-0001",
+        },
+    )
+    assert r.status_code == 201, r.text
+    first = r.json()["proposal"]
+    assert first["status"] == "submitted" and first["decided"] is False
+    after = client.get(f"/proposals/{first['proposal_id']}", headers=H).json()
+    assert after["decided"] is True and seen == [job["job_id"]]
+
+
+def test_client_llm_parses_and_caches(tmp_path, monkeypatch):
+    monkeypatch.setenv("GIGSIM_LLM_CACHE", str(tmp_path / "cache.json"))
+    monkeypatch.setattr(client_llm, "_CACHE", None)
+    calls = []
+
+    def fake_chat(system, user, timeout):
+        calls.append(user)
+        return 'Sure: {"interest": 1.7, "concerns": ["a", "b", "c", "d"], "reply": "Hi"}'
+
+    monkeypatch.setattr(client_llm, "_chat", fake_chat)
+    first = client_llm.judge(JOB, PREFS, "letter", 100.0, [])
+    again = client_llm.judge(JOB, PREFS, "letter", 100.0, [])
+    assert first["interest"] == 1.0 and len(first["concerns"]) == 3
+    assert again["cached"] is True and len(calls) == 1
+    assert client_llm.parse("no json here") is None

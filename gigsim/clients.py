@@ -3,15 +3,18 @@
 Each client has preferences the freelancer never sees (must-have skills, a budget ceiling, a
 dislike of generic openings, a preference for concise letters, whether screening answers matter).
 Two decision modes, chosen by GIGSIM_CLIENT_MODE:
-  rules  - deterministic scoring (default; reproducible evaluations)
-  llm    - a small open model plays the client, with the rule score as fallback
+  rules  - deterministic scoring only (default; tests and quick runs)
+  llm    - an open model also reads the proposal as that client (gigsim/client_llm.py); its
+           interest is blended with the rule score (GIGSIM_LLM_WEIGHT, default 0.5) and the client
+           writes its own reply. Decisions run in the background, like a real client's.
+In both modes the dice are seeded on the job and the letter, so a proposal always gets the same
+reaction, and the hidden preferences (must-have skills, budget ceiling) always count.
 """
 
 from __future__ import annotations
 
 import datetime as dt
 import hashlib
-import json
 import os
 import random
 import re
@@ -151,21 +154,25 @@ def score_proposal(
         score -= 0.1
         reasons.append("makes guarantees")
 
+    return {"score": round(score, 3), "reasons": reasons, **probabilities(score, prefs)}
+
+
+def probabilities(score: float, prefs: dict[str, Any]) -> dict[str, float]:
     warmth = prefs.get("reply_warmth", 0.6)
     p_reply = (
         0.0
         if prefs.get("never_replies")
         else max(0.02, min(0.95, 0.15 + score * 0.9)) * (0.6 + 0.4 * warmth)
     )
-    p_interview_given_reply = max(0.1, min(0.9, 0.25 + score))
-    p_hire_given_interview = max(0.1, min(0.8, 0.2 + score * 0.8))
     return {
-        "score": round(score, 3),
-        "reasons": reasons,
         "p_reply": round(p_reply, 3),
-        "p_interview": round(p_interview_given_reply, 3),
-        "p_hire": round(p_hire_given_interview, 3),
+        "p_interview": round(max(0.1, min(0.9, 0.25 + score)), 3),
+        "p_hire": round(max(0.1, min(0.8, 0.2 + score * 0.8)), 3),
     }
+
+
+def mode() -> str:
+    return os.environ.get("GIGSIM_CLIENT_MODE", "rules")
 
 
 def decide(
@@ -175,15 +182,33 @@ def decide(
     cover_letter: str,
     bid: float,
     answers: list[str],
+    llm_view: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Return {'outcome': submitted|viewed|replied|interview|hired|lost, 'message': str|None, 'breakdown': {...}}."""
+    """Return {'outcome': submitted|viewed|replied|interview|hired|lost, 'message': str|None,
+    'breakdown': {...}}. `llm_view` is the client model's reading (client_llm.judge), if any."""
     breakdown = score_proposal(job, prefs, cover_letter, bid, answers)
+    breakdown["mode"] = "rules"
+    if llm_view is not None and not prefs.get("never_replies"):
+        w = float(os.environ.get("GIGSIM_LLM_WEIGHT", "0.5"))
+        blended = (1 - w) * breakdown["score"] + w * float(llm_view["interest"])
+        breakdown.update(
+            {
+                "mode": "llm",
+                "rule_score": breakdown["score"],
+                "llm_interest": llm_view["interest"],
+                "llm_concerns": llm_view.get("concerns", []),
+                "llm_model": llm_view.get("model"),
+                "score": round(blended, 3),
+                **probabilities(blended, prefs),
+            }
+        )
     r = _rng("decide", proposal_id)
     outcome = "viewed" if r.random() < 0.85 else "submitted"
     message = None
     if outcome == "viewed" and r.random() < breakdown["p_reply"]:
         outcome = "replied"
-        message = _client_reply(job, prefs, breakdown, bid, r)
+        template = _client_reply(job, prefs, breakdown, bid, r)
+        message = (llm_view or {}).get("reply") or template
         if r.random() < breakdown["p_interview"]:
             outcome = "interview"
             message += "\n\nCould you share a few times this week for a short call?"
@@ -191,12 +216,6 @@ def decide(
                 outcome = "hired"
     elif outcome == "viewed" and r.random() < 0.3:
         outcome = "lost"
-
-    if os.environ.get("GIGSIM_CLIENT_MODE", "rules") == "llm" and not prefs.get("never_replies"):
-        llm = _llm_decide(job, prefs, cover_letter, bid, answers)
-        if llm:
-            outcome, message = llm["outcome"], llm.get("message") or message
-            breakdown["llm"] = True
     return {"outcome": outcome, "message": message, "breakdown": breakdown}
 
 
@@ -224,56 +243,6 @@ def _client_reply(
             "Your price is above what we planned; is there a lighter scope you could offer?"
         )
     return f"{r.choice(openers)} {r.choice(asks)}"
-
-
-def _llm_decide(
-    job: dict[str, Any], prefs: dict[str, Any], cover_letter: str, bid: float, answers: list[str]
-) -> dict[str, Any] | None:
-    """Optional: a small open model plays the client. Returns None on any failure."""
-    key = os.environ.get("GROQ_API_KEY")
-    if not key:
-        return None
-    try:
-        import httpx
-
-        system = (
-            "You role-play a client on a freelance marketplace deciding on one proposal. "
-            "Use the hidden preferences strictly. Reply ONLY with JSON: "
-            '{"outcome": "viewed|replied|interview|hired|lost", "message": "<short client reply or null>"}'
-        )
-        user = json.dumps(
-            {
-                "job": {
-                    "title": job["title"],
-                    "description": job["description"][:1500],
-                    "screening_questions": job.get("screening_questions", []),
-                },
-                "hidden_preferences": prefs,
-                "proposal": {"cover_letter": cover_letter[:2500], "bid": bid, "answers": answers},
-            },
-            ensure_ascii=False,
-        )
-        resp = httpx.post(
-            "https://api.groq.com/openai/v1/chat/completions",
-            headers={"Authorization": f"Bearer {key}"},
-            json={
-                "model": os.environ.get("GIGSIM_CLIENT_LLM", "llama-3.1-8b-instant"),
-                "temperature": 0.3,
-                "response_format": {"type": "json_object"},
-                "messages": [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user},
-                ],
-            },
-            timeout=30,
-        )
-        resp.raise_for_status()
-        data = json.loads(resp.json()["choices"][0]["message"]["content"])
-        if data.get("outcome") in {"viewed", "replied", "interview", "hired", "lost"}:
-            return data
-    except Exception:  # noqa: BLE001 - any failure falls back to the rule engine
-        return None
-    return None
 
 
 def client_followup(prefs: dict[str, Any], freelancer_message: str, message_id: str) -> str | None:

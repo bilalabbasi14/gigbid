@@ -48,6 +48,10 @@ services:
     environment:
       GIGSIM_API_TOKEN: ${GIGSIM_API_TOKEN:-dev-token}
       GIGSIM_CHAOS_RATE: ${GIGSIM_CHAOS_RATE:-0.02}
+      GIGSIM_CLIENT_MODE: ${GIGSIM_CLIENT_MODE:-llm}
+      GIGSIM_CLIENT_LLM: ${GIGSIM_CLIENT_LLM:-ollama:qwen3:4b-instruct}
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      GIGSIM_LLM_CACHE: /data/gigsim_client_cache.json
     ports: ["8081:8081"]
     volumes: ["gigsimdata:/data"]
     healthcheck:

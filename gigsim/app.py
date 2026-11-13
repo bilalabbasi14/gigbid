@@ -10,7 +10,10 @@ from __future__ import annotations
 import datetime as dt
 import hashlib
 import json
+import logging
 import os
+import queue
+import threading
 import uuid
 from collections.abc import Iterator
 from pathlib import Path
@@ -22,6 +25,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
+from gigsim import client_llm
 from gigsim import clients as sim_clients
 from gigsim.models import (
     Account,
@@ -76,6 +80,10 @@ def _startup() -> None:
         ensure_accounts(s, parse_accounts())
         if os.environ.get("GIGSIM_AUTOSEED", "1") == "1":
             seed_database(s)
+        if sim_clients.mode() == "llm":
+            for p in s.scalars(select(Proposal).where(Proposal.status == "submitted")).all():
+                if (p.client_decision or {}).get("pending"):
+                    _DECIDER.submit(p.proposal_id)
 
 
 def get_db() -> Iterator[Session]:
@@ -168,6 +176,7 @@ def proposal_out(p: Proposal) -> dict[str, Any]:
         "updated_at": p.updated_at.isoformat() + "Z",
         "cover_letter": p.cover_letter,
         "screening_answers": p.screening_answers,
+        "decided": not (p.client_decision or {}).get("pending"),
     }
 
 
@@ -353,14 +362,19 @@ def create_proposal(
     client = db.get(Client, j.client_id)
     # seed the client's dice on the job and the letter, not the random proposal id, so the same
     # proposal to the same job always gets the same reaction (reproducible outcome evaluations)
-    seed_key = f"{j.job_id}:{hashlib.sha256(body.cover_letter.encode()).hexdigest()[:16]}"
-    decision = sim_clients.decide(
-        job_out(j),
-        client.hidden_prefs if client else {},
-        seed_key,
-        body.cover_letter,
-        body.bid_amount,
-        body.screening_answers,
+    prefs = client.hidden_prefs if client else {}
+    deferred = sim_clients.mode() == "llm" and not prefs.get("never_replies")
+    decision = (
+        None
+        if deferred
+        else sim_clients.decide(
+            job_out(j),
+            prefs,
+            _seed_key(j.job_id, body.cover_letter),
+            body.cover_letter,
+            body.bid_amount,
+            body.screening_answers,
+        )
     )
     p = Proposal(
         proposal_id=pid,
@@ -372,38 +386,14 @@ def create_proposal(
         screening_answers=body.screening_answers,
         connects_spent=j.connects_cost,
         status="submitted",
-        client_decision=decision["breakdown"],
+        client_decision={"pending": True} if decision is None else decision["breakdown"],
         thread_id=thread_id,
     )
     db.add(p)
     j.applicants += 1
     emit(db, acct.freelancer_id, "proposal.submitted", {"proposal_id": pid, "job_id": j.job_id})
-    # The client's reaction is applied immediately but time-stamped as later, so polling clients
-    # observe a realistic progression: submitted -> viewed -> replied/interview/hired/lost.
-    outcome = decision["outcome"]
-    if outcome != "submitted":
-        p.status = outcome
-        p.updated_at = utcnow()
-        emit(
-            db, acct.freelancer_id, f"proposal.{outcome}", {"proposal_id": pid, "job_id": j.job_id}
-        )
-        if decision["message"]:
-            db.add(
-                Message(
-                    message_id="msg_" + uuid.uuid4().hex[:12],
-                    thread_id=thread_id,
-                    proposal_id=pid,
-                    freelancer_id=acct.freelancer_id,
-                    sender="client",
-                    body=decision["message"],
-                )
-            )
-            emit(
-                db,
-                acct.freelancer_id,
-                "message.received",
-                {"thread_id": thread_id, "proposal_id": pid},
-            )
+    if decision is not None:
+        _apply_decision(db, p, decision)
     db.flush()
     resp = {"proposal": proposal_out(p), "connects_remaining": acct.connects}
     db.add(
@@ -415,7 +405,103 @@ def create_proposal(
         )
     )
     db.commit()
+    if decision is None:
+        _DECIDER.submit(pid)
     return resp
+
+
+def _seed_key(job_id: str, cover_letter: str) -> str:
+    # seed the client's dice on the job and the letter, not the random proposal id, so the same
+    # proposal to the same job always gets the same reaction (reproducible outcome evaluations)
+    return f"{job_id}:{hashlib.sha256(cover_letter.encode()).hexdigest()[:16]}"
+
+
+def _apply_decision(db: Session, p: Proposal, decision: dict[str, Any]) -> None:
+    """Apply a client's reaction: status, event and (for a reply) the client's first message."""
+    p.client_decision = decision["breakdown"]
+    outcome = decision["outcome"]
+    if outcome == "submitted":
+        return
+    p.status = outcome
+    p.updated_at = utcnow()
+    emit(
+        db,
+        p.freelancer_id,
+        f"proposal.{outcome}",
+        {"proposal_id": p.proposal_id, "job_id": p.job_id},
+    )
+    if decision["message"]:
+        db.add(
+            Message(
+                message_id="msg_" + uuid.uuid4().hex[:12],
+                thread_id=p.thread_id,
+                proposal_id=p.proposal_id,
+                freelancer_id=p.freelancer_id,
+                sender="client",
+                body=decision["message"],
+            )
+        )
+        emit(
+            db,
+            p.freelancer_id,
+            "message.received",
+            {"thread_id": p.thread_id, "proposal_id": p.proposal_id},
+        )
+
+
+def decide_pending(proposal_id: str) -> None:
+    """The client reads a proposal and reacts (LLM mode). Safe to call twice."""
+    with SessionLocal() as db:
+        p = db.get(Proposal, proposal_id)
+        if p is None or not (p.client_decision or {}).get("pending"):
+            return
+        j = db.get(Job, p.job_id)
+        client = db.get(Client, j.client_id) if j else None
+        prefs = client.hidden_prefs if client else {}
+        job = job_out(j) if j else {"job_id": p.job_id, "title": "", "description": ""}
+        view = client_llm.judge(job, prefs, p.cover_letter, p.bid_amount, p.screening_answers or [])
+        decision = sim_clients.decide(
+            job,
+            prefs,
+            _seed_key(p.job_id, p.cover_letter),
+            p.cover_letter,
+            p.bid_amount,
+            p.screening_answers or [],
+            llm_view=view,
+        )
+        if view is None:
+            decision["breakdown"]["llm_unavailable"] = True
+        _apply_decision(db, p, decision)
+        db.commit()
+
+
+class _Decider:
+    """One background thread works through pending client decisions in order, so a slow local
+    model never blocks a request and never runs twice at once on a small machine."""
+
+    def __init__(self) -> None:
+        self.q: queue.Queue[str] = queue.Queue()
+        self.thread: threading.Thread | None = None
+
+    def submit(self, proposal_id: str) -> None:
+        if os.environ.get("GIGSIM_DECIDE_INLINE") == "1":  # tests
+            decide_pending(proposal_id)
+            return
+        if self.thread is None or not self.thread.is_alive():
+            self.thread = threading.Thread(target=self._run, name="gigsim-decider", daemon=True)
+            self.thread.start()
+        self.q.put(proposal_id)
+
+    def _run(self) -> None:
+        while True:
+            pid = self.q.get()
+            try:
+                decide_pending(pid)
+            except Exception:  # noqa: BLE001 - keep the worker alive; the proposal stays pending
+                logging.getLogger("gigsim").exception("client decision failed for %s", pid)
+
+
+_DECIDER = _Decider()
 
 
 @app.get("/proposals")

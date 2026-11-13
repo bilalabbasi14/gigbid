@@ -1,13 +1,13 @@
-# GigSim (student-built stand-in)
+# GigSim: the marketplace simulator
 
 `GIGSIM_ORIGIN=student-built`
 
-The instructor-provided GigSim simulator was not included in the starter kit received. This
-folder contains a functionally equivalent simulator so the whole system could be built and
-measured. When the official GigSim arrives it replaces this folder; the only code that talks to
-it is `mcp_servers/marketplace/adapters/gigsim.py`, which maps the REST contract below onto the
-marketplace port. After the swap, `gigsim/.lock.sha256` freezes the folder and CI fails on any
-change under it.
+GigSim is part of this project: the course asks each student to build their own simulator. It is
+a safe, repeatable stand-in for a real freelance marketplace, and every outcome metric (reply and
+hire rate) is measured here. The only code that talks to it is
+`mcp_servers/marketplace/adapters/gigsim.py`, which maps the REST contract below onto the
+marketplace port. `python scripts/ci_checks.py --freeze-gigsim` writes `gigsim/.lock.sha256`
+when the simulator is final, after which CI fails on any change under this folder.
 
 ## What it simulates
 - **Jobs**: 2,100 real Upwork posts (two public Kaggle datasets, see `docs/DATA_CARD.md`) across
@@ -16,10 +16,21 @@ change under it.
 - **Clients** with public history (spend, rating, hires, verification) and **hidden
   preferences** (must-have skills, budget ceiling, dislike of generic openings, concision,
   whether screening answers matter). The hidden preferences are never served by the API.
-- **Decisions**: when a proposal is submitted the client scores it and the proposal moves to
-  `viewed | replied | interview | hired | lost`; replies create message threads. Default mode is
-  deterministic (`GIGSIM_CLIENT_MODE=rules`) so evaluations are reproducible; `llm` lets a small
-  open model play the client with the rule score as fallback.
+- **Decisions**: when a proposal is submitted the client reacts and the proposal moves to
+  `viewed | replied | interview | hired | lost`; replies create message threads.
+  - `GIGSIM_CLIENT_MODE=rules` (default): a deterministic score from the hidden preferences.
+  - `GIGSIM_CLIENT_MODE=llm`: an open model also reads the proposal as that client
+    (`gigsim/client_llm.py`, prompt in `gigsim/prompts/client_decision.md`) and returns its
+    interest, concerns and the reply it would write. Its interest is blended with the rule score
+    (`GIGSIM_LLM_WEIGHT`, default 0.5), so must-have skills and the budget ceiling always count,
+    and the client's own reply becomes the first message. The model is
+    `GIGSIM_CLIENT_LLM=ollama:qwen3:4b-instruct` by default (free, local) or `groq:<model>`.
+    Decisions run in a background worker, like a real client reading later: `POST /proposals`
+    returns `status: submitted, decided: false`, and `GET /proposals/{id}` shows the reaction
+    once `decided` is true. Pending decisions resume after a restart.
+  - In both modes the dice are seeded on the job and the letter, and model judgements are cached
+    (`GIGSIM_LLM_CACHE`), so the same proposal always gets the same reaction. Scam posters never
+    reply. If the model is unavailable the client decides by rules and the breakdown records it.
 - **Connects**: each proposal spends the job's Connects cost; `402` when the balance is too low.
 - **Rate limits** (`60/min` per token, `429` with `Retry-After`) and **chaos** (`GIGSIM_CHAOS_RATE`,
   default 2 % of requests return `503`).
