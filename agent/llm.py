@@ -247,7 +247,7 @@ def _give_up(node: str, last: BaseException | None) -> BaseException:
 
 
 TRANSIENT_ATTEMPTS = 4  # timeouts, 5xx, unspecified 429s: exponential backoff
-PER_MINUTE_ATTEMPTS = 6  # per-minute limits: wait as long as the provider says (at most 65 s)
+PER_MINUTE_ATTEMPTS = 10  # per-minute limits: wait as long as the provider says (at most 65 s)
 
 
 def _next_step(exc: BaseException, attempt: int, kw: dict[str, Any], model: Any) -> float | None:
@@ -292,6 +292,25 @@ async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any)
             await asyncio.sleep(wait)
 
 
+_SLOTS: dict[tuple[int, str], asyncio.Semaphore] = {}
+
+
+def _slot(spec: str) -> asyncio.Semaphore:
+    """At most budgets.max_concurrent_calls_per_model calls in flight per model and event loop:
+    free tiers cap tokens per minute per model, and a burst of parallel calls only buys 429s."""
+    key = (id(asyncio.get_running_loop()), spec)
+    if key not in _SLOTS:
+        n = int(settings.config().budgets.get("max_concurrent_calls_per_model", 2))
+        _SLOTS[key] = asyncio.Semaphore(max(1, n))
+    return _SLOTS[key]
+
+
+def _brief(exc: BaseException) -> str:
+    """The provider's message, short and without account ids, for the log."""
+    text = re.sub(r"org_[A-Za-z0-9]+", "org_…", str(exc))
+    return " ".join(text.split())[:240]
+
+
 def _failed() -> None:
     global _CALL_FAILURES
     _CALL_FAILURES += 1
@@ -317,7 +336,9 @@ def invoke_for_node(
                 _failed()
                 raise
             last = capped or exc
-            log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+            log.warning(
+                "node %s: model %s failed (%s: %s)", node, spec, type(exc).__name__, _brief(exc)
+            )
     _failed()
     raise _give_up(node, last)
 
@@ -332,13 +353,16 @@ async def ainvoke_for_node(
             last = QuotaExhaustedError(f"{spec} is still at its daily cap")
             continue
         try:
-            return await _ainvoke(chat_model(spec, **model_kw), messages, **kw)
+            async with _slot(spec):
+                return await _ainvoke(chat_model(spec, **model_kw), messages, **kw)
         except Exception as exc:  # noqa: BLE001
             capped = _note_cap(spec, exc)
             if capped is None and not _is_transient(exc):
                 _failed()
                 raise
             last = capped or exc
-            log.warning("node %s: model %s failed (%s)", node, spec, type(exc).__name__)
+            log.warning(
+                "node %s: model %s failed (%s: %s)", node, spec, type(exc).__name__, _brief(exc)
+            )
     _failed()
     raise _give_up(node, last)

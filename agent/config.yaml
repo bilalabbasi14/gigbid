@@ -113,6 +113,7 @@ budgets:
   per_node_timeout_seconds: 180   # first call loads the CPU embedding model
   per_node_retries: 2
   max_parallel_branches: 3        # Send fan-out at once (free tiers cap tokens per minute)
+  max_concurrent_calls_per_model: 2   # model calls in flight per model (agent/llm.py)
   latency_p95_seconds_per_job: 60
   latency_p95_seconds_per_proposal: 120
   cost_usd_per_job_analysed: 0.01

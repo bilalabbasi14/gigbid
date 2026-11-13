@@ -145,3 +145,35 @@ async def test_every_failed_call_is_counted(models: dict[str, list[Any]], monkey
     assert llm.call_failures() == 1 and llm.quota_failures() == 0
     assert llm.is_provider_failure(RuntimeError("503 overloaded"))
     assert not llm.is_provider_failure(ValueError("missing field"))
+
+
+async def test_calls_per_model_are_capped(monkeypatch: pytest.MonkeyPatch) -> None:
+    import asyncio
+
+    monkeypatch.setitem(llm.settings.config().budgets, "max_concurrent_calls_per_model", 2)
+    monkeypatch.setattr(llm, "_SLOTS", {})
+    monkeypatch.setattr(
+        type(llm.settings.config()), "model_for", lambda self, node, fallback=False: "test:m"
+    )
+    live, peak = 0, 0
+
+    class Slow:
+        async def ainvoke(self, messages: Any, **kw: Any) -> str:
+            nonlocal live, peak
+            live += 1
+            peak = max(peak, live)
+            loop = asyncio.get_running_loop()
+            done = loop.create_future()
+            loop.call_later(0.01, done.set_result, None)
+            await done
+            live -= 1
+            return "ok"
+
+    monkeypatch.setattr(llm, "chat_model", lambda spec, **kw: Slow())
+    await asyncio.gather(*(llm.ainvoke_for_node("analyst", []) for _ in range(6)))
+    assert peak == 2
+
+
+def test_failure_log_hides_account_ids() -> None:
+    msg = llm._brief(RuntimeError("Rate limit for org_01kym7na02e2sbmg99cs7242ey on TPM"))
+    assert "org_01" not in msg and "TPM" in msg

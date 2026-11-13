@@ -298,6 +298,9 @@ def write_result(name: str, payload: dict[str, Any]) -> Path:
 # policy pack, run options), so results from an older configuration are never mixed in.
 
 
+TIMING_ONLY = {"list_prices_usd_per_million", "max_concurrent_calls_per_model"}
+
+
 def fingerprint(extra: dict[str, Any] | None = None) -> str:
     h = hashlib.sha1()  # noqa: S324 - identity, not security
     files = sorted((ROOT / "agent/prompts").glob("*.md"))
@@ -315,8 +318,8 @@ def fingerprint(extra: dict[str, Any] | None = None) -> str:
         "reranker": cfg.models.reranker,
         "policy_version": cfg.policy_version,
         **{k: getattr(cfg, k) for k in ("rag", "thresholds", "pricing", "guardrails")},
-        # list prices only price results; they do not change what the agents do
-        "budgets": {k: v for k, v in cfg.budgets.items() if k != "list_prices_usd_per_million"},
+        # prices and call concurrency change cost and timing, not what the agents do
+        "budgets": {k: v for k, v in cfg.budgets.items() if k not in TIMING_ONLY},
         "extra": extra or {},
     }
     h.update(json.dumps(runtime, sort_keys=True, default=str).encode())
