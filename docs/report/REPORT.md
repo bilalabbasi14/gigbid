@@ -123,9 +123,23 @@ for ai_ml and the second worst for fullstack, so it does not ship as a global st
 corrective loop shows the same split, which fits the fact that it grades with the same
 cross-encoder. Why the cross-encoder demotes fullstack evidence is not yet established; a
 per-query comparison of V2 and V3 on the fullstack jobs is pending. The LLM-based
-variants (V1 decomposition, V7 HyDE, `best`), V6 contextual and V9 skill graph, claim
-verification before and after (`proposal_eval_*.json`) and the judge calibration
-(`judge_calibration.json`) are pending.
+variants (V1 decomposition, V7 HyDE, `best`), V6 contextual and V9 skill graph were not run:
+on the free tier their per-query model calls did not fit next to the proposal runs.
+
+**Claim verification.** Six proposals with V2 retrieval, drafted, verified and sent to GigSim
+(`evals/results/proposal_eval_v2_hybrid.json`): 0.67 unsupported claims per proposal before
+verification (9.5% of claims), none after; the Critic passed 5 of 6 after 1.2 revisions on
+average; no compliance blocks. The verifier removed or rewrote every unsupported sentence
+before the Critic saw the draft, which is the property the architecture depends on. With LLM
+clients, 1 of 6 proposals got a reply (and a hire). Six proposals per variant cannot show a
+reply-rate difference between variants; the V0 comparison is pending (*`proposal_eval_v0_naive.json`*).
+
+**Judge calibration** (*pending the human labels*). The judge scored the 30 calibration items
+(`evals/results/judge_scores.json`), past proposals drawn evenly from won, replied and ignored.
+
+**What ships.** V2 hybrid retrieval (`agent/config.yaml` rag.variant): the best Recall@5
+overall, no model call and no cross-encoder, so it adds no quota and no latency. Reranking is
+kept as an option, not a default, because its gain on one persona is paid for by another.
 
 ## 5. R&D question C: single agent, supervisor, graph (*results pending: `multiagent_comparison.json`*)
 
@@ -223,3 +237,12 @@ and 365 s per proposal against 120, measured on the development laptop with the 
 limits. Most of the proposal time is Critic send-backs (zero to two per proposal), so the
 optimisation that matters is a draft that passes the Critic the first time, not a faster model.
 The hidden-run numbers will be reported against the same budgets without adjustment.
+
+**Choosing the model configuration** (`evals/results/profile_comparison.json`). The open
+profile (Groq: gpt-oss-20b, Qwen3.8 27B, gpt-oss-120b) and the local profile (qwen3:4b-instruct
+on the laptop CPU, i5-1155G7 with 7.8 GB and no GPU) decided the same nine dev jobs. The local
+profile scored bid-or-skip F1 0.75 against 0.57 and the two agreed on 44% of decisions, which
+nine jobs cannot separate from noise. Speed and hosting decided: the local profile needs p50 296 s
+and p95 666 s per job at 2.8 output tokens per second of wall time, against p50 92 s for the open
+profile and a 60 s budget, and the 4 GiB deployment VM has no room for a local model. The open
+profile ships; the local profile runs the CI smoke evaluation, where it costs no API quota.
