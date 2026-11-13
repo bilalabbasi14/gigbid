@@ -30,16 +30,57 @@ def parse_spec(spec: str) -> tuple[str, str]:
     return provider, model
 
 
-@lru_cache(maxsize=32)
+@lru_cache(maxsize=1)
+def groq_keys() -> tuple[str, ...]:
+    """GROQ_API_KEY, then GROQ_API_KEY_2, _3, ... (environment first, then .env). Each key from a
+    separate account brings its own daily and per-minute limits; the routes below rotate over the
+    extra keys and use the main key last, which keeps the main key's quota for the live app."""
+    from dotenv import dotenv_values
+
+    file_vals = dotenv_values(settings.ROOT / ".env") if (settings.ROOT / ".env").exists() else {}
+    main = settings.env().groq_api_key
+    keys = [main.get_secret_value() if hasattr(main, "get_secret_value") else (main or "")]
+    extra = sorted(
+        {k for k in [*os.environ, *file_vals] if re.fullmatch(r"GROQ_API_KEY_\d+", k)},
+        key=lambda k: int(k.rsplit("_", 1)[1]),
+    )
+    for name in extra:
+        v = (os.environ.get(name) or file_vals.get(name) or "").strip().strip('"').strip("'")
+        if v:
+            keys.append(v)
+    return tuple(dict.fromkeys(k for k in keys if k))
+
+
+_CURSOR: dict[str, int] = {}
+
+
+def _routes(spec: str) -> list[int]:
+    """Key indices to try for a model, in order: the extra keys in rotation, the main key last."""
+    n = len(groq_keys()) if spec.startswith("groq:") else 1
+    if n <= 1:
+        return [0]
+    start = _CURSOR.get(spec, 0)
+    _CURSOR[spec] = start + 1
+    extra = [1 + (start + j) % (n - 1) for j in range(n - 1)]
+    return [*extra, 0]
+
+
+def _label(spec: str, key: int) -> str:
+    return spec if key == 0 else f"{spec} (key {key + 1})"
+
+
+@lru_cache(maxsize=64)
 def chat_model(
     spec: str,
     temperature: float | None = None,
     max_tokens: int | None = None,
     timeout: float | None = None,
     max_retries: int = 0,
+    key_index: int = 0,
 ) -> BaseChatModel:
     """`max_retries` is the provider client's own retry (it honours retry-after headers); keep it
-    0 for calls that go through invoke_for_node, which retries and falls back itself."""
+    0 for calls that go through invoke_for_node, which retries and falls back itself.
+    `key_index` picks one of groq_keys()."""
     env = settings.env()
     gen = settings.config().models.generation
     temperature = gen.get("temperature", 0.2) if temperature is None else temperature
@@ -51,9 +92,12 @@ def chat_model(
         from langchain_groq import ChatGroq
 
         extra: dict[str, Any] = {"reasoning_effort": "low"} if "gpt-oss" in model else {}
+        keys = groq_keys()
         return ChatGroq(
             model=model,
-            api_key=env.groq_api_key or None,
+            api_key=(keys[key_index] if key_index < len(keys) else None)
+            or env.groq_api_key
+            or None,
             temperature=temperature,
             max_tokens=max_tokens,
             timeout=timeout,
@@ -98,7 +142,11 @@ def chat_model(
 
 
 def chat_for_node(node: str, *, fallback: bool = False, **kw: Any) -> BaseChatModel:
-    return chat_model(settings.config().model_for(node, fallback=fallback), **kw)
+    """A model object for callers that drive it themselves (the multi-agent baselines): the next
+    key that is not at its daily cap."""
+    spec = settings.config().model_for(node, fallback=fallback)
+    key = next((k for k in _routes(spec) if not _capped(spec, k)), 0)
+    return chat_model(spec, key_index=key, **kw)
 
 
 class QuotaExhaustedError(RuntimeError):
@@ -224,18 +272,22 @@ def _candidates(node: str) -> list[str]:
     return list(dict.fromkeys(specs))
 
 
-def _capped(spec: str) -> bool:
-    until = _EXHAUSTED.get(spec)
+def _capkey(spec: str, key: int) -> str:
+    return spec if key == 0 else f"{spec}#{key}"
+
+
+def _capped(spec: str, key: int = 0) -> bool:
+    until = _EXHAUSTED.get(_capkey(spec, key))
     return until is not None and time.monotonic() < until
 
 
-def _note_cap(spec: str, exc: BaseException) -> QuotaExhaustedError | None:
+def _note_cap(spec: str, exc: BaseException, key: int = 0) -> QuotaExhaustedError | None:
     wait = _daily_cap_wait(exc)
     if wait is None:
         return None
-    _EXHAUSTED[spec] = time.monotonic() + wait
-    log.warning("model %s reached its daily cap; skipping it for %.0f s", spec, wait)
-    return QuotaExhaustedError(f"{spec} reached its daily cap (retry in {wait:.0f} s)")
+    _EXHAUSTED[_capkey(spec, key)] = time.monotonic() + wait
+    log.warning("model %s reached its daily cap; skipping it for %.0f s", _label(spec, key), wait)
+    return QuotaExhaustedError(f"{_label(spec, key)} reached its daily cap (retry in {wait:.0f} s)")
 
 
 def _give_up(node: str, last: BaseException | None) -> BaseException:
@@ -297,18 +349,18 @@ async def _ainvoke(model: BaseChatModel, messages: list[BaseMessage], **kw: Any)
             await asyncio.sleep(wait)
 
 
-_SLOTS: dict[tuple[int, str], asyncio.Semaphore] = {}
+_SLOTS: dict[tuple[int, str, int], asyncio.Semaphore] = {}
 
 
-def _slot(spec: str) -> asyncio.Semaphore:
+def _slot(spec: str, key: int = 0) -> asyncio.Semaphore:
     """At most budgets.max_concurrent_calls_per_model calls in flight per model and event loop:
     free tiers cap tokens per minute per model, and a burst of parallel calls only buys 429s."""
-    key = (id(asyncio.get_running_loop()), spec)
-    if key not in _SLOTS:
+    slot = (id(asyncio.get_running_loop()), spec, key)  # limits are per key, so slots are too
+    if slot not in _SLOTS:
         cap = settings.config().budgets.get("max_concurrent_calls_per_model", 2)
         n = cap.get(spec, cap.get("default", 2)) if isinstance(cap, dict) else cap
-        _SLOTS[key] = asyncio.Semaphore(max(1, int(n)))
-    return _SLOTS[key]
+        _SLOTS[slot] = asyncio.Semaphore(max(1, int(n)))
+    return _SLOTS[slot]
 
 
 def _brief(exc: BaseException) -> str:
@@ -331,20 +383,25 @@ def invoke_for_node(
     model_kw = model_kw or {}
     last: BaseException | None = None
     for spec in _candidates(node):
-        if _capped(spec):
-            last = QuotaExhaustedError(f"{spec} is still at its daily cap")
-            continue
-        try:
-            return _invoke(chat_model(spec, **model_kw), messages, **kw)
-        except Exception as exc:  # noqa: BLE001
-            capped = _note_cap(spec, exc)
-            if capped is None and not _is_transient(exc):
-                _failed()
-                raise
-            last = capped or exc
-            log.warning(
-                "node %s: model %s failed (%s: %s)", node, spec, type(exc).__name__, _brief(exc)
-            )
+        for key in _routes(spec):
+            if _capped(spec, key):
+                last = QuotaExhaustedError(f"{_label(spec, key)} is still at its daily cap")
+                continue
+            try:
+                return _invoke(chat_model(spec, key_index=key, **model_kw), messages, **kw)
+            except Exception as exc:  # noqa: BLE001
+                capped = _note_cap(spec, exc, key)
+                if capped is None and not _is_transient(exc):
+                    _failed()
+                    raise
+                last = capped or exc
+                log.warning(
+                    "node %s: model %s failed (%s: %s)",
+                    node,
+                    _label(spec, key),
+                    type(exc).__name__,
+                    _brief(exc),
+                )
     _failed()
     raise _give_up(node, last)
 
@@ -355,20 +412,27 @@ async def ainvoke_for_node(
     model_kw = model_kw or {}
     last: BaseException | None = None
     for spec in _candidates(node):
-        if _capped(spec):
-            last = QuotaExhaustedError(f"{spec} is still at its daily cap")
-            continue
-        try:
-            async with _slot(spec):
-                return await _ainvoke(chat_model(spec, **model_kw), messages, **kw)
-        except Exception as exc:  # noqa: BLE001
-            capped = _note_cap(spec, exc)
-            if capped is None and not _is_transient(exc):
-                _failed()
-                raise
-            last = capped or exc
-            log.warning(
-                "node %s: model %s failed (%s: %s)", node, spec, type(exc).__name__, _brief(exc)
-            )
+        for key in _routes(spec):
+            if _capped(spec, key):
+                last = QuotaExhaustedError(f"{_label(spec, key)} is still at its daily cap")
+                continue
+            try:
+                async with _slot(spec, key):
+                    return await _ainvoke(
+                        chat_model(spec, key_index=key, **model_kw), messages, **kw
+                    )
+            except Exception as exc:  # noqa: BLE001
+                capped = _note_cap(spec, exc, key)
+                if capped is None and not _is_transient(exc):
+                    _failed()
+                    raise
+                last = capped or exc
+                log.warning(
+                    "node %s: model %s failed (%s: %s)",
+                    node,
+                    _label(spec, key),
+                    type(exc).__name__,
+                    _brief(exc),
+                )
     _failed()
     raise _give_up(node, last)

@@ -185,3 +185,40 @@ def test_waits_in_milliseconds_are_understood() -> None:
         "Limit 1000, Used 313, Requested 700. Please try again in 779.99999ms."
     )
     assert llm._per_minute_wait(RuntimeError(otpm)) == pytest.approx(0.78, abs=0.01)
+
+
+async def test_extra_keys_rotate_and_a_capped_key_is_skipped(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(llm, "groq_keys", lambda: ("main", "k2", "k3"))
+    monkeypatch.setattr(llm, "_EXHAUSTED", {})
+    monkeypatch.setattr(llm, "_CURSOR", {})
+    monkeypatch.setattr(llm, "_SLOTS", {})
+    monkeypatch.setenv("GIGBID_STRICT_MODELS", "1")
+    monkeypatch.setattr(
+        type(llm.settings.config()), "model_for", lambda self, node, fallback=False: "groq:m"
+    )
+    used: list[int] = []
+
+    class Keyed:
+        def __init__(self, key: int) -> None:
+            self.key = key
+
+        async def ainvoke(self, messages: Any, **kw: Any) -> str:
+            used.append(self.key)
+            if self.key == 1:
+                raise RuntimeError(TPD)
+            return f"key{self.key}"
+
+    monkeypatch.setattr(llm, "chat_model", lambda spec, key_index=0, **kw: Keyed(key_index))
+    assert await llm.ainvoke_for_node("analyst", []) == "key2"  # key 2 of the account is capped
+    assert await llm.ainvoke_for_node("analyst", []) == "key2"
+    assert await llm.ainvoke_for_node("analyst", []) == "key2"
+    assert used == [1, 2, 2, 2] and llm._capped("groq:m", 1)
+    assert 0 not in used  # the main key is kept for last
+
+
+def test_only_groq_models_have_several_routes(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(llm, "groq_keys", lambda: ("main", "k2"))
+    assert llm._routes("ollama:qwen3:4b-instruct") == [0]
+    assert llm._routes("groq:x") == [1, 0]
