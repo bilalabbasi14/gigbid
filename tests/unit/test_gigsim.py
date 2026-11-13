@@ -253,3 +253,30 @@ def test_client_llm_parses_and_caches(tmp_path, monkeypatch):
     assert first["interest"] == 1.0 and len(first["concerns"]) == 3
     assert again["cached"] is True and len(calls) == 1
     assert client_llm.parse("no json here") is None
+
+
+def test_two_accounts_may_use_the_same_idempotency_key(client):
+    client.post(
+        "/admin/accounts",
+        params={"api_key": "second-token", "freelancer_id": "fl_second", "connects": 500},
+    )
+    h2 = {"Authorization": "Bearer second-token"}
+    applied = {p["job_id"] for p in client.get("/proposals", headers=H).json()["items"]}
+    job = next(
+        j
+        for j in client.get("/jobs", headers=H, params={"limit": 50}).json()["items"]
+        if j["job_id"] not in applied
+    )
+    body = {
+        "job_id": job["job_id"],
+        "cover_letter": f"Your {job['title']} needs a clear first milestone and weekly demos.",
+        "bid_amount": 400.0 if job["payment_type"] == "fixed" else 30.0,
+        "bid_type": job["payment_type"],
+        "screening_answers": [
+            "An answer of reasonable length." for _ in job["screening_questions"]
+        ],
+        "idempotency_key": "shared-key-0001",
+    }
+    assert client.post("/proposals", headers=H, json=body).status_code == 201
+    assert client.post("/proposals", headers=h2, json=body).status_code == 201
+    assert client.post("/proposals", headers=h2, json=body).json()["idempotent_replay"] is True

@@ -315,8 +315,14 @@ class ProposalIn(BaseModel):
     dry_run: bool = False
 
 
+def _scoped(fid: str, endpoint: str, key: str) -> str:
+    """Idempotency keys belong to one account and one endpoint, as on a real marketplace: two
+    freelancers may use the same key without colliding."""
+    return f"{fid}:{endpoint}:{key}"
+
+
 def _idempotent(db: Session, key: str, fid: str, endpoint: str) -> dict[str, Any] | None:
-    rec = db.get(IdempotencyRecord, key)
+    rec = db.get(IdempotencyRecord, _scoped(fid, endpoint, key))
     if rec and rec.freelancer_id == fid and rec.endpoint == endpoint:
         return {**rec.response, "idempotent_replay": True}
     return None
@@ -398,7 +404,7 @@ def create_proposal(
     resp = {"proposal": proposal_out(p), "connects_remaining": acct.connects}
     db.add(
         IdempotencyRecord(
-            key=body.idempotency_key,
+            key=_scoped(acct.freelancer_id, "proposals", body.idempotency_key),
             freelancer_id=acct.freelancer_id,
             endpoint="proposals",
             response=resp,
@@ -635,7 +641,7 @@ def send_message(
     resp = {"message_id": mid, "thread_id": body.thread_id, "client_replied": bool(reply)}
     db.add(
         IdempotencyRecord(
-            key=body.idempotency_key,
+            key=_scoped(acct.freelancer_id, "messages", body.idempotency_key),
             freelancer_id=acct.freelancer_id,
             endpoint="messages",
             response=resp,
