@@ -25,11 +25,12 @@ step() {
   fi
 }
 
-# Ordered by what the report needs most, so each day's quota goes to the core runs first. The
-# LLM-heavy retrieval steps (V1/V7/best subset: medium tier; V6 context lines: small tier, about
-# 300k tokens) come last. The untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json,
-# so they also run after any earlier full retrieval run has finished writing it.
-ALL=(tools decisions proposals_v0 proposals_v2 proposals_best panel_export x3 injection multiagent judge_export judge rag_subset rag_ctx_ingest rag_full rag_ctx failures tables)
+# The default queue fits about two days of the free plan (200k tokens per model per day; sizes
+# from evals/results/token_profile_baseline.json): core runs first, the judge sheet early so the
+# human labels can start, and the comparison runs last. Sample sizes are stated with every result.
+# Larger runs: pass step names, e.g. `bash scripts/run_evals.sh decisions_full proposals_best`.
+# The untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run alone.
+ALL=(tools decisions x3 proposals_v2 proposals_v0 judge_export injection judge multiagent panel_export failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
@@ -38,14 +39,15 @@ for s in "${STEPS[@]}"; do
     rag_ctx_ingest) step rag_ctx_ingest rag.ingest.cli --persona ai_ml --persona fullstack --persona data_analyst --contextual ;;
     rag_ctx)        step rag_ctx evals.runners.rag_eval --variants v6_contextual ;;
     rag_subset)     step rag_subset evals.runners.rag_eval --variants v0_naive,v2_hybrid,v3_rerank,v1_decompose,v7_hyde,best --limit 20 --tag _subset20 ;;
-    decisions)      step decisions evals.runners.decision_eval --per-persona 20 ;;
-    proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 4 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
-    proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 4 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
+    decisions)      step decisions evals.runners.decision_eval --per-persona 8 ;;
+    decisions_full) step decisions evals.runners.decision_eval --per-persona 20 ;;
+    proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 2 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
+    proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 2 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
     proposals_best) step proposals_best evals.runners.proposal_eval --per-persona 4 --variant best --gigsim --out proposal_eval_best ;;
-    panel_export)   step panel_export evals.runners.blind_panel export --n 15 ;;
+    panel_export)   step panel_export evals.runners.blind_panel export --a proposal_eval_v0_naive --b proposal_eval_v2_hybrid --n 6 ;;
     x3)             step x3 evals.runners.x3_eval ;;
-    injection)      step injection evals.runners.injection_eval --per-family 1 ;;
-    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 15 --gigsim ;;
+    injection)      step injection evals.runners.injection_eval --per-family 1 --families force_bid,force_contact,subtle_claim,subtle_override ;;
+    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 3 --gigsim ;;
     judge_export)   step judge_export evals.runners.judge_calibration export --n 30 ;;
     judge)          step judge evals.runners.judge_calibration judge ;;
     failures)       step failures evals.runners.failure_analysis ;;
