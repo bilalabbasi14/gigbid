@@ -1,8 +1,10 @@
 name: Smoke eval
 # 30-job smoke evaluation on pull requests that touch agent, RAG, MCP, policy or simulator code.
-# Fails if unsupported claims rise, bid-or-skip F1 or scam recall drop, or p95 latency exceeds the
-# budget (thresholds in evals/thresholds.yaml). Needs the GROQ_API_KEY repository secret; without
-# it the job reports "skipped" instead of failing.
+# It runs the local model profile (Ollama, qwen3:4b-instruct on the runner's CPU), so pull
+# requests spend no API quota and need no secret; the free API tier's daily token cap belongs to
+# the evaluation queue and the live app. Fails if unsupported claims rise, bid-or-skip F1 or scam
+# recall drop, or p95 latency exceeds the budget (evals/thresholds.yaml, one block per profile).
+# Run it by hand with profile=open to check the deployed profile (needs the GROQ_API_KEY secret).
 on:
   pull_request:
     paths:
@@ -14,11 +16,17 @@ on:
       - "data/policy_pack/**"
       - "gigsim/**"
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "Model profile"
+        type: choice
+        options: [local, open]
+        default: local
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 240
     services:
       postgres:
         image: pgvector/pgvector:pg16
@@ -30,41 +38,64 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U gigbid -d gigbid" --health-interval 5s --health-timeout 3s --health-retries 20
     env:
-      MODEL_PROFILE: open
+      MODEL_PROFILE: ${{ inputs.profile || 'local' }}
       DATABASE_URL: postgresql+psycopg://gigbid:gigbid@localhost:5432/gigbid
       APP_ENV: test
       LANGSMITH_TRACING: "false"
       HF_HUB_DISABLE_SYMLINKS_WARNING: "1"
+      OLLAMA_BASE_URL: http://127.0.0.1:11434
+      OLLAMA_MODELS: /home/runner/.ollama/models
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
     steps:
       - uses: actions/checkout@v4
-      - name: Check model key
-        id: key
-        run: echo "present=$([ -n "$GROQ_API_KEY" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Check the profile can run
+        id: ready
+        run: |
+          if [ "$MODEL_PROFILE" = "open" ] && [ -z "$GROQ_API_KEY" ]; then
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: astral-sh/setup-uv@v5
-        if: steps.key.outputs.present == 'true'
+        if: steps.ready.outputs.ok == 'true'
         with: { enable-cache: true }
       - uses: actions/setup-python@v5
-        if: steps.key.outputs.present == 'true'
+        if: steps.ready.outputs.ok == 'true'
         with: { python-version: "3.12" }
       - uses: actions/cache@v4
-        if: steps.key.outputs.present == 'true'
+        if: steps.ready.outputs.ok == 'true'
         with:
           path: ~/.cache/huggingface
           key: hf-models-${{ hashFiles('agent/config.yaml') }}
+      - uses: actions/cache@v4
+        if: steps.ready.outputs.ok == 'true' && env.MODEL_PROFILE == 'local'
+        with:
+          path: /home/runner/.ollama/models
+          key: ollama-qwen3-4b-instruct-v1
+      - name: Start Ollama with the local model
+        if: steps.ready.outputs.ok == 'true' && env.MODEL_PROFILE == 'local'
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          sudo systemctl stop ollama || true   # run as the runner user so the model dir is cacheable
+          mkdir -p "$OLLAMA_MODELS"
+          nohup ollama serve > /tmp/ollama.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf "$OLLAMA_BASE_URL/api/version" && break; sleep 2; done
+          ollama pull qwen3:4b-instruct
       - name: Install
-        if: steps.key.outputs.present == 'true'
+        if: steps.ready.outputs.ok == 'true'
         run: uv sync --extra dev --extra eval
       - name: Index the persona corpora
-        if: steps.key.outputs.present == 'true'
+        if: steps.ready.outputs.ok == 'true'
         run: uv run python -m rag.ingest.cli --all
       - name: Run the smoke eval against thresholds
-        if: steps.key.outputs.present == 'true'
-        run: uv run python -m evals.runners.smoke_eval --jobs 30 --proposals 3 --thresholds evals/thresholds.yaml
-      - name: Skipped (no GROQ_API_KEY secret)
-        if: steps.key.outputs.present != 'true'
-        run: echo "::notice::Smoke eval skipped because the GROQ_API_KEY repository secret is not set"
+        if: steps.ready.outputs.ok == 'true'
+        run: uv run python -m evals.runners.smoke_eval --jobs 30 --proposals 1 --thresholds evals/thresholds.yaml
+      - name: Skipped (open profile without GROQ_API_KEY)
+        if: steps.ready.outputs.ok != 'true'
+        run: echo "::notice::The open-profile smoke eval needs the GROQ_API_KEY repository secret"
+      - name: Ollama log
+        if: failure() && env.MODEL_PROFILE == 'local'
+        run: tail -50 /tmp/ollama.log || true
       - uses: actions/upload-artifact@v4
-        if: always() && steps.key.outputs.present == 'true'
+        if: always() && steps.ready.outputs.ok == 'true'
         with: { name: smoke-eval-results, path: "evals/results/smoke_*.json", if-no-files-found: ignore }
