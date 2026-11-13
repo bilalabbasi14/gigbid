@@ -98,7 +98,11 @@ _Not yet run: `uv run python -m evals.runners.multiagent_compare`._
 
 ### Tool granularity (Part A)
 <!-- results: tools -->
-_Not yet run: `uv run python -m evals.runners.tool_design_eval`._
+| Tool set | Selection accuracy | Argument accuracy | Tokens / task | Source |
+|---|---|---|---|---|
+| A. fine-grained (18 tools) | 0.950 | 0.825 | 2023 | evals/results/tool_design.json |
+| B. coarse (3 tools) | 0.750 | 0.350 | 565 | evals/results/tool_design.json |
+| C. fine-grained, rewritten descriptions | 0.975 | 0.875 | 2390 | evals/results/tool_design.json |
 <!-- /results -->
 
 ### Safety and the portfolio builder
