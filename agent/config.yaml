@@ -117,6 +117,12 @@ budgets:
   latency_p95_seconds_per_proposal: 120
   cost_usd_per_job_analysed: 0.01
   cost_usd_per_proposal: 0.05
+  # Groq on-demand list prices, USD per 1M tokens [input, output] (console.groq.com/docs/models,
+  # 2026-11-12). The free plan costs nothing; these price what a paid deployment would spend.
+  list_prices_usd_per_million:
+    openai/gpt-oss-20b: [0.075, 0.30]
+    openai/gpt-oss-120b: [0.15, 0.60]
+    qwen/qwen3.8-27b: [0.80, 4.00]
 
 thresholds:
   bid_min_fit_score: 0.60

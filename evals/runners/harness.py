@@ -314,7 +314,9 @@ def fingerprint(extra: dict[str, Any] | None = None) -> str:
         "embeddings": cfg.models.embeddings,
         "reranker": cfg.models.reranker,
         "policy_version": cfg.policy_version,
-        **{k: getattr(cfg, k) for k in ("rag", "budgets", "thresholds", "pricing", "guardrails")},
+        **{k: getattr(cfg, k) for k in ("rag", "thresholds", "pricing", "guardrails")},
+        # list prices only price results; they do not change what the agents do
+        "budgets": {k: v for k, v in cfg.budgets.items() if k != "list_prices_usd_per_million"},
         "extra": extra or {},
     }
     h.update(json.dumps(runtime, sort_keys=True, default=str).encode())
