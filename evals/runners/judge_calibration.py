@@ -12,7 +12,7 @@
 The judge prompt is agent/prompts/judge.md (node "judge", large tier). Items are the proposals
 GigBid wrote in evals/results/proposal_eval*.json; when there are fewer than --n, the sheet is
 filled with the personas' past proposals (data/personas/*/proposals.jsonl), drawn evenly from
-won, replied and ignored ones so the items span the quality range. The `source` column says which.
+won, replied and ignored ones so the items span the quality range. judge_sheet_sources.json says which, out of the scorer's sight.
 """
 
 from __future__ import annotations
@@ -31,6 +31,9 @@ from evals.runners.harness import load_dev, write_result
 
 LABEL_DIR = ROOT / "evals/labeling"
 SHEET = LABEL_DIR / "judge_sheet.csv"
+SOURCES = (
+    LABEL_DIR / "judge_sheet_sources.json"
+)  # where each item came from; not shown to the scorer
 JUDGED = ROOT / "evals/results/judge_scores.json"
 CRITERIA = ["relevance", "specificity", "credibility", "clarity", "next_step", "overall"]
 
@@ -89,7 +92,6 @@ def export(n: int, seed: int, force: bool = False) -> None:
         w.writerow(
             [
                 "item_id",
-                "source",
                 "job_id",
                 "job_title",
                 "job_description",
@@ -103,7 +105,6 @@ def export(n: int, seed: int, force: bool = False) -> None:
             w.writerow(
                 [
                     f"j{i:02d}",
-                    r["source"],
                     r["job_id"],
                     job.get("title", r.get("title", "")),
                     (job.get("description") or "")[:1500],
@@ -112,8 +113,12 @@ def export(n: int, seed: int, force: bool = False) -> None:
                     "",
                 ]
             )
+    SOURCES.write_text(
+        json.dumps({f"j{i:02d}": r["source"] for i, r in enumerate(items, 1)}, indent=2),
+        encoding="utf-8",
+    )
     print(
-        f"wrote {len(items)} proposals to {SHEET} - fill human_* with scores 1-5 (see agent/prompts/judge.md for the rubric)"
+        f"wrote {len(items)} proposals to {SHEET} - fill human_* with scores 1-5 (rubric: evals/labeling/RUBRIC.md)"
     )
 
 
