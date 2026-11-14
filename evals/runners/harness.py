@@ -97,10 +97,14 @@ async def client_reaction(adapter: Any, result: Any, wait_s: float = 900.0) -> s
     t0 = time.monotonic()
     async with httpx.AsyncClient(timeout=15) as c:
         while time.monotonic() - t0 < wait_s:
-            r = await c.get(
-                f"{adapter.base_url}/proposals/{pid}",
-                headers={"Authorization": f"Bearer {adapter.token}"},
-            )
+            try:
+                r = await c.get(
+                    f"{adapter.base_url}/proposals/{pid}",
+                    headers={"Authorization": f"Bearer {adapter.token}"},
+                )
+            except httpx.TransportError:  # GigSim busy deciding another proposal: poll again
+                await asyncio.sleep(3)
+                continue
             r.raise_for_status()
             p = r.json()
             if p.get("decided", True):
