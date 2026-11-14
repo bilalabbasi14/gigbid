@@ -1,0 +1,1222 @@
+{
+  "generated_at": "2026-11-14T15:32:15Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "config": {
+    "personas": "ai_ml,fullstack,data_analyst",
+    "variant": "v2_hybrid",
+    "fresh": false
+  },
+  "overall": {
+    "case_studies": 30,
+    "unsupported_rate_before": 0.14,
+    "unsupported_rate_after": 0.006,
+    "claims_per_case_study": 12.167,
+    "facts_cited_per_case_study": 11.233,
+    "library_recall": 0.402,
+    "library_precision": 0.618,
+    "retrieval_weighted": {
+      "original": {
+        "recall@5": 0.7429,
+        "mrr": 0.4802,
+        "ndcg@10": 0.5417
+      },
+      "base": {
+        "recall@5": 0.722,
+        "mrr": 0.4721,
+        "ndcg@10": 0.5273
+      },
+      "built": {
+        "recall@5": 0.7303,
+        "mrr": 0.4669,
+        "ndcg@10": 0.5252
+      }
+    },
+    "n_jobs": 120
+  },
+  "personas": {
+    "ai_ml": {
+      "repositories": 8,
+      "drafted": 8,
+      "retrieval": {
+        "n_jobs": 35,
+        "original": {
+          "recall@5": 0.6571,
+          "mrr": 0.4286,
+          "ndcg@10": 0.4902
+        },
+        "base": {
+          "recall@5": 0.6143,
+          "mrr": 0.4152,
+          "ndcg@10": 0.4617
+        },
+        "built": {
+          "recall@5": 0.6143,
+          "mrr": 0.4169,
+          "ndcg@10": 0.4593
+        }
+      },
+      "case_studies": [
+        {
+          "repo": "assembly-maintenance-forecast",
+          "project_id": "p11",
+          "claims": 10,
+          "labels_before": {
+            "supported": 10,
+            "partly_supported": 0,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 0,
+          "facts_total": 19,
+          "facts_cited": 16,
+          "libraries_found": [
+            "airflow",
+            "aws sdk",
+            "flask",
+            "mlflow",
+            "numpy",
+            "pandas",
+            "pytorch"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "aws sagemaker",
+            "docker",
+            "mlflow",
+            "mlops",
+            "python",
+            "pytorch",
+            "time\u2011series forecasting"
+          ],
+          "library_precision": 0.429,
+          "library_recall": 0.375,
+          "words": 201,
+          "seconds": 203.82
+        },
+        {
+          "repo": "clinical-notes-summarizer",
+          "project_id": "p01",
+          "claims": 14,
+          "labels_before": {
+            "supported": 8,
+            "partly_supported": 1,
+            "unsupported": 5
+          },
+          "unsupported_rate_before": 0.357,
+          "unsupported_rate_after": 0.0,
+          "removed": 6,
+          "facts_total": 19,
+          "facts_cited": 12,
+          "libraries_found": [
+            "aws sdk",
+            "fastapi",
+            "hugging face transformers",
+            "mlflow",
+            "pydantic",
+            "pytorch",
+            "uvicorn"
+          ],
+          "libraries_in_metadata": [
+            "aws sagemaker",
+            "docker",
+            "fastapi",
+            "hugging face transformers",
+            "mlflow",
+            "mlops",
+            "nlp",
+            "python",
+            "pytorch",
+            "summarization"
+          ],
+          "library_precision": 0.571,
+          "library_recall": 0.4,
+          "words": 211,
+          "seconds": 337.51
+        },
+        {
+          "repo": "fintech-fraud-dashboard",
+          "project_id": "p09",
+          "claims": 13,
+          "labels_before": {
+            "supported": 11,
+            "partly_supported": 2,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 2,
+          "facts_total": 21,
+          "facts_cited": 15,
+          "libraries_found": [
+            "airflow",
+            "aws sdk",
+            "fastapi",
+            "mlflow",
+            "numpy",
+            "pandas",
+            "scikit-learn",
+            "uvicorn",
+            "xgboost"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "aws sagemaker",
+            "docker",
+            "mlflow",
+            "mlops",
+            "python",
+            "xgboost"
+          ],
+          "library_precision": 0.333,
+          "library_recall": 0.429,
+          "words": 232,
+          "seconds": 174.34
+        },
+        {
+          "repo": "image-quality-pipeline",
+          "project_id": "p15",
+          "claims": 13,
+          "labels_before": {
+            "supported": 12,
+            "partly_supported": 0,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.077,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 12,
+          "facts_cited": 10,
+          "libraries_found": [
+            "numpy",
+            "opencv"
+          ],
+          "libraries_in_metadata": [
+            "automation",
+            "computer vision",
+            "docker",
+            "opencv",
+            "python"
+          ],
+          "library_precision": 0.5,
+          "library_recall": 0.2,
+          "words": 207,
+          "seconds": 468.27
+        },
+        {
+          "repo": "legal-contract-bot",
+          "project_id": "p07",
+          "claims": 14,
+          "labels_before": {
+            "supported": 5,
+            "partly_supported": 0,
+            "unsupported": 9
+          },
+          "unsupported_rate_before": 0.643,
+          "unsupported_rate_after": 0.0,
+          "removed": 9,
+          "facts_total": 24,
+          "facts_cited": 17,
+          "libraries_found": [
+            "fastapi",
+            "hugging face transformers",
+            "langchain",
+            "pgvector",
+            "postgresql",
+            "pydantic",
+            "pytorch",
+            "sentence-transformers",
+            "uvicorn"
+          ],
+          "libraries_in_metadata": [
+            "docker",
+            "hugging face transformers",
+            "langchain",
+            "nlp",
+            "pgvector",
+            "postgresql",
+            "python",
+            "rag"
+          ],
+          "library_precision": 0.444,
+          "library_recall": 0.5,
+          "words": 212,
+          "seconds": 136.24
+        },
+        {
+          "repo": "logistics-route-optimizer",
+          "project_id": "p13",
+          "claims": 10,
+          "labels_before": {
+            "supported": 9,
+            "partly_supported": 1,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 13,
+          "facts_cited": 7,
+          "libraries_found": [
+            "fastapi",
+            "pydantic",
+            "uvicorn"
+          ],
+          "libraries_in_metadata": [
+            "api development",
+            "aws sagemaker",
+            "docker",
+            "fastapi",
+            "graph algorithms",
+            "networkx",
+            "python"
+          ],
+          "library_precision": 0.333,
+          "library_recall": 0.143,
+          "words": 222,
+          "seconds": 277.31
+        },
+        {
+          "repo": "rag-product-recommender",
+          "project_id": "p02",
+          "claims": 9,
+          "labels_before": {
+            "supported": 8,
+            "partly_supported": 1,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 20,
+          "facts_cited": 16,
+          "libraries_found": [
+            "fastapi",
+            "langchain",
+            "numpy",
+            "openai api",
+            "postgresql",
+            "pydantic",
+            "pytorch",
+            "sentence-transformers",
+            "uvicorn"
+          ],
+          "libraries_in_metadata": [
+            "aws sagemaker",
+            "docker",
+            "langchain",
+            "mlops",
+            "personalization",
+            "pgvector",
+            "postgresql",
+            "python",
+            "rag"
+          ],
+          "library_precision": 0.222,
+          "library_recall": 0.222,
+          "words": 235,
+          "seconds": 126.75
+        },
+        {
+          "repo": "realestate-doc-search",
+          "project_id": "p04",
+          "claims": 12,
+          "labels_before": {
+            "supported": 7,
+            "partly_supported": 5,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 4,
+          "facts_total": 19,
+          "facts_cited": 17,
+          "libraries_found": [
+            "fastapi",
+            "langchain",
+            "openai api",
+            "postgresql",
+            "pydantic",
+            "sqlalchemy",
+            "uvicorn"
+          ],
+          "libraries_in_metadata": [
+            "docker",
+            "fastapi",
+            "langchain",
+            "pgvector",
+            "python",
+            "rag",
+            "search"
+          ],
+          "library_precision": 0.286,
+          "library_recall": 0.286,
+          "words": 223,
+          "seconds": 143.08
+        }
+      ],
+      "tokens": 62058,
+      "cost_usd": 0.019595
+    },
+    "fullstack": {
+      "repositories": 8,
+      "drafted": 8,
+      "retrieval": {
+        "n_jobs": 31,
+        "original": {
+          "recall@5": 0.7903,
+          "mrr": 0.5409,
+          "ndcg@10": 0.6085
+        },
+        "base": {
+          "recall@5": 0.7903,
+          "mrr": 0.5167,
+          "ndcg@10": 0.5929
+        },
+        "built": {
+          "recall@5": 0.8226,
+          "mrr": 0.5306,
+          "ndcg@10": 0.6033
+        }
+      },
+      "case_studies": [
+        {
+          "repo": "audit-workflow-tool",
+          "project_id": "p15",
+          "claims": 13,
+          "labels_before": {
+            "supported": 4,
+            "partly_supported": 1,
+            "unsupported": 8
+          },
+          "unsupported_rate_before": 0.615,
+          "unsupported_rate_after": 0.0,
+          "removed": 9,
+          "facts_total": 15,
+          "facts_cited": 13,
+          "libraries_found": [
+            "apollo graphql",
+            "express",
+            "graphql",
+            "react",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "apollo-client",
+            "apollo-server-express",
+            "docker",
+            "express",
+            "graphql",
+            "node.js",
+            "postgresql",
+            "react",
+            "react-beautiful-dnd",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.6,
+          "words": 200,
+          "seconds": 214.01
+        },
+        {
+          "repo": "boutique-hotel-reservations",
+          "project_id": "p07",
+          "claims": 15,
+          "labels_before": {
+            "supported": 9,
+            "partly_supported": 3,
+            "unsupported": 3
+          },
+          "unsupported_rate_before": 0.2,
+          "unsupported_rate_after": 0.0,
+          "removed": 6,
+          "facts_total": 19,
+          "facts_cited": 8,
+          "libraries_found": [
+            "next.js",
+            "react",
+            "stripe",
+            "supabase",
+            "tailwind css",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "date-fns",
+            "next.js",
+            "stripe",
+            "stripe-react",
+            "supabase",
+            "supabase-js",
+            "tailwind css",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.875,
+          "words": 144,
+          "seconds": 198.51
+        },
+        {
+          "repo": "factory-kpi-dashboard",
+          "project_id": "p09",
+          "claims": 10,
+          "labels_before": {
+            "supported": 7,
+            "partly_supported": 2,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.1,
+          "unsupported_rate_after": 0.0,
+          "removed": 2,
+          "facts_total": 12,
+          "facts_cited": 9,
+          "libraries_found": [
+            "express",
+            "graphql",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "apollo-client",
+            "apollo-server-express",
+            "docker",
+            "express",
+            "graphql",
+            "node.js",
+            "postgresql",
+            "react",
+            "recharts",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.4,
+          "words": 184,
+          "seconds": 75.53
+        },
+        {
+          "repo": "media-publishing-engine",
+          "project_id": "p13",
+          "claims": 15,
+          "labels_before": {
+            "supported": 5,
+            "partly_supported": 2,
+            "unsupported": 8
+          },
+          "unsupported_rate_before": 0.533,
+          "unsupported_rate_after": 0.167,
+          "removed": 9,
+          "facts_total": 18,
+          "facts_cited": 15,
+          "libraries_found": [
+            "django",
+            "django rest framework",
+            "postgresql",
+            "react",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "django",
+            "django rest framework",
+            "django-cms",
+            "docker",
+            "postgresql",
+            "psycopg2",
+            "react",
+            "react-markdown",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.778,
+          "words": 192,
+          "seconds": 297.12
+        },
+        {
+          "repo": "microlending-api",
+          "project_id": "p11",
+          "claims": 11,
+          "labels_before": {
+            "supported": 4,
+            "partly_supported": 4,
+            "unsupported": 3
+          },
+          "unsupported_rate_before": 0.273,
+          "unsupported_rate_after": 0.0,
+          "removed": 7,
+          "facts_total": 11,
+          "facts_cited": 6,
+          "libraries_found": [
+            "express",
+            "jest",
+            "stripe",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "docker",
+            "express",
+            "ioredis",
+            "jest",
+            "node.js",
+            "postgresql",
+            "redis",
+            "stripe",
+            "typeorm",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.4,
+          "words": 160,
+          "seconds": 211.34
+        },
+        {
+          "repo": "realestate-portal-analytics",
+          "project_id": "p05",
+          "claims": 14,
+          "labels_before": {
+            "supported": 10,
+            "partly_supported": 4,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 4,
+          "facts_total": 13,
+          "facts_cited": 9,
+          "libraries_found": [
+            "express",
+            "graphql",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "apollo-server-express",
+            "chart.js",
+            "docker",
+            "express",
+            "graphql",
+            "ioredis",
+            "node.js",
+            "pg",
+            "postgresql",
+            "redis"
+          ],
+          "library_precision": 0.667,
+          "library_recall": 0.3,
+          "words": 176,
+          "seconds": 266.62
+        },
+        {
+          "repo": "realestate-portal-phase1",
+          "project_id": "p03",
+          "claims": 11,
+          "labels_before": {
+            "supported": 8,
+            "partly_supported": 3,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 3,
+          "facts_total": 20,
+          "facts_cited": 13,
+          "libraries_found": [
+            "next.js",
+            "prisma",
+            "react",
+            "tailwind css",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "docker",
+            "next-seo",
+            "next.js",
+            "postgresql",
+            "prisma",
+            "react-hook-form",
+            "tailwind css",
+            "tailwindcss",
+            "typescript"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.556,
+          "words": 192,
+          "seconds": 128.44
+        },
+        {
+          "repo": "sustainable-marketplace-mvp",
+          "project_id": "p01",
+          "claims": 12,
+          "labels_before": {
+            "supported": 11,
+            "partly_supported": 0,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.083,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 23,
+          "facts_cited": 14,
+          "libraries_found": [
+            "express",
+            "jest",
+            "next.js",
+            "prisma",
+            "react",
+            "stripe",
+            "tailwind css",
+            "typescript"
+          ],
+          "libraries_in_metadata": [
+            "docker",
+            "docker-compose",
+            "express",
+            "next-auth",
+            "next.js",
+            "node.js",
+            "postgresql",
+            "prisma",
+            "react",
+            "react-query",
+            "stripe",
+            "stripe-node",
+            "tailwind css",
+            "tailwindcss",
+            "typescript"
+          ],
+          "library_precision": 0.875,
+          "library_recall": 0.6,
+          "words": 171,
+          "seconds": 154.66
+        }
+      ],
+      "tokens": 64133,
+      "cost_usd": 0.019995
+    },
+    "data_analyst": {
+      "repositories": 14,
+      "drafted": 14,
+      "retrieval": {
+        "n_jobs": 54,
+        "original": {
+          "recall@5": 0.7712,
+          "mrr": 0.4787,
+          "ndcg@10": 0.5367
+        },
+        "base": {
+          "recall@5": 0.7526,
+          "mrr": 0.4833,
+          "ndcg@10": 0.5321
+        },
+        "built": {
+          "recall@5": 0.7526,
+          "mrr": 0.4627,
+          "ndcg@10": 0.523
+        }
+      },
+      "case_studies": [
+        {
+          "repo": "churn-predict-dashboard",
+          "project_id": "p01",
+          "claims": 11,
+          "labels_before": {
+            "supported": 9,
+            "partly_supported": 2,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 2,
+          "facts_total": 16,
+          "facts_cited": 8,
+          "libraries_found": [
+            "bigquery",
+            "numpy",
+            "pandas",
+            "scikit-learn"
+          ],
+          "libraries_in_metadata": [
+            "bigquery",
+            "dbt",
+            "dbt-core",
+            "google-cloud-bigquery",
+            "pandas",
+            "power bi",
+            "power bi desktop",
+            "python",
+            "scikit-learn",
+            "sql"
+          ],
+          "library_precision": 0.75,
+          "library_recall": 0.4,
+          "words": 214,
+          "seconds": 148.86
+        },
+        {
+          "repo": "ecom-clv-segmentation",
+          "project_id": "p07",
+          "claims": 11,
+          "labels_before": {
+            "supported": 7,
+            "partly_supported": 2,
+            "unsupported": 2
+          },
+          "unsupported_rate_before": 0.182,
+          "unsupported_rate_after": 0.0,
+          "removed": 4,
+          "facts_total": 13,
+          "facts_cited": 10,
+          "libraries_found": [
+            "numpy",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "apache-airflow",
+            "bigquery",
+            "google-cloud-bigquery",
+            "matplotlib",
+            "pandas",
+            "python",
+            "scipy",
+            "statistics"
+          ],
+          "library_precision": 0.5,
+          "library_recall": 0.111,
+          "words": 146,
+          "seconds": 176.2
+        },
+        {
+          "repo": "enterprise-dbt-migration-airflow",
+          "project_id": "p03",
+          "claims": 14,
+          "labels_before": {
+            "supported": 11,
+            "partly_supported": 1,
+            "unsupported": 2
+          },
+          "unsupported_rate_before": 0.143,
+          "unsupported_rate_after": 0.0,
+          "removed": 3,
+          "facts_total": 14,
+          "facts_cited": 11,
+          "libraries_found": [
+            "airflow",
+            "bigquery",
+            "dbt"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "apache-airflow",
+            "bigquery",
+            "dbt",
+            "dbt-core",
+            "google-cloud-bigquery",
+            "pytest-dbt",
+            "python",
+            "sql"
+          ],
+          "library_precision": 1.0,
+          "library_recall": 0.778,
+          "words": 159,
+          "seconds": 197.67
+        },
+        {
+          "repo": "fintech-loan-default-model",
+          "project_id": "p05",
+          "claims": 12,
+          "labels_before": {
+            "supported": 12,
+            "partly_supported": 0,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 0,
+          "facts_total": 10,
+          "facts_cited": 10,
+          "libraries_found": [
+            "numpy",
+            "pandas",
+            "scikit-learn",
+            "snowflake"
+          ],
+          "libraries_in_metadata": [
+            "a/b testing",
+            "pandas",
+            "python",
+            "scikit-learn",
+            "snowflake",
+            "snowflake-connector-python",
+            "sql",
+            "statistics",
+            "statsmodels"
+          ],
+          "library_precision": 0.75,
+          "library_recall": 0.444,
+          "words": 212,
+          "seconds": 93.9
+        },
+        {
+          "repo": "fintech-risk-score",
+          "project_id": "p03",
+          "claims": 15,
+          "labels_before": {
+            "supported": 12,
+            "partly_supported": 2,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.067,
+          "unsupported_rate_after": 0.0,
+          "removed": 3,
+          "facts_total": 14,
+          "facts_cited": 8,
+          "libraries_found": [
+            "pandas",
+            "scikit-learn",
+            "snowflake"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "apache-airflow",
+            "bigquery",
+            "dbt",
+            "dbt-core",
+            "google-cloud-bigquery",
+            "pytest-dbt",
+            "python",
+            "sql"
+          ],
+          "library_precision": 0.0,
+          "library_recall": 0.0,
+          "words": 234,
+          "seconds": 239.88
+        },
+        {
+          "repo": "fintech-ws-governance",
+          "project_id": "p15",
+          "claims": 9,
+          "labels_before": {
+            "supported": 7,
+            "partly_supported": 2,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 2,
+          "facts_total": 14,
+          "facts_cited": 11,
+          "libraries_found": [
+            "airflow",
+            "bigquery",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "bigquery",
+            "google-cloud-bigquery",
+            "pandas",
+            "power bi",
+            "power bi desktop",
+            "python",
+            "scikit-learn",
+            "statistics"
+          ],
+          "library_precision": 0.667,
+          "library_recall": 0.375,
+          "words": 155,
+          "seconds": 129.43
+        },
+        {
+          "repo": "fintech-ws-ingest",
+          "project_id": "p13",
+          "claims": 11,
+          "labels_before": {
+            "supported": 7,
+            "partly_supported": 1,
+            "unsupported": 3
+          },
+          "unsupported_rate_before": 0.273,
+          "unsupported_rate_after": 0.0,
+          "removed": 4,
+          "facts_total": 12,
+          "facts_cited": 11,
+          "libraries_found": [
+            "airflow",
+            "dbt",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "apache-airflow",
+            "bigquery",
+            "google-cloud-bigquery",
+            "pandas",
+            "python",
+            "sql",
+            "statistics",
+            "statsmodels"
+          ],
+          "library_precision": 0.667,
+          "library_recall": 0.333,
+          "words": 168,
+          "seconds": 220.92
+        },
+        {
+          "repo": "legal-case-nlp-search-tool",
+          "project_id": "p11",
+          "claims": 14,
+          "labels_before": {
+            "supported": 13,
+            "partly_supported": 0,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.071,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 17,
+          "facts_cited": 13,
+          "libraries_found": [
+            "nltk",
+            "numpy",
+            "pandas",
+            "postgresql",
+            "scikit-learn",
+            "sqlalchemy"
+          ],
+          "libraries_in_metadata": [
+            "nltk",
+            "pandas",
+            "python",
+            "scikit-learn",
+            "sql",
+            "sqlalchemy",
+            "statistics"
+          ],
+          "library_precision": 0.833,
+          "library_recall": 0.714,
+          "words": 226,
+          "seconds": 195.04
+        },
+        {
+          "repo": "legal-timeline-tableau",
+          "project_id": "p09",
+          "claims": 15,
+          "labels_before": {
+            "supported": 15,
+            "partly_supported": 0,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 0,
+          "facts_total": 12,
+          "facts_cited": 7,
+          "libraries_found": [
+            "pandas",
+            "snowflake"
+          ],
+          "libraries_in_metadata": [
+            "a/b testing",
+            "bigquery",
+            "google analytics 4",
+            "google-analytics-data",
+            "google-cloud-bigquery",
+            "power bi",
+            "power bi desktop",
+            "sql"
+          ],
+          "library_precision": 0.0,
+          "library_recall": 0.0,
+          "words": 212,
+          "seconds": 154.51
+        },
+        {
+          "repo": "logistics-delay-prediction-gps",
+          "project_id": "p07",
+          "claims": 11,
+          "labels_before": {
+            "supported": 10,
+            "partly_supported": 0,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.091,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 17,
+          "facts_cited": 13,
+          "libraries_found": [
+            "airflow",
+            "bigquery",
+            "matplotlib",
+            "numpy",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "airflow",
+            "apache-airflow",
+            "bigquery",
+            "google-cloud-bigquery",
+            "matplotlib",
+            "pandas",
+            "python",
+            "scipy",
+            "statistics"
+          ],
+          "library_precision": 0.8,
+          "library_recall": 0.667,
+          "words": 213,
+          "seconds": 130.72
+        },
+        {
+          "repo": "logistics-latency-dbt",
+          "project_id": "p05",
+          "claims": 9,
+          "labels_before": {
+            "supported": 8,
+            "partly_supported": 1,
+            "unsupported": 0
+          },
+          "unsupported_rate_before": 0.0,
+          "unsupported_rate_after": 0.0,
+          "removed": 1,
+          "facts_total": 10,
+          "facts_cited": 8,
+          "libraries_found": [
+            "airflow",
+            "bigquery"
+          ],
+          "libraries_in_metadata": [
+            "a/b testing",
+            "pandas",
+            "python",
+            "scikit-learn",
+            "snowflake",
+            "snowflake-connector-python",
+            "sql",
+            "statistics",
+            "statsmodels"
+          ],
+          "library_precision": 0.0,
+          "library_recall": 0.0,
+          "words": 178,
+          "seconds": 104.58
+        },
+        {
+          "repo": "realestate-heatmap",
+          "project_id": "p12",
+          "claims": 11,
+          "labels_before": {
+            "supported": 4,
+            "partly_supported": 4,
+            "unsupported": 3
+          },
+          "unsupported_rate_before": 0.273,
+          "unsupported_rate_after": 0.0,
+          "removed": 7,
+          "facts_total": 14,
+          "facts_cited": 8,
+          "libraries_found": [
+            "bigquery",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "excel",
+            "pandas",
+            "power bi",
+            "power bi desktop",
+            "sql",
+            "sqlalchemy",
+            "statistics"
+          ],
+          "library_precision": 0.5,
+          "library_recall": 0.143,
+          "words": 178,
+          "seconds": 203.08
+        },
+        {
+          "repo": "saas-churn-prediction-dbts",
+          "project_id": "p01",
+          "claims": 15,
+          "labels_before": {
+            "supported": 11,
+            "partly_supported": 2,
+            "unsupported": 2
+          },
+          "unsupported_rate_before": 0.133,
+          "unsupported_rate_after": 0.0,
+          "removed": 4,
+          "facts_total": 16,
+          "facts_cited": 9,
+          "libraries_found": [
+            "bigquery",
+            "dbt",
+            "numpy",
+            "pandas",
+            "scikit-learn",
+            "xgboost"
+          ],
+          "libraries_in_metadata": [
+            "bigquery",
+            "dbt",
+            "dbt-core",
+            "google-cloud-bigquery",
+            "pandas",
+            "power bi",
+            "power bi desktop",
+            "python",
+            "scikit-learn",
+            "sql"
+          ],
+          "library_precision": 0.667,
+          "library_recall": 0.6,
+          "words": 210,
+          "seconds": 260.28
+        },
+        {
+          "repo": "saas-ltv-attribution-model",
+          "project_id": "p02",
+          "claims": 11,
+          "labels_before": {
+            "supported": 9,
+            "partly_supported": 1,
+            "unsupported": 1
+          },
+          "unsupported_rate_before": 0.091,
+          "unsupported_rate_after": 0.0,
+          "removed": 2,
+          "facts_total": 13,
+          "facts_cited": 13,
+          "libraries_found": [
+            "bigquery",
+            "dbt",
+            "numpy",
+            "pandas"
+          ],
+          "libraries_in_metadata": [
+            "bigquery",
+            "dax",
+            "dbt-core",
+            "google-cloud-bigquery",
+            "pandas",
+            "power bi",
+            "power bi desktop",
+            "sql",
+            "statistics"
+          ],
+          "library_precision": 0.75,
+          "library_recall": 0.444,
+          "words": 178,
+          "seconds": 203.13
+        }
+      ],
+      "tokens": 107265,
+      "cost_usd": 0.034245
+    }
+  }
+}
