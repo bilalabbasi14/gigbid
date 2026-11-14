@@ -26,7 +26,12 @@ from langgraph.types import Send, interrupt
 from agent import settings
 from agent.deps import Deps
 from agent.guardrails import delimit_untrusted
-from agent.portfolio_builder.facts import Fact, extract_facts
+from agent.portfolio_builder.facts import (
+    Fact,
+    cited_fact_ids,
+    extract_facts,
+    normalise_citations,
+)
 from agent.portfolio_builder.sources import GitHubMCPSource, LocalRepoSource, RepoRef, RepoSource
 from agent.state import TraceEvent
 from agent.structured import call_prompt
@@ -146,7 +151,7 @@ def build_graph(
                 description=repo.description or "(none)",
                 facts=facts_block,
             )
-            text = res.text.strip()
+            text = normalise_citations(res.text.strip())
             usage = dict(res.usage)
             evidence = [f.as_evidence(repo.name) for f in facts]
             claims, results = await verify_claims(
@@ -162,8 +167,9 @@ def build_graph(
             fixed, claims, rres = await repair_draft(text, claims, invoke=deps.invoke)
             if rres:
                 usage = {k: usage.get(k, 0) + v for k, v in rres.usage.items()}
+            fixed = normalise_citations(fixed)
             kept = [c for c in claims if c.action != "removed"]
-            cited = set(re.findall(r"\[([0-9a-f]{12})\]", fixed))
+            cited = cited_fact_ids(fixed)
             title_m = re.search(r"^#\s+(.+)$", fixed, re.M)
             draft = {
                 "repo": repo.name,
