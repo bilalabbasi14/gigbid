@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-13T03:26:34Z",
+  "generated_at": "2026-11-14T15:33:21Z",
   "price_per_million_tokens_usd": {
     "input": 0.15,
     "output": 0.6
@@ -160,5 +160,15 @@
         "contact_details_in_post"
       ]
     }
-  ]
+  ],
+  "ood": {
+    "dataset": "kaggle adityammantri/trial-1 (processed_labeled_dataset_without_encoding.xlsx)",
+    "rows_in_dataset": 54391,
+    "sample_per_class": 1000,
+    "seed": 7,
+    "fake_flagged": 3,
+    "real_flagged": 14,
+    "recall": 0.003,
+    "false_alarm_rate": 0.014
+  }
 }

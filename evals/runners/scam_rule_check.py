@@ -7,6 +7,11 @@ starts from: scam recall by scam kind and false alarms on every non-scam dev job
 
   uv run python -m evals.runners.scam_rule_check --label before   (then again with --label after)
 Writes evals/results/scam_rule_check_<label>.json.
+
+With --ood PATH it also scores a balanced sample of a public labelled dataset of real and fake job
+ads (Kaggle `adityammantri/trial-1`, processed_labeled_dataset_without_encoding.xlsx; not
+committed, see docs/DATA_CARD.md), worded unlike the dev set's planted scams:
+  uv run --with openpyxl --with pandas python -m evals.runners.scam_rule_check --label after \n      --ood data/raw/kaggle/fakejobs/processed_labeled_dataset_without_encoding.xlsx
 """
 
 from __future__ import annotations
@@ -30,9 +35,42 @@ def scam_kinds() -> dict[str, str]:
     return kinds
 
 
+def flagged_post(job: dict[str, Any], max_risk: float) -> bool:
+    pre = prescreen(job, job.get("client"))
+    return pre["score"] >= max_risk or bool(pre.get("hard", []))
+
+
+def ood_check(path: str, max_risk: float, n: int = 1000, seed: int = 7) -> dict[str, Any]:
+    """The same rule on n fake and n real posts from a public dataset (no client history)."""
+    import pandas as pd  # only for this option: uv run --with openpyxl --with pandas
+
+    df = pd.read_excel(path)
+    fake = df[df.fraudulent == 1].sample(n, random_state=seed)
+    real = df[df.fraudulent == 0].sample(n, random_state=seed)
+
+    def count(part: Any) -> int:
+        return sum(
+            flagged_post({"title": str(r.job_title), "description": str(r.text)}, max_risk)
+            for _, r in part.iterrows()
+        )
+
+    tp, fp = count(fake), count(real)
+    return {
+        "dataset": "kaggle adityammantri/trial-1 (processed_labeled_dataset_without_encoding.xlsx)",
+        "rows_in_dataset": len(df),
+        "sample_per_class": n,
+        "seed": seed,
+        "fake_flagged": tp,
+        "real_flagged": fp,
+        "recall": round(tp / n, 3),
+        "false_alarm_rate": round(fp / n, 3),
+    }
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", required=True)
+    ap.add_argument("--ood", default="", help="path to the public fake-job dataset (.xlsx)")
     args = ap.parse_args()
     max_risk = float(settings.config().thresholds.get("max_risk_score", 0.7))
     kinds = scam_kinds()
@@ -76,6 +114,8 @@ def main() -> None:
             if r["flagged"]
         ][:20],
     }
+    if args.ood:
+        summary["ood"] = ood_check(args.ood, max_risk)
     path = write_result(f"scam_rule_check_{args.label}", {"label": args.label, **summary})
     print(
         f"{args.label}: scams caught {tp}/{len(scams)} (recall {summary['scam_recall']}), "
@@ -83,6 +123,11 @@ def main() -> None:
     )
     for k, v in by_kind.items():
         print(f"  {k:14s} {v['caught']}/{v['n']}")
+    if args.ood:
+        o = summary["ood"]
+        print(
+            f"  public dataset: fake flagged {o['fake_flagged']}/{o['sample_per_class']}, real flagged {o['real_flagged']}/{o['sample_per_class']}"
+        )
 
 
 if __name__ == "__main__":
