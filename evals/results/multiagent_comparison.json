@@ -1,0 +1,94 @@
+{
+  "generated_at": "2026-11-14T14:10:31Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "config": {
+    "jobs": 6,
+    "seed": 21,
+    "systems": "single,supervisor,graph",
+    "gigsim": true,
+    "summary_only": false,
+    "fresh": false
+  },
+  "systems": {
+    "graph": {
+      "n": 6,
+      "errors": 0,
+      "bid_skip_accuracy": 0.833,
+      "scam_recall": null,
+      "proposals": 2,
+      "unsupported_claims_per_proposal": 0.0,
+      "unsupported_rate": 0.0,
+      "violations_in_output": 0,
+      "violations_caught_by_guard": 0,
+      "gigsim_reply_rate": 0.0,
+      "tokens_per_job": 15431,
+      "latency_s": {
+        "p50": 29.65,
+        "p95": 116.76,
+        "mean": 52.338
+      },
+      "cost_usd_per_job": 0.003737,
+      "accuracy_by_job_type": {
+        "off_persona": 1.0,
+        "past_proposal": 0.667
+      }
+    },
+    "single": {
+      "n": 6,
+      "errors": 3,
+      "bid_skip_accuracy": 0.333,
+      "scam_recall": null,
+      "proposals": 0,
+      "unsupported_claims_per_proposal": null,
+      "unsupported_rate": null,
+      "violations_in_output": 0,
+      "violations_caught_by_guard": 0,
+      "gigsim_reply_rate": null,
+      "tokens_per_job": 5454,
+      "latency_s": {
+        "p50": 8.39,
+        "p95": 42.85,
+        "mean": 17.73
+      },
+      "cost_usd_per_job": 0.000938,
+      "accuracy_by_job_type": {
+        "off_persona": 1.0,
+        "past_proposal": 0.0
+      }
+    },
+    "supervisor": {
+      "n": 6,
+      "errors": 2,
+      "bid_skip_accuracy": 0.75,
+      "scam_recall": null,
+      "proposals": 0,
+      "unsupported_claims_per_proposal": null,
+      "unsupported_rate": null,
+      "violations_in_output": 0,
+      "violations_caught_by_guard": 0,
+      "gigsim_reply_rate": null,
+      "tokens_per_job": 2740,
+      "latency_s": {
+        "p50": 8.54,
+        "p95": 9.39,
+        "mean": 6.43
+      },
+      "cost_usd_per_job": 0.000688,
+      "accuracy_by_job_type": {
+        "off_persona": 1.0,
+        "past_proposal": 0.0
+      }
+    }
+  }
+}
