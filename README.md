@@ -56,7 +56,10 @@ decisions: [docs/adr/](docs/adr/).
 Every number below is produced by the runners in `evals/runners/` and read from committed files in
 [`evals/results/`](evals/results/) by `evals/runners/results_table.py`. Models: the open profile
 (open-weight models on Groq's free tier; open embedding and reranker models on CPU). Data: the
-stand-in GigSim simulator and synthetic persona corpora described in the data card.
+GigSim marketplace simulator (built for this project, with LLM-driven clients) and synthetic
+persona corpora described in the data card. Samples are small because of the free tier's daily
+quota; each table states its size, and the [R&D report](docs/report/REPORT.md) explains what each
+number can and cannot show.
 
 ### Retrieval and proposal quality by RAG variant (Part B)
 <!-- results: rag -->
@@ -99,6 +102,13 @@ Recall@5 by persona:
 | Jobs evaluated | 60 | evals/results/decision_eval.json |
 <!-- /results -->
 
+Measured with a bid threshold of 0.60 and the scam rule before commit `ca3f453`. The shipped
+settings were checked offline on the same saved decisions: a replayed bid-or-skip F1 of 0.667 at
+0.50 ([threshold_sweep.json](evals/results/threshold_sweep.json)), and 45 of 45 planted scams
+flagged by the new rule with no new false alarms
+([scam_rule_check_after.json](evals/results/scam_rule_check_after.json)); on 1,000 fake ads
+from a public dataset the rule flags only 3, so new scam wording still depends on the model.
+
 ### Single agent vs prebuilt supervisor vs hand-built graph (Part C)
 <!-- results: multiagent -->
 | System | Jobs | Failed runs | Bid-or-skip accuracy (completed runs) | Scam recall | Unsupported claims / proposal | Violations left in output | Violations caught | GigSim reply rate | Tokens / job | p95 latency (s) | Source |
@@ -107,6 +117,9 @@ Recall@5 by persona:
 | (b) langgraph-supervisor | 6 | 2 | 0.750 | – | – | 0 | 0 | – | 2740 | 9.4 | evals/results/multiagent_comparison.json |
 | (c) GigBid graph | 6 | 0 | 0.833 | – | 0.000 | 0 | 0 | 0.000 | 15431 | 116.8 | evals/results/multiagent_comparison.json |
 <!-- /results -->
+
+Failed baseline runs called tools that do not exist, and neither baseline bid on any job it
+completed, so only the graph reached a proposal (report Section 5).
 
 ### Tool granularity (Part A)
 <!-- results: tools -->
@@ -152,7 +165,7 @@ Or everything in containers: `docker compose -f infra/docker-compose.yml up --bu
 | `mcp_servers/` | Portfolio (read), Marketplace (GigSim and Upwork adapters behind one port, write tools with idempotency and dry run), Workspace |
 | `apps/api`, `apps/web` | FastAPI with SSE streaming and approvals that resume graph threads; Next.js app with every required screen |
 | `worker/` | Arq worker: scheduled scouting, pipeline sync, conversation polling |
-| `gigsim/` | Marketplace simulator (stand-in until the course's simulator is provided) |
+| `gigsim/` | Marketplace simulator with LLM-driven clients that have hidden preferences |
 | `evals/` | Dev sets, runners, committed results |
 | `packages/gigbid-portfolio-mcp` | The Portfolio server as a stand-alone package anyone can install |
 | `infra/`, `docs/` | Dockerfiles, compose, deployment; architecture, ADRs, runbook, data card |

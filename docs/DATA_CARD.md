@@ -80,6 +80,14 @@ corpora replace this folder unchanged in code when received.
 | `evals/datasets/tool_tasks.jsonl` | 40 tool-selection tasks (hand-written) | correct tool and arguments |
 | `evals/datasets/tool_descriptions_v2.yaml` | rewritten tool descriptions for tool set C | — |
 
+**External check for the scam rule.** Kaggle `adityammantri/trial-1` ("Fake-Job-Posting-Detection",
+54,391 labelled real and fake job ads from many job boards, 28% fake). The licence is listed as
+unknown, so the file is not committed or redistributed: it stays in `data/raw/` and
+`evals/runners/scam_rule_check.py --ood` reports only aggregate counts on a seeded sample of
+1,000 fake and 1,000 real ads (`evals/results/scam_rule_check_*.json`). It is worded unlike the
+dev set's planted scams, which is the point: it shows how far a rule tuned on the dev set
+carries.
+
 The hidden test set is instructor-owned and never enters the repository.
 
 ## 6. Handling and privacy
