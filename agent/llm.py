@@ -397,6 +397,13 @@ def invoke_for_node(
                 capped = _note_cap(spec, exc, key)
                 if capped is None and not _is_transient(exc):
                     _failed()
+                    log.warning(
+                        "node %s: model %s failed, not retried (%s: %s)",
+                        node,
+                        _label(spec, key),
+                        type(exc).__name__,
+                        _brief(exc),
+                    )
                     raise
                 last = capped or exc
                 log.warning(
@@ -429,6 +436,13 @@ async def ainvoke_for_node(
                 capped = _note_cap(spec, exc, key)
                 if capped is None and not _is_transient(exc):
                     _failed()
+                    log.warning(
+                        "node %s: model %s failed, not retried (%s: %s)",
+                        node,
+                        _label(spec, key),
+                        type(exc).__name__,
+                        _brief(exc),
+                    )
                     raise
                 last = capped or exc
                 log.warning(

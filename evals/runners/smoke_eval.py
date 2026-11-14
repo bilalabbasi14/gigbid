@@ -54,7 +54,15 @@ def main() -> int:
             fresh=True,
             retry_errors=False,
         )
-        prop = proposal_eval.aggregate(asyncio.run(proposal_eval.run(pargs)))
+        for attempt in (1, 2):  # a discarded item (failed model call) reruns once from saved rows
+            try:
+                prop = proposal_eval.aggregate(asyncio.run(proposal_eval.run(pargs)))
+                break
+            except SystemExit as exc:
+                if exc.code != 3 or attempt == 2:
+                    raise
+                print("proposal item discarded after a failed model call; rerunning it once")
+                pargs.fresh = False
     checks = {
         "bid_skip_f1": (dec["bid_skip"]["f1"], ">=", th["min_bid_skip_f1"]),
         "scam_recall": (dec["scam"]["recall"], ">=", th["min_scam_recall"]),
