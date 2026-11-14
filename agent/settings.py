@@ -103,6 +103,7 @@ class AgentConfig(BaseModel):
     autonomy: dict[str, Any]
     memory: dict[str, Any]
     guardrails: dict[str, Any]
+    risk: dict[str, Any] = Field(default_factory=dict)
 
     def model_for(self, node: str, *, fallback: bool = False, profile: str | None = None) -> str:
         """Resolve `node` -> provider-qualified model name for the active profile."""

@@ -130,7 +130,7 @@ budgets:
     qwen/qwen3.8-27b: [0.80, 4.00]
 
 thresholds:
-  bid_min_fit_score: 0.60
+  bid_min_fit_score: 0.50        # 0.60 until 2026-11-14; replay on 48 saved dev decisions (evals/results/threshold_sweep.json): F1 0.621 -> 0.667, precision and recall both up
   watch_min_fit_score: 0.45
   max_risk_score: 0.70
   scam_block_score: 0.85
@@ -150,6 +150,27 @@ autonomy:
 memory:
   style_promotion_min_edits: 3     # same edit pattern seen >= N times => promote
   outcome_promotion_min_samples: 5 # outcomes per category before a rule is promoted
+
+risk:
+  # Risk Assessor pre-screen (agent/nodes/risk_assessor.py). Each signal adds its weight to a
+  # 0-1 risk score; a keyword signal is a list in data/policy_pack/policy.yaml -> keywords. A
+  # `hard` signal marks a post as a likely scam on its own, so the Decision node skips it:
+  # phrases that ask for money, credentials or contact off the platform, or for unpaid work.
+  weights:
+    off_platform: 0.45
+    free_work: 0.4
+    guarantee: 0.05
+    scam_fee: 0.6
+    scam_off_platform: 0.6
+    scam_credentials: 0.7
+    scam_too_good: 0.5
+    contact_details_in_post: 0.3
+    external_link: 0.2
+    prompt_injection: 0.35
+    zero_budget_trial: 0.3
+    too_good_to_be_true: 0.3
+    unverified_no_spend: 0.15
+  hard_signals: [free_work, scam_fee, scam_off_platform, scam_credentials, scam_too_good]
 
 guardrails:
   enabled: true                    # injection defences; only the injection evaluation turns them off

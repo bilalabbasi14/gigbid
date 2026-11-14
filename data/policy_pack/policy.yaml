@@ -50,3 +50,8 @@ keywords:
   off_platform: ["whatsapp", "telegram", "skype", "signal", "discord", "zelle", "paypal", "wise", "crypto", "bitcoin", "outside upwork", "off platform", "off-platform", "direct payment", "gmail.com", "my email"]
   free_work: ["unpaid test", "free sample", "free trial task", "work for free", "no payment for the first", "as a test, build", "complete the project before payment"]
   guarantee: ["guarantee", "guaranteed", "100% success", "first page of google", "will definitely", "promise you"]
+  # scam indicators used by the Risk Assessor (agent/config.yaml -> risk); phrases, not product names
+  scam_fee: ["onboarding fee", "registration fee", "application fee", "training fee", "pay a deposit", "purchase our", "refunded with your first", "starter kit fee"]
+  scam_off_platform: ["contact me directly", "outside the platform", "outside upwork", "off the platform", "friends-and-family", "to save fees", "send your bank details", "your bank details", "pay in gift cards", "gift card payment"]
+  scam_credentials: ["your platform login", "your login credentials", "your password", "verify your account", "copy of your passport", "send your id"]
+  scam_too_good: ["hired instantly", "no interview", "easy money", "pre-pay", "pay you in advance"]
