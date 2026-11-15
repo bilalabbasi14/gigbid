@@ -32,8 +32,10 @@ class RegisterIn(BaseModel):
 
 
 class LoginIn(BaseModel):
-    email: EmailStr
-    password: str
+    # not EmailStr: accounts seeded with reserved domains (reviewer@gigbid.local) must still sign in;
+    # the lookup is an exact match, so a malformed address simply finds no user
+    email: str = Field(min_length=3, max_length=320)
+    password: str = Field(max_length=128)
 
 
 class UserOut(BaseModel):

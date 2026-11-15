@@ -313,3 +313,23 @@ async def test_a_run_left_queued_by_a_restart_does_not_block_analysis(client: As
     assert r.status_code == 202 and r.json()["thread_id"] != first
     old = (await client.get(f"/runs/{first}")).json()
     assert old["status"] == "failed" and "interrupted" in old["needs_attention_reason"]
+
+
+async def test_seeded_reviewer_with_a_reserved_domain_can_sign_in(client: AsyncClient):
+    from apps.api.auth.security import hash_password
+    from apps.api.db import User, session_factory
+
+    async with session_factory()() as s:  # what the seed creates: reviewer@gigbid.local
+        s.add(
+            User(
+                email="reviewer@gigbid.local",
+                password_hash=hash_password("reviewer-pass-1"),
+                display_name="Reviewer",
+                persona="ai_ml",
+            )
+        )
+        await s.commit()
+    r = await client.post(
+        "/auth/login", json={"email": "reviewer@gigbid.local", "password": "reviewer-pass-1"}
+    )
+    assert r.status_code == 200, r.text
