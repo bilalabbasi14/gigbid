@@ -190,7 +190,12 @@ async def analyse(
     if rec.latest_thread_id:
         run = await session.get(Run, rec.latest_thread_id)
         if run and run.status in ("queued", "running"):
-            return AnalyseOut(thread_id=rec.latest_thread_id, status=run.status)
+            if runtime().is_active(run.thread_id):
+                return AnalyseOut(thread_id=rec.latest_thread_id, status=run.status)
+            # left behind by a failed start or a restart: close it and start again
+            run.status = "failed"
+            run.needs_attention_reason = "interrupted before it finished; analysed again"
+            await session.commit()
     thread_id = await runtime().start_bid(user, job_id, job=rec.job_json or None)
     return AnalyseOut(thread_id=thread_id, status="queued")
 

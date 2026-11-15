@@ -293,3 +293,23 @@ async def test_memory_store_is_used_off_the_event_loop(client: AsyncClient):
         json={"action": "edit", "edited_cover_letter": "Hi, I'm ready to start this week."},
     )
     assert r.status_code == 200, r.text
+
+
+async def test_a_run_left_queued_by_a_restart_does_not_block_analysis(client: AsyncClient):
+    from apps.api.db import Run, session_factory
+
+    await client.post(
+        "/auth/register",
+        json={"email": "q@example.com", "password": "secret123", "persona": "ai_ml"},
+    )
+    await client.post("/jobs/scout", json={"query": "rag", "limit": 10})
+    first = (await client.post("/jobs/job_test_1/analyse")).json()["thread_id"]
+    await _wait(client, first, {"awaiting_approval", "needs_attention", "failed", "skipped"})
+    async with session_factory()() as s:  # what a crash between insert and start leaves behind
+        run = await s.get(Run, first)
+        run.status = "queued"
+        await s.commit()
+    r = await client.post("/jobs/job_test_1/analyse")
+    assert r.status_code == 202 and r.json()["thread_id"] != first
+    old = (await client.get(f"/runs/{first}")).json()
+    assert old["status"] == "failed" and "interrupted" in old["needs_attention_reason"]

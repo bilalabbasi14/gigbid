@@ -71,6 +71,7 @@ class Runtime:
             self.deps, checkpointer=self.checkpointer, store=self.store
         )
         self._tasks: set[asyncio.Task[Any]] = set()
+        self._active: dict[str, asyncio.Task[Any]] = {}
         self.persistence = "memory"
         self._cm: list[Any] = []
 
@@ -119,11 +120,19 @@ class Runtime:
             return self.portfolio_graph, builder_config(thread_id, user_id=user_id)
         return self.conv_graph, conversation_config(thread_id, user_id=user_id)
 
-    def _spawn(self, coro: Any) -> asyncio.Task[Any]:
+    def _spawn(self, coro: Any, thread_id: str | None = None) -> asyncio.Task[Any]:
         t = asyncio.create_task(coro)
         self._tasks.add(t)
         t.add_done_callback(self._tasks.discard)
+        if thread_id:
+            self._active[thread_id] = t
+            t.add_done_callback(lambda _t: self._active.pop(thread_id, None))
         return t
+
+    def is_active(self, thread_id: str) -> bool:
+        """Whether this process is executing the run now. A run left 'queued' or 'running' by a
+        failed start or a restart is not, and must not block a new analysis."""
+        return thread_id in self._active
 
     async def _update_run(self, thread_id: str, **fields: Any) -> None:
         async with session_factory()() as s:
@@ -144,6 +153,12 @@ class Runtime:
         self, user: User, job_id: str, *, job: dict[str, Any] | None = None, background: bool = True
     ) -> str:
         thread_id = f"bid-{uuid.uuid4().hex[:12]}"
+        persona = user.persona if user.persona != "own" else f"user_{user.user_id}"
+        # the memory helpers use the store's sync API: off the event loop, as the Postgres store
+        # rejects sync calls made on its own loop; read before the run row exists, so a failure
+        # here leaves no run stuck in 'queued'
+        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
+        hints = await asyncio.to_thread(memstore.outcome_hints, user.user_id, None, self.store)
         async with session_factory()() as s:
             s.add(
                 Run(
@@ -162,11 +177,6 @@ class Runtime:
             if rec:
                 rec.status, rec.latest_thread_id = "analysing", thread_id
             await s.commit()
-        persona = user.persona if user.persona != "own" else f"user_{user.user_id}"
-        # the memory helpers use the store's sync API: off the event loop, as the Postgres store
-        # rejects sync calls made on its own loop
-        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
-        hints = await asyncio.to_thread(memstore.outcome_hints, user.user_id, None, self.store)
         state = initial_state(
             job_id,
             thread_id=thread_id,
@@ -186,7 +196,7 @@ class Runtime:
             kind="bid",
         )
         if background:
-            self._spawn(coro)
+            self._spawn(coro, thread_id)
         else:
             await coro
         return thread_id
@@ -200,6 +210,7 @@ class Runtime:
         background: bool = True,
     ) -> str:
         thread_id = f"conv-{uuid.uuid4().hex[:12]}"
+        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
         async with session_factory()() as s:
             s.add(
                 Run(
@@ -212,7 +223,6 @@ class Runtime:
                 )
             )
             await s.commit()
-        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
         state = initial_conversation_state(
             thread_id=thread_id,
             marketplace_thread_id=marketplace_thread_id,
@@ -230,7 +240,7 @@ class Runtime:
             kind="conversation",
         )
         if background:
-            self._spawn(coro)
+            self._spawn(coro, thread_id)
         else:
             await coro
         return thread_id
