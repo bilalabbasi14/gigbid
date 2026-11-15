@@ -1,4 +1,4 @@
-# GigBid: R&D report (draft)
+# GigBid: R&D report
 
 An engineering design review of GigBid, a multi-agent copilot that finds freelance jobs, decides
 which are worth paid Connects, drafts grounded proposals and handles client replies, with a human
@@ -6,7 +6,7 @@ approving everything that reaches a client. Every number below cites a file in `
 a commit or a trace. All evaluations ran on the open profile with fallback models disabled, over
 several days on the free tier (ADR 0003). Two settings changed after the measurements, both
 checked offline on the saved results and stated where they apply: the scam rule and the bid
-threshold (Section 8). Section 10 is completed after the hidden test run.
+threshold (Section 8). Section 10 covers the live deployment; the hidden test results come after the deadline.
 
 ## 1. Problem and constraints
 
@@ -337,7 +337,22 @@ the fit score at what the retrieved evidence supports when an injection is flagg
 score already is); off-platform requests that avoid every keyword; and claims the verifier labels
 as partly supported.
 
-## 10. Hidden test results (*pending: after the deadline run*)
+## 10. Deployment and the hidden test
+
+**Live system.** GigBid runs at https://gigbid-bilal.eastus.cloudapp.azure.com on one Azure VM (2
+vCPU, 8 GiB; ADR 0005), with Postgres on Neon, deployed from `main` by GitHub Actions. The app
+uses about 2 GiB. The instructor's hidden test runs against this URL after the deadline, so its
+results are not in this report; they will be compared with the budgets below without adjustment.
+
+**What deployment found.** The first live analysis failed: the memory helpers called the
+Postgres-backed LangGraph store synchronously from the event loop, which the store rejects, while
+the tests used an in-memory store that allowed it (`bfed9dd`). The failed start had also left a run
+in "queued" that blocked any new analysis of that job (`7db90a4`). Both are fixed with regression
+tests, one of which uses a store that rejects synchronous calls the way the Postgres store does.
+Then four scenarios were run on the live app and their traces published (README): a planted scam
+skipped with its reasons, a proposal the Critic sent back twice before approval, and a proposal
+waiting for approval while the app container was killed and restarted. That proposal was approved
+after the restart and submitted once; a second approval was refused with 409.
 
 **Budgets before the hidden run** (`evals/results/budget_check.json`; cost at Groq list prices,
 the free plan itself costs nothing). Cost is within budget: about $0.008 per analysed job and

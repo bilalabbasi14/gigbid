@@ -10,10 +10,10 @@ through the same adapter.
 
 | | |
 |---|---|
-| Live app | _deployment link added at submission_ (reviewer login shared privately) |
+| Live app | https://gigbid-bilal.eastus.cloudapp.azure.com (reviewer login shared privately) |
 | Portfolio MCP server | [`gigbid-portfolio-mcp`](packages/gigbid-portfolio-mcp): `uvx --from "git+https://github.com/bilalabbasi14/gigbid#subdirectory=packages/gigbid-portfolio-mcp" gigbid-portfolio-mcp --portfolio ./my-work` |
 | Signature extension | X3 Portfolio builder: GitHub repositories turned into case studies verified against the code ([docs/EXTENSION.md](docs/EXTENSION.md)) |
-| Public traces | _added at submission_: skipped scam · approved proposal · Critic loop · crash and resume |
+| Public traces (LangSmith, from the live app) | [skipped scam](https://smith.langchain.com/public/6efc9f1d-e203-48ea-afa6-8574622805fa/r) · [proposal sent back twice by the Critic](https://smith.langchain.com/public/4f97e4ac-04da-417f-b910-801ed0533a1d/r), then [approved and submitted](https://smith.langchain.com/public/5c67f23e-caac-45e7-b312-f2b710d3f950/r) · crash and resume: [run up to approval](https://smith.langchain.com/public/b30714c6-1135-4b1c-addd-725ba2ae532d/r), app container killed and restarted, [approved and submitted once](https://smith.langchain.com/public/19ff4eea-3021-47a9-b2bd-1a1b74f10194/r) |
 
 ## What it does
 
