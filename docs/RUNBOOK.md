@@ -36,7 +36,7 @@ reranker on CPU inside the container). Hosting choice and alternatives: ADR 0005
 
 | Piece | Where | Notes |
 |---|---|---|
-| App container | One Linux VM (Azure for Students, B2s: 2 vCPU, 4 GiB, plus 4 GB swap), built from `infra/docker/space.Dockerfile` | always on, no cold starts |
+| App container | One Linux VM (Azure free trial, Standard_D2as_v7: 2 vCPU, 8 GiB, plus 4 GB swap; ADR 0005), built from `infra/docker/space.Dockerfile` | always on, no cold starts; the app uses about 2 GiB |
 | HTTPS | Caddy in front of the app (`infra/vm/Caddyfile`) | Let's Encrypt certificate for the VM's DNS name, renewed automatically |
 | Postgres + pgvector | Neon free plan | survives VM rebuilds; `CREATE EXTENSION vector` |
 | Redis, GigSim, MCP servers | inside the app container | queue state is disposable; GigSim's database is on a volume |
@@ -47,7 +47,8 @@ The container runs `scripts/serve_all.sh`: Redis, GigSim, the idempotent seed (r
 saved searches, persona index), the API, the worker and the Next.js server on port 7860. If any
 process exits the container exits and Docker restarts it.
 
-**First deployment** (on the VM, once):
+**First deployment** (on the VM, once). The VM's network security group must allow inbound TCP
+22, 80 and 443; Let's Encrypt validates the certificate over 80 and 443.
 ```bash
 curl -fsSLO https://raw.githubusercontent.com/bilalabbasi14/gigbid/main/infra/vm/setup.sh
 bash setup.sh <vm-dns-name>       # swap, Docker, clone to /opt/gigbid, .env.production with secrets

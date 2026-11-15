@@ -35,3 +35,14 @@ hosted model there, because the VM has no room for a local one.
   about twice the cost.
 - The credit has to outlast grading; a $20-a-month budget alert guards it.
 - Moving hosts later is cheap: the same image runs anywhere Docker runs.
+
+## Amendment (2026-11-15): what was actually deployed
+The account available was an Azure free trial, not Azure for Students: $200 of credit for 30
+days, with a card for identity checks only. The trial subscription offered none of the 4 GiB B-series
+sizes, so the VM is a **Standard_D2as_v7** (2 vCPU, 8 GiB) in East US, still well inside the credit.
+Measured during a live analysis, the app container uses about 2.0 GiB and swap stays unused, so
+the 3.5 GB estimate above was pessimistic and memory is not a constraint at this size. The trial
+ends around 2026-12-15; to keep the URL live past that, the subscription has to be upgraded to
+pay-as-you-go before then. Two setup details the plan missed: the VM's network security group
+must allow inbound 80 and 443 (Let's Encrypt validates over them), and the first deploy runs
+from a branch until `infra/vm/` reaches main.

@@ -10,7 +10,7 @@ SITE="${1:?usage: setup.sh <dns-name of this VM>}"
 REPO="${GIGBID_REPO:-https://github.com/bilalabbasi14/gigbid.git}"
 DIR=/opt/gigbid
 
-# The stack needs about 3.5 GB at peak; swap keeps a 4 GB VM from running out during builds.
+# The app uses about 2 GB in use (measured on an 8 GiB VM); swap keeps a 4 GB VM safe during builds.
 if ! swapon --show | grep -q /swapfile; then
   sudo fallocate -l 4G /swapfile
   sudo chmod 600 /swapfile
