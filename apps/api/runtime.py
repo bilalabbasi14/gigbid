@@ -35,6 +35,29 @@ from apps.api.bus import bus
 from apps.api.db import JobRecord, PipelineCard, Run, User, session_factory, utcnow
 
 log = logging.getLogger(__name__)
+
+
+async def open_pool(url: str) -> Any:
+    """One connection pool for the LangGraph checkpointer and store. Serverless Postgres (Neon)
+    closes connections when it suspends after a few idle minutes, so a single long-lived
+    connection fails every call after a quiet period. The pool checks each connection when it is
+    handed out and replaces broken or long-idle ones."""
+    from psycopg.rows import dict_row
+    from psycopg_pool import AsyncConnectionPool
+
+    pool = AsyncConnectionPool(
+        url,
+        min_size=1,
+        max_size=6,
+        max_idle=120,
+        open=False,
+        check=AsyncConnectionPool.check_connection,
+        kwargs={"autocommit": True, "prepare_threshold": 0, "row_factory": dict_row},
+    )
+    await pool.open(wait=True, timeout=30)
+    return pool
+
+
 TERMINAL = {"submitted", "skipped", "watch", "rejected", "blocked", "needs_attention", "failed"}
 
 # rough open-model prices per 1M tokens for cost accounting (USD); hosted open providers
@@ -87,13 +110,12 @@ class Runtime:
                 from langgraph.store.postgres.aio import AsyncPostgresStore
 
                 url = settings.env().database_url.replace("postgresql+psycopg://", "postgresql://")
-                cm1 = AsyncPostgresSaver.from_conn_string(url)
-                checkpointer = await cm1.__aenter__()
+                pool = await open_pool(url)
+                checkpointer = AsyncPostgresSaver(pool)
                 await checkpointer.setup()
-                cm2 = AsyncPostgresStore.from_conn_string(url)
-                store = await cm2.__aenter__()
+                store = AsyncPostgresStore(pool)
                 await store.setup()
-                cms = [cm1, cm2]
+                cms = [pool]
             except Exception as exc:  # noqa: BLE001
                 log.warning(
                     "Postgres checkpointer unavailable (%s); using in-memory persistence", exc
