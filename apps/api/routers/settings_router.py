@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import base64
 import hashlib
 import secrets
@@ -121,20 +122,24 @@ async def delete_search(
 # ---- memory viewer ----
 @router.get("/memory", response_model=MemoryView)
 async def view_memory(user: CurrentUser) -> MemoryView:
-    return MemoryView(**memstore.list_memory(user.user_id, runtime().store))
+    return MemoryView(
+        **await asyncio.to_thread(memstore.list_memory, user.user_id, runtime().store)
+    )
 
 
 @router.delete("/memory/{kind}/{key}", status_code=204)
 async def delete_memory(
     kind: str, key: str, user: CurrentUser, category: str | None = None
 ) -> None:
-    if not memstore.delete_memory(user.user_id, kind, key, category, runtime().store):
+    if not await asyncio.to_thread(
+        memstore.delete_memory, user.user_id, kind, key, category, runtime().store
+    ):
         raise HTTPException(404, "memory item not found")
 
 
 @router.delete("/memory", status_code=204)
 async def clear_memory(user: CurrentUser) -> None:
-    memstore.clear_memory(user.user_id, runtime().store)
+    await asyncio.to_thread(memstore.clear_memory, user.user_id, runtime().store)
 
 
 # ---- connected accounts (OAuth 2.1 with PKCE for Upwork; GitHub PAT) ----

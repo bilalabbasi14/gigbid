@@ -8,6 +8,7 @@ import os
 
 import pytest
 from httpx import ASGITransport, AsyncClient
+from langgraph.store.memory import InMemoryStore
 
 os.environ["APP_ENV"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./data/processed/test_api.db"
@@ -253,3 +254,42 @@ async def test_health_flags_a_newer_marketplace_policy(
     monkeypatch.setattr(FakeMarket, "policy_version", h["policy_version"] + 1)
     h = (await client.get("/health")).json()
     assert h["marketplace_policy_version"] == h["policy_version"] + 1 and h["policy_drift"] is True
+
+
+class LoopGuardStore(InMemoryStore):
+    """Rejects sync calls made on a running event loop, as LangGraph's AsyncPostgresStore does
+    in production (the in-memory store used by the other tests accepts them)."""
+
+    def batch(self, ops):  # type: ignore[no-untyped-def]
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return super().batch(ops)
+        raise asyncio.InvalidStateError("synchronous store call on the event loop")
+
+
+async def test_memory_store_is_used_off_the_event_loop(client: AsyncClient):
+    from agent.memory import store as memstore
+    from apps.api.runtime import runtime
+
+    guard = LoopGuardStore()
+    runtime().store = guard
+    memstore.set_store(guard)
+    await client.post(
+        "/auth/register",
+        json={"email": "s@example.com", "password": "secret123", "persona": "ai_ml"},
+    )
+    assert (await client.get("/settings/memory")).status_code == 200
+    assert (await client.delete("/settings/memory")).status_code == 204
+    await client.post("/jobs/scout", json={"query": "rag", "limit": 10})
+    r = await client.post("/jobs/job_test_1/analyse")
+    assert r.status_code == 202, r.text
+    run = await _wait(
+        client, r.json()["thread_id"], {"awaiting_approval", "needs_attention", "failed", "skipped"}
+    )
+    assert run["status"] == "awaiting_approval", run
+    r = await client.post(
+        f"/approvals/{run['thread_id']}",
+        json={"action": "edit", "edited_cover_letter": "Hi, I'm ready to start this week."},
+    )
+    assert r.status_code == 200, r.text

@@ -163,6 +163,10 @@ class Runtime:
                 rec.status, rec.latest_thread_id = "analysing", thread_id
             await s.commit()
         persona = user.persona if user.persona != "own" else f"user_{user.user_id}"
+        # the memory helpers use the store's sync API: off the event loop, as the Postgres store
+        # rejects sync calls made on its own loop
+        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
+        hints = await asyncio.to_thread(memstore.outcome_hints, user.user_id, None, self.store)
         state = initial_state(
             job_id,
             thread_id=thread_id,
@@ -170,8 +174,8 @@ class Runtime:
             persona=persona,
             user_prefs=self.user_prefs(user),
             job=job,
-            style_rules=memstore.style_rules(user.user_id, self.store),
-            outcome_hints=memstore.outcome_hints(user.user_id, None, self.store),
+            style_rules=style,
+            outcome_hints=hints,
         )
         coro = self._execute(
             thread_id,
@@ -208,13 +212,14 @@ class Runtime:
                 )
             )
             await s.commit()
+        style = await asyncio.to_thread(memstore.style_rules, user.user_id, self.store)
         state = initial_conversation_state(
             thread_id=thread_id,
             marketplace_thread_id=marketplace_thread_id,
             user_id=user.user_id,
             persona=user.persona,
             job_id=job_id,
-            style_rules=memstore.style_rules(user.user_id, self.store),
+            style_rules=style,
         )
         coro = self._execute(
             thread_id,
@@ -370,7 +375,8 @@ class Runtime:
         )
         promoted: list[str] = []
         if decision.get("action") == "edit" and decision.get("edited_cover_letter") and before:
-            promoted = promotion_rules.record_edit(
+            promoted = await asyncio.to_thread(
+                promotion_rules.record_edit,
                 user_id,
                 before,
                 decision["edited_cover_letter"],
@@ -481,7 +487,8 @@ class Runtime:
         if not v.get("proposal_draft"):
             return []
         feats = proposal_features(v["proposal_draft"], v.get("job", {}), v.get("price_quote"))
-        return promotion_rules.record_outcome(
+        return await asyncio.to_thread(
+            promotion_rules.record_outcome,
             user_id,
             category=card.category or v.get("persona", "all"),
             features=feats,
