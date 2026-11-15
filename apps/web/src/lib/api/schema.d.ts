@@ -1262,10 +1262,7 @@ export interface components {
         };
         /** LoginIn */
         LoginIn: {
-            /**
-             * Email
-             * Format: email
-             */
+            /** Email */
             email: string;
             /** Password */
             password: string;

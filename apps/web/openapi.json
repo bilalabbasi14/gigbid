@@ -4580,11 +4580,13 @@
         "properties": {
           "email": {
             "type": "string",
-            "format": "email",
+            "maxLength": 320,
+            "minLength": 3,
             "title": "Email"
           },
           "password": {
             "type": "string",
+            "maxLength": 128,
             "title": "Password"
           }
         },
