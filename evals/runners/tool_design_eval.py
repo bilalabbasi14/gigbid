@@ -1,7 +1,8 @@
 """R&D question A: does tool granularity change agent behaviour?
 
-Three tool sets over the same 18 capabilities, built from the committed MCP schema snapshots:
-  A fine    - one tool per capability (the shipped MCP tools, their own descriptions)
+Three tool sets over the same 18 capabilities, built from the MCP schema snapshots frozen in
+evals/datasets/tool_surface_docstrings/ (the surface as measured):
+  A fine    - one tool per capability (the MCP tools with their docstring descriptions)
   B coarse  - three tools (marketplace, portfolio, workspace) taking {operation, arguments}
   C best    - the fine-grained tools with rewritten descriptions (evals/datasets/tool_descriptions_v2.yaml)
 
@@ -29,7 +30,8 @@ from agent import llm, settings
 from evals.runners.harness import write_result
 
 ROOT = settings.ROOT
-SNAP = ROOT / "tests/contract/snapshots"
+# the tool surface as it was measured (docstring descriptions); the servers now publish set C
+SNAP = ROOT / "evals/datasets/tool_surface_docstrings"
 SERVERS = ("marketplace", "portfolio", "workspace")
 SYSTEM = "You operate a freelancer's marketplace, portfolio and calendar through tools. For the user's request, make exactly one tool call with the correct arguments. Do not answer in prose."
 
@@ -190,6 +192,8 @@ async def ask(
             resp = await model.ainvoke(msgs)
             break
         except Exception as exc:  # noqa: BLE001
+            if llm.is_daily_cap(exc):  # not worth retrying; the run resumes from saved rows
+                raise llm.QuotaExhaustedError(str(exc)[:300]) from exc
             text = f"{type(exc).__name__} {exc}".lower()
             if (
                 "429" in text
@@ -295,7 +299,11 @@ def main() -> None:
     ][: args.limit]
     results = {}
     for kind in [k for k in args.sets.split(",") if k]:
-        results[kind] = asyncio.run(run(kind, spec, tasks))
+        try:
+            results[kind] = asyncio.run(run(kind, spec, tasks))
+        except llm.QuotaExhaustedError as exc:
+            print(f"partial: {kind} stopped at the daily cap of {spec}; rerun later ({exc})"[:300])
+            raise SystemExit(3) from exc
         r = results[kind]
         print(
             f"{kind}: selection {r['selection_accuracy']}  arguments {r['argument_accuracy']}  tokens/task {r['tokens_per_task']}"

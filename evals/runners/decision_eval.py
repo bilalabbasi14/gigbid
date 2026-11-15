@@ -83,6 +83,12 @@ def score(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "latency_s_per_job": summary_stats(lat),
         "cost_usd_per_job": summary_stats(costs),
         "tokens_mean_per_job": round(sum(r["tokens"] for r in rows) / len(rows)) if rows else None,
+        # throughput over wall time (three analysis nodes run in parallel): the local-model figure
+        "output_tokens_per_second": round(
+            sum(r.get("output_tokens", 0) for r in rows) / sum(lat), 2
+        )
+        if lat
+        else None,
     }
 
 
@@ -153,6 +159,8 @@ async def run(args: argparse.Namespace, personas: tuple[str, ...]) -> list[dict[
                 "price_in_band": in_band,
                 "latency_s": round(dt, 2),
                 "tokens": sum(usage.values()),
+                "input_tokens": usage.get("input_tokens", 0),
+                "output_tokens": usage.get("output_tokens", 0),
                 "cost_usd": cost(usage),
                 "node_errors": st.get("errors", []),
             },

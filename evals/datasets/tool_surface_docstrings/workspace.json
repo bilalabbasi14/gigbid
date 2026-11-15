@@ -1,0 +1,341 @@
+{
+  "__prompts__": [],
+  "__resource_templates__": [],
+  "create_email_draft": {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Save an email as a draft for the human to review and send. Never sends.",
+    "inputSchema": {
+      "properties": {
+        "body": {
+          "maxLength": 8000,
+          "minLength": 1,
+          "title": "Body",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 8,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "subject": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Subject",
+          "type": "string"
+        },
+        "to": {
+          "maxLength": 200,
+          "minLength": 3,
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "to",
+        "subject",
+        "body",
+        "idempotency_key"
+      ],
+      "title": "create_email_draftArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "body": {
+          "title": "Body",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "draft_id": {
+          "title": "Draft Id",
+          "type": "string"
+        },
+        "status": {
+          "const": "draft",
+          "default": "draft",
+          "title": "Status",
+          "type": "string"
+        },
+        "subject": {
+          "title": "Subject",
+          "type": "string"
+        },
+        "to": {
+          "title": "To",
+          "type": "string"
+        }
+      },
+      "required": [
+        "draft_id",
+        "to",
+        "subject",
+        "body",
+        "created_at"
+      ],
+      "title": "EmailDraft",
+      "type": "object"
+    },
+    "title": "Create an email draft"
+  },
+  "create_interview_hold": {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": false
+    },
+    "description": "Block a tentative slot for an interview. Idempotent on `idempotency_key`.",
+    "inputSchema": {
+      "properties": {
+        "end": {
+          "description": "ISO-8601 end, UTC",
+          "title": "End",
+          "type": "string"
+        },
+        "idempotency_key": {
+          "maxLength": 128,
+          "minLength": 8,
+          "title": "Idempotency Key",
+          "type": "string"
+        },
+        "start": {
+          "description": "ISO-8601 start, UTC",
+          "title": "Start",
+          "type": "string"
+        },
+        "thread_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thread Id"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 3,
+          "title": "Title",
+          "type": "string"
+        },
+        "with_client": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "With Client"
+        }
+      },
+      "required": [
+        "start",
+        "end",
+        "title",
+        "idempotency_key"
+      ],
+      "title": "create_interview_holdArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "string"
+        },
+        "hold_id": {
+          "title": "Hold Id",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "string"
+        },
+        "status": {
+          "default": "tentative",
+          "enum": [
+            "tentative",
+            "confirmed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "thread_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Thread Id"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "with_client": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "With Client"
+        }
+      },
+      "required": [
+        "hold_id",
+        "start",
+        "end",
+        "title"
+      ],
+      "title": "Hold",
+      "type": "object"
+    },
+    "title": "Create a tentative interview hold"
+  },
+  "get_free_slots": {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "Free interview slots on working days within the next `days` days (UTC).",
+    "inputSchema": {
+      "properties": {
+        "days": {
+          "default": 5,
+          "maximum": 14,
+          "minimum": 1,
+          "title": "Days",
+          "type": "integer"
+        },
+        "max_slots": {
+          "default": 8,
+          "maximum": 40,
+          "minimum": 1,
+          "title": "Max Slots",
+          "type": "integer"
+        },
+        "slot_minutes": {
+          "default": 30,
+          "maximum": 120,
+          "minimum": 15,
+          "title": "Slot Minutes",
+          "type": "integer"
+        },
+        "work_end_hour": {
+          "default": 17,
+          "maximum": 24,
+          "minimum": 1,
+          "title": "Work End Hour",
+          "type": "integer"
+        },
+        "work_start_hour": {
+          "default": 9,
+          "maximum": 23,
+          "minimum": 0,
+          "title": "Work Start Hour",
+          "type": "integer"
+        }
+      },
+      "title": "get_free_slotsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "$defs": {
+        "Slot": {
+          "properties": {
+            "end": {
+              "title": "End",
+              "type": "string"
+            },
+            "start": {
+              "title": "Start",
+              "type": "string"
+            },
+            "timezone": {
+              "default": "UTC",
+              "title": "Timezone",
+              "type": "string"
+            }
+          },
+          "required": [
+            "start",
+            "end"
+          ],
+          "title": "Slot",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "days": {
+          "title": "Days",
+          "type": "integer"
+        },
+        "slot_minutes": {
+          "title": "Slot Minutes",
+          "type": "integer"
+        },
+        "slots": {
+          "items": {
+            "$ref": "#/$defs/Slot"
+          },
+          "title": "Slots",
+          "type": "array"
+        }
+      },
+      "required": [
+        "days",
+        "slot_minutes",
+        "slots"
+      ],
+      "title": "FreeSlotsResult",
+      "type": "object"
+    },
+    "title": "List free calendar slots"
+  },
+  "list_workspace_items": {
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false,
+      "readOnlyHint": true
+    },
+    "description": "All interview holds and email drafts.",
+    "inputSchema": {
+      "properties": {},
+      "title": "list_workspace_itemsArguments",
+      "type": "object"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "list_workspace_itemsDictOutput",
+      "type": "object"
+    },
+    "title": "List holds and drafts"
+  }
+}

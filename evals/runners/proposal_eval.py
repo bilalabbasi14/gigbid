@@ -30,6 +30,7 @@ from evals.runners.harness import (
     QuotaGuard,
     RowLog,
     analyse,
+    client_reaction,
     cost,
     draft,
     load_dev,
@@ -151,6 +152,8 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
             "words": d.get("word_count"),
             "first_draft_words": first.get("word_count"),
             "evidence_cited": len(d.get("evidence_ids", [])),
+            "bid_amount": (st.get("price_quote") or {}).get("amount"),
+            "bid_type": (st.get("price_quote") or {}).get("bid_type"),
             "latency_s_analysis": round(t_an, 2),
             "latency_s_proposal": round(t_an + t_dr, 2),
             "tokens": sum(st.get("usage", {}).values()),
@@ -168,10 +171,10 @@ async def run(args: argparse.Namespace) -> list[dict[str, Any]]:
                         bid_amount=float(pq["amount"]),
                         bid_type=pq["bid_type"],
                         screening_answers=d.get("screening_answers", []),
-                        idempotency_key=f"eval-{row['job_id']}-{args.seed}",
+                        idempotency_key=f"eval-{args.out}-{row['job_id']}-{args.seed}",
                     )
                 )
-                out["gigsim_status"] = res.status
+                out["gigsim_status"] = await client_reaction(adapter, res)
             except Exception as exc:  # noqa: BLE001
                 out["gigsim_status"] = f"error: {exc}"[:120]
         log.add(row["job_id"], out)

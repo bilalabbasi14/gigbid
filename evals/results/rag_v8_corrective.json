@@ -1,0 +1,36 @@
+{
+  "variant": "v8_corrective",
+  "personas": {
+    "ai_ml": {
+      "recall@5": 0.7385,
+      "mrr": 0.5219,
+      "ndcg@10": 0.5586,
+      "n": 65,
+      "latency_p50_s": 24.817,
+      "latency_p95_s": 31.239
+    },
+    "fullstack": {
+      "recall@5": 0.4688,
+      "mrr": 0.2569,
+      "ndcg@10": 0.3363,
+      "n": 64,
+      "latency_p50_s": 18.485,
+      "latency_p95_s": 30.673
+    },
+    "data_analyst": {
+      "recall@5": 0.7065,
+      "mrr": 0.4781,
+      "ndcg@10": 0.5197,
+      "n": 64,
+      "latency_p50_s": 23.113,
+      "latency_p95_s": 31.678
+    }
+  },
+  "n_jobs": 193,
+  "overall": {
+    "recall@5": 0.6384,
+    "mrr": 0.4195,
+    "ndcg@10": 0.472
+  },
+  "timestamp": "2026-11-11T19:11:52Z"
+}

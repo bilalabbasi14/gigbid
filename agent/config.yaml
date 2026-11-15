@@ -26,16 +26,16 @@ models:
       fallback_small: groq:qwen/qwen3.8-27b          # separate daily quota from gpt-oss on Groq
       fallback_large: groq:qwen/qwen3.8-27b
     local:                                            # fully offline on a laptop (slow on CPU)
-      small: ollama:qwen3:4b
-      medium: ollama:qwen3:4b
-      large: ollama:qwen3:4b
+      small: ollama:qwen3:4b-instruct                 # the plain qwen3:4b tag always thinks
+      medium: ollama:qwen3:4b-instruct
+      large: ollama:qwen3:4b-instruct
       fallback_small: ollama:llama3.2
       fallback_large: ollama:llama3.2
     paid:
       small: groq:openai/gpt-oss-20b
       medium: openai:gpt-4.1-mini
       large: openai:gpt-4.1
-      fallback_small: ollama:qwen3:4b
+      fallback_small: ollama:qwen3:4b-instruct
       fallback_large: groq:openai/gpt-oss-120b
   # Route by node: tier name resolved against the active profile.
   nodes:
@@ -65,9 +65,31 @@ models:
     max_output_tokens: 1200
     request_timeout_seconds: 60
     max_retries: 3
+    local_context_tokens: 6144     # Ollama num_ctx; its default is too small for writer prompts
+    # Output budget per prompt. Free tiers count the requested max_tokens against per-minute output
+    # limits, so each prompt asks for what it needs: about 1.5x the longest answer measured in
+    # evals/results/token_profile_baseline.json. An answer cut off at its budget is retried once
+    # with twice the budget (agent/structured.py).
+    max_output_tokens_by_prompt:
+      analyst: 700
+      risk: 550
+      fit_requirements: 250
+      fit_assess: 900
+      verifier_split: 900
+      verifier_judge: 900
+      verifier_rewrite: 600
+      writer: 900
+      critic: 500
+      compliance_rewrite: 600
+      liaison_intent: 300
+      liaison_reply: 500
+      judge: 500
+      portfolio_builder: 900
+      hyde: 400
+      contextual_chunk: 200
 
 rag:
-  variant: v0_naive          # set to the measured best after Part B evaluation
+  variant: v2_hybrid         # shipped: best Recall@5 overall in evals/results/rag_summary.json, no LLM or reranker cost
   k: 5
   chunk_size: 512
   chunk_overlap: 64
@@ -90,13 +112,25 @@ budgets:
   max_tokens_per_thread: 40000
   per_node_timeout_seconds: 180   # first call loads the CPU embedding model
   per_node_retries: 2
+  max_parallel_branches: 3        # Send fan-out at once (free tiers cap tokens per minute)
+  # model calls in flight per model (agent/llm.py). Qwen's output-per-minute limit drops to 1,000
+  # under load, which fits about one call at a time.
+  max_concurrent_calls_per_model:
+    default: 2
+    groq:qwen/qwen3.8-27b: 1
   latency_p95_seconds_per_job: 60
   latency_p95_seconds_per_proposal: 120
   cost_usd_per_job_analysed: 0.01
   cost_usd_per_proposal: 0.05
+  # Groq on-demand list prices, USD per 1M tokens [input, output] (console.groq.com/docs/models,
+  # 2026-11-12). The free plan costs nothing; these price what a paid deployment would spend.
+  list_prices_usd_per_million:
+    openai/gpt-oss-20b: [0.075, 0.30]
+    openai/gpt-oss-120b: [0.15, 0.60]
+    qwen/qwen3.8-27b: [0.80, 4.00]
 
 thresholds:
-  bid_min_fit_score: 0.60
+  bid_min_fit_score: 0.50        # 0.60 until 2026-11-14; replay on 48 saved dev decisions (evals/results/threshold_sweep.json): F1 0.621 -> 0.667, precision and recall both up
   watch_min_fit_score: 0.45
   max_risk_score: 0.70
   scam_block_score: 0.85
@@ -116,6 +150,27 @@ autonomy:
 memory:
   style_promotion_min_edits: 3     # same edit pattern seen >= N times => promote
   outcome_promotion_min_samples: 5 # outcomes per category before a rule is promoted
+
+risk:
+  # Risk Assessor pre-screen (agent/nodes/risk_assessor.py). Each signal adds its weight to a
+  # 0-1 risk score; a keyword signal is a list in data/policy_pack/policy.yaml -> keywords. A
+  # `hard` signal marks a post as a likely scam on its own, so the Decision node skips it:
+  # phrases that ask for money, credentials or contact off the platform, or for unpaid work.
+  weights:
+    off_platform: 0.45
+    free_work: 0.4
+    guarantee: 0.05
+    scam_fee: 0.6
+    scam_off_platform: 0.6
+    scam_credentials: 0.7
+    scam_too_good: 0.5
+    contact_details_in_post: 0.3
+    external_link: 0.2
+    prompt_injection: 0.35
+    zero_budget_trial: 0.3
+    too_good_to_be_true: 0.3
+    unverified_no_spend: 0.15
+  hard_signals: [free_work, scam_fee, scam_off_platform, scam_credentials, scam_too_good]
 
 guardrails:
   enabled: true                    # injection defences; only the injection evaluation turns them off

@@ -42,10 +42,12 @@ Clients are reconstructed from the 60k rows' public client fields (country, paym
 total spent, rating, review count); rows that share those fields are treated as one client. Posts
 without client fields receive a seeded synthetic history. Each client also receives **hidden
 preferences** (must-have skills drawn from the post, a budget ceiling, dislike of generic
-openings, concision, whether screening answers matter) that drive the deterministic decision
-engine in `gigsim/clients.py`. Hidden preferences are never exposed through the API. Outcome
-metrics (reply rate, hire rate) therefore measure consistency with these rules, not real human
-behaviour; see the report for the caveat.
+openings, concision, whether screening answers matter) that drive the decision engine in
+`gigsim/clients.py`. In LLM mode an open model (`qwen3:4b-instruct` by default) also reads each
+proposal as that client and its interest is blended with the rule score. Hidden preferences are
+never exposed through the API. Outcome metrics (reply rate, hire rate) therefore measure how
+simulated clients with these preferences react, not real human behaviour; see the report for the
+caveat.
 
 ## 4. Persona corpora (synthetic, LLM-generated)
 
@@ -77,6 +79,14 @@ corpora replace this folder unchanged in code when received.
 | `evals/datasets/dev_<persona>.jsonl` | 136 / 130 / 136 dev jobs: the persona's past-proposal jobs (gold bid + cited projects), the persona's planted adversarial posts, and 25 off-persona jobs (gold skip) | bid or skip, scam, injection, relevant project ids, fair price band (from the client's stated range or market quantiles) |
 | `evals/datasets/tool_tasks.jsonl` | 40 tool-selection tasks (hand-written) | correct tool and arguments |
 | `evals/datasets/tool_descriptions_v2.yaml` | rewritten tool descriptions for tool set C | — |
+
+**External check for the scam rule.** Kaggle `adityammantri/trial-1` ("Fake-Job-Posting-Detection",
+54,391 labelled real and fake job ads from many job boards, 28% fake). The licence is listed as
+unknown, so the file is not committed or redistributed: it stays in `data/raw/` and
+`evals/runners/scam_rule_check.py --ood` reports only aggregate counts on a seeded sample of
+1,000 fake and 1,000 real ads (`evals/results/scam_rule_check_*.json`). It is worded unlike the
+dev set's planted scams, which is the point: it shows how far a rule tuned on the dev set
+carries.
 
 The hidden test set is instructor-owned and never enters the repository.
 

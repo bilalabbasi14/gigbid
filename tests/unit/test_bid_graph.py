@@ -14,6 +14,7 @@ from langchain_core.tools import StructuredTool
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.types import Command
 
+from agent import settings
 from agent.deps import Deps
 from agent.graphs.bid_graph import build_bid_graph, initial_state, run_config
 from agent.mcp_client import ToolProvider
@@ -388,7 +389,9 @@ async def test_scam_is_skipped_without_drafting():
 
 
 async def test_low_fit_is_skipped_or_watched():
-    script, tools = Script(fit_score=0.5), FakeTools()
+    th = settings.config().thresholds  # a fit inside the watch band, whatever the thresholds are
+    fit = (float(th["watch_min_fit_score"]) + float(th["bid_min_fit_score"])) / 2
+    script, tools = Script(fit_score=round(fit, 3)), FakeTools()
     graph = make(script, tools)
     out = await graph.ainvoke(initial_state("job_test_1", thread_id="t8"), run_config("t8"))
     assert out["decision"]["decision"] == "watch" and out["status"] == "watch"

@@ -11,6 +11,15 @@ export PYTHONUNBUFFERED=1 HF_HUB_DISABLE_SYMLINKS_WARNING=1 OMP_NUM_THREADS=4 LA
 LOGS=data/processed/eval_logs
 mkdir -p "$LOGS"
 
+# One queue at a time: two queues share the same per-minute model limits and starve each other.
+LOCK="$LOGS/.queue.lock"
+if ! mkdir "$LOCK" 2> /dev/null; then
+  echo "another evaluation queue is running (remove $LOCK if it is not)"; exit 1
+fi
+trap 'rmdir "$LOCK" 2> /dev/null' EXIT
+# To stop the queue, stop this script's process tree, not only the current step: a stopped step
+# just lets the queue start the next one.
+
 step() {
   local name="$1"; shift
   echo "[$(date +%H:%M:%S)] >>> $name"
@@ -25,23 +34,29 @@ step() {
   fi
 }
 
-# untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run last, after any
-# earlier full retrieval run has finished writing it
-ALL=(rag_ctx_ingest rag_subset decisions proposals_v0 proposals_v2 proposals_best x3 injection multiagent judge_export judge rag_full rag_ctx failures tables)
+# The default queue fits about two days of the free plan (200k tokens per model per day; sizes
+# from evals/results/token_profile_baseline.json): core runs first, the judge sheet early so the
+# human labels can start, and the comparison runs last. Sample sizes are stated with every result.
+# Larger runs: pass step names, e.g. `bash scripts/run_evals.sh decisions_full proposals_best`.
+# The untagged retrieval steps (rag_full, rag_ctx) write rag_summary.json, so they run alone.
+ALL=(tools decisions proposals_v2 proposals_v0 injection judge_export judge multiagent x3 panel_export failures tables)
 STEPS=("${@:-${ALL[@]}}")
 for s in "${STEPS[@]}"; do
   case "$s" in
+    tools)          step tools evals.runners.tool_design_eval --sets fine,coarse,best ;;
     rag_full)       step rag_full evals.runners.rag_eval --variants v0_naive,v9_skill_graph ;;  # V2-V8 come from the full run already in progress
     rag_ctx_ingest) step rag_ctx_ingest rag.ingest.cli --persona ai_ml --persona fullstack --persona data_analyst --contextual ;;
     rag_ctx)        step rag_ctx evals.runners.rag_eval --variants v6_contextual ;;
     rag_subset)     step rag_subset evals.runners.rag_eval --variants v0_naive,v2_hybrid,v3_rerank,v1_decompose,v7_hyde,best --limit 20 --tag _subset20 ;;
     decisions)      step decisions evals.runners.decision_eval --per-persona 20 ;;
-    proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 4 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
-    proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 4 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
+    decisions_full) step decisions evals.runners.decision_eval --per-persona 20 ;;
+    proposals_v0)   step proposals_v0 evals.runners.proposal_eval --per-persona 2 --variant v0_naive --gigsim --out proposal_eval_v0_naive ;;
+    proposals_v2)   step proposals_v2 evals.runners.proposal_eval --per-persona 2 --variant v2_hybrid --gigsim --out proposal_eval_v2_hybrid ;;
     proposals_best) step proposals_best evals.runners.proposal_eval --per-persona 4 --variant best --gigsim --out proposal_eval_best ;;
+    panel_export)   step panel_export evals.runners.blind_panel export --a proposal_eval_v0_naive --b proposal_eval_v2_hybrid --n 6 ;;
     x3)             step x3 evals.runners.x3_eval ;;
-    injection)      step injection evals.runners.injection_eval --per-family 1 ;;
-    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 30 --gigsim ;;
+    injection)      step injection evals.runners.injection_eval --per-family 1 --families force_bid,force_contact,subtle_claim,subtle_override ;;
+    multiagent)     step multiagent evals.runners.multiagent_compare --jobs 6 --gigsim ;;
     judge_export)   step judge_export evals.runners.judge_calibration export --n 30 ;;
     judge)          step judge evals.runners.judge_calibration judge ;;
     failures)       step failures evals.runners.failure_analysis ;;

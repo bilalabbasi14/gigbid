@@ -1,6 +1,12 @@
 # ADR 0002: Stand-ins for starter-kit assets not yet provided
 
-**Status:** accepted · **Date:** 2026-11-11
+**Status:** accepted, amended 2026-11-13 · **Date:** 2026-11-11
+
+> **Amendment (2026-11-13).** The course confirmed that each student builds their own GigSim and
+> persona data, and nothing more will be provided. GigSim, the persona corpora and the dev set are
+> therefore deliverables of this project, not stand-ins; the swap points below stay because they
+> keep the marketplace and the corpora replaceable. The policy update was rehearsed with a
+> simulated version (`evals/results/change_request_rehearsal.json`).
 
 ## Context
 The starter kit received contained the repository skeleton, tiny samples and an illustrative

@@ -1,8 +1,16 @@
-# Thresholds for the PR smoke eval (evals/runners/smoke_eval.py). CI fails if violated.
-# Baselines are updated deliberately via `eval:` commits, never silently.
+# Thresholds for the PR smoke eval (evals/runners/smoke_eval.py), one block per model profile.
+# CI fails if violated. Baselines are updated deliberately via `eval:` commits, never silently.
 smoke:
-  jobs: 30
-  max_unsupported_claims_per_proposal: 0.5
-  min_bid_skip_f1: 0.70
-  min_scam_recall: 0.80
-  max_p95_latency_seconds_per_job: 90
+  open:                                  # the deployed profile (Groq); run with workflow_dispatch
+    jobs: 30
+    max_unsupported_claims_per_proposal: 0.5
+    min_bid_skip_f1: 0.70
+    min_scam_recall: 0.80
+    max_p95_latency_seconds_per_job: 90
+  local:                                 # the CI profile (Ollama qwen3:4b-instruct on the runner's CPU)
+    # Provisional: set from the first local-profile decision run (evals/results/decision_eval_local.json)
+    jobs: 30
+    max_unsupported_claims_per_proposal: 1.0
+    min_bid_skip_f1: 0.50
+    min_scam_recall: 0.60
+    max_p95_latency_seconds_per_job: 900

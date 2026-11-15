@@ -32,29 +32,46 @@ local developer loop, not both.
 ## 3. Production deployment (public URL)
 
 The deployed link runs the **open** profile (hosted open-weight models on Groq; embeddings and
-reranker on CPU inside the container).
+reranker on CPU inside the container). Hosting choice and alternatives: ADR 0005.
 
-| Piece | Where | Free tier |
+| Piece | Where | Notes |
 |---|---|---|
-| App container | Hugging Face Docker Space built from `infra/docker/space.Dockerfile` | 2 vCPU, 16 GB RAM |
-| Postgres + pgvector | Neon | 0.5 GB storage, `CREATE EXTENSION vector` supported |
-| Redis | inside the container (queue state is disposable) | — |
-| Models | Groq (open-weight models) | rate-limited; GigBid backs off and falls back |
-| Tracing | LangSmith | 5k traces per month |
+| App container | One Linux VM (Azure for Students, B2s: 2 vCPU, 4 GiB, plus 4 GB swap), built from `infra/docker/space.Dockerfile` | always on, no cold starts |
+| HTTPS | Caddy in front of the app (`infra/vm/Caddyfile`) | Let's Encrypt certificate for the VM's DNS name, renewed automatically |
+| Postgres + pgvector | Neon free plan | survives VM rebuilds; `CREATE EXTENSION vector` |
+| Redis, GigSim, MCP servers | inside the app container | queue state is disposable; GigSim's database is on a volume |
+| Models | Groq (open-weight models) | free plan limits per model; GigBid backs off and falls back |
+| Simulated clients | `groq:openai/gpt-oss-20b` | the VM has no room for a local model |
 
-The container runs `scripts/serve_all.sh`: Redis, GigSim (unless `GIGSIM_BASE_URL` points at the
-instructor's simulator), the idempotent seed (reviewer login, saved searches, persona index), the
-API, the worker and the Next.js server on `$PORT` (7860). If any process exits the container exits
-and the host restarts it.
+The container runs `scripts/serve_all.sh`: Redis, GigSim, the idempotent seed (reviewer login,
+saved searches, persona index), the API, the worker and the Next.js server on port 7860. If any
+process exits the container exits and Docker restarts it.
 
-Deploys happen from GitHub Actions (`.github/workflows/deploy.yml`) on every push to `main`: the
-workflow pushes the repository to the Space, which rebuilds. A scheduled job pings `/api/health`
-every 6 hours so the free Space does not sleep before the hidden test run.
+**First deployment** (on the VM, once):
+```bash
+curl -fsSLO https://raw.githubusercontent.com/bilalabbasi14/gigbid/main/infra/vm/setup.sh
+bash setup.sh <vm-dns-name>       # swap, Docker, clone to /opt/gigbid, .env.production with secrets
+nano /opt/gigbid/.env.production  # fill DATABASE_URL (Neon) and GROQ_API_KEY
+newgrp docker
+bash /opt/gigbid/infra/vm/deploy.sh
+```
 
-**Required Space secrets:** `DATABASE_URL`, `GROQ_API_KEY`, `APP_SECRET_KEY`,
-`TOKEN_ENCRYPTION_KEY`, `REVIEWER_EMAIL`, `REVIEWER_PASSWORD`, `GIGSIM_API_TOKEN`; optional
-`OPENROUTER_API_KEY`, `LANGSMITH_API_KEY`, `LANGSMITH_TRACING=true`, `GIGSIM_BASE_URL` (to point at
-an external GigSim), `GITHUB_TOKEN` (GitHub MCP for the portfolio builder).
+**Later deployments** happen from GitHub Actions (`.github/workflows/deploy.yml`) on every push
+to `main`: it runs `infra/vm/deploy.sh` over SSH (pull, rebuild, restart, wait until healthy) and
+checks `LIVE_URL/api/health`. A scheduled run checks the URL every 6 hours, so an outage before the
+hidden test run shows up as a failed workflow. Repository secrets: `DEPLOY_HOST`, `DEPLOY_USER`,
+`DEPLOY_SSH_KEY`, `LIVE_URL`.
+
+**Settings on the VM** (`/opt/gigbid/.env.production`, from `infra/vm/env.production.example`):
+`SITE_ADDRESS`, `WEB_BASE_URL`, `DATABASE_URL`, `GROQ_API_KEY`, `APP_SECRET_KEY`,
+`TOKEN_ENCRYPTION_KEY`, `GIGSIM_API_TOKEN`, `MCP_BEARER_TOKEN`, `REVIEWER_EMAIL`,
+`REVIEWER_PASSWORD`, `REVIEWER_PERSONA`, `GIGSIM_CLIENT_MODE`, `GIGSIM_CLIENT_LLM`; optional
+`LANGSMITH_API_KEY`, `LANGSMITH_TRACING=true`, `GITHUB_TOKEN` (GitHub MCP for the portfolio
+builder). The file is never committed and never copied into the image (`.dockerignore`).
+
+**Operations:** logs `docker compose -f infra/vm/docker-compose.yml logs -f app`; restart
+`docker compose -f infra/vm/docker-compose.yml --env-file .env.production restart app`; memory
+`free -m` (we estimate the stack peaks around 3.5 GB; swap absorbs builds).
 
 ## 4. Rate limits and schedules
 

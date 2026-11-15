@@ -116,15 +116,15 @@ def multiagent_table() -> str:
         "graph": "(c) GigBid graph",
     }
     rows = [
-        "| System | Jobs | Bid-or-skip accuracy | Scam recall | Unsupported claims / proposal | Violations left in output | Violations caught | GigSim reply rate | Tokens / job | p95 latency (s) | Source |",
-        "|---|---|---|---|---|---|---|---|---|---|---|",
+        "| System | Jobs | Failed runs | Bid-or-skip accuracy (completed runs) | Scam recall | Unsupported claims / proposal | Violations left in output | Violations caught | GigSim reply rate | Tokens / job | p95 latency (s) | Source |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for k in ("single", "supervisor", "graph"):
         m = d["systems"].get(k)
         if not m:
             continue
         rows.append(
-            f"| {names[k]} | {m['n']} | {f(m['bid_skip_accuracy'])} | {f(m['scam_recall'])} | {f(m['unsupported_claims_per_proposal'])} | {f(m['violations_in_output'])} | {f(m['violations_caught_by_guard'])} | {f(m['gigsim_reply_rate'])} | {f(m['tokens_per_job'])} | {f(m['latency_s']['p95'], 1)} | evals/results/multiagent_comparison.json |"
+            f"| {names[k]} | {m['n']} | {m.get('errors', 0)} | {f(m['bid_skip_accuracy'])} | {f(m['scam_recall'])} | {f(m['unsupported_claims_per_proposal'])} | {f(m['violations_in_output'])} | {f(m['violations_caught_by_guard'])} | {f(m['gigsim_reply_rate'])} | {f(m['tokens_per_job'])} | {f(m['latency_s']['p95'], 1)} | evals/results/multiagent_comparison.json |"
         )
     return "\n".join(rows)
 

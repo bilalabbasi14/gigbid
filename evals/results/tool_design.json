@@ -1,0 +1,2203 @@
+{
+  "generated_at": "2026-11-13T01:10:45Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "model": "groq:openai/gpt-oss-20b",
+  "n_tasks": 40,
+  "summary": {
+    "fine": {
+      "tool_set": "fine",
+      "n_tools": 18,
+      "schema_tokens_estimate": 2849,
+      "selection_accuracy": 0.95,
+      "argument_accuracy": 0.825,
+      "mean_argument_score": 0.879,
+      "tokens_per_task": 2022.9,
+      "input_tokens_per_task": 1975.2
+    },
+    "coarse": {
+      "tool_set": "coarse",
+      "n_tools": 3,
+      "schema_tokens_estimate": 737,
+      "selection_accuracy": 0.75,
+      "argument_accuracy": 0.35,
+      "mean_argument_score": 0.454,
+      "tokens_per_task": 565.4,
+      "input_tokens_per_task": 525.7
+    },
+    "best": {
+      "tool_set": "best",
+      "n_tools": 18,
+      "schema_tokens_estimate": 3147,
+      "selection_accuracy": 0.975,
+      "argument_accuracy": 0.875,
+      "mean_argument_score": 0.917,
+      "tokens_per_task": 2390.5,
+      "input_tokens_per_task": 2343.3
+    }
+  },
+  "results": {
+    "fine": {
+      "tool_set": "fine",
+      "n_tools": 18,
+      "schema_tokens_estimate": 2849,
+      "selection_accuracy": 0.95,
+      "argument_accuracy": 0.825,
+      "mean_argument_score": 0.879,
+      "tokens_per_task": 2022.9,
+      "input_tokens_per_task": 1975.2,
+      "rows": [
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t01",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "query": "Django"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2054,
+          "input_tokens": 2012,
+          "latency_s": 2.11
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t02",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "min_budget": 40,
+            "payment_type": "hourly"
+          },
+          "selected_ok": true,
+          "arg_score": 0.667,
+          "args_ok": false,
+          "tokens": 2065,
+          "input_tokens": 2019,
+          "latency_s": 0.65
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t03",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 20,
+            "payment_type": "fixed"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 2055,
+          "input_tokens": 2016,
+          "latency_s": 2.39
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t04",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 20,
+            "min_budget": null,
+            "page": 1,
+            "payment_type": null,
+            "posted_after": "2026-11-01",
+            "query": null,
+            "skills": null
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 2104,
+          "input_tokens": 2024,
+          "latency_s": 0.71
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t05",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_f30b54a906a9a53b"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2071,
+          "input_tokens": 2026,
+          "latency_s": 0.72
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t06",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_848801d566733fa1"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2060,
+          "input_tokens": 2023,
+          "latency_s": 3.02
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t07",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_069b5a1fef41fd94"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2070,
+          "input_tokens": 2030,
+          "latency_s": 2.06
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t08",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_9a1b2c3d4e5f"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2077,
+          "input_tokens": 2033,
+          "latency_s": 2.28
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t09",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_0f1e2d3c4b5a"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2075,
+          "input_tokens": 2031,
+          "latency_s": 1.44
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t10",
+          "expected": "get_connects_balance",
+          "called": "get_connects_balance",
+          "args": {},
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2046,
+          "input_tokens": 2016,
+          "latency_s": 1.32
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t11",
+          "expected": "get_connects_balance",
+          "called": "get_connects_balance",
+          "args": {},
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2047,
+          "input_tokens": 2017,
+          "latency_s": 1.16
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t12",
+          "expected": "list_threads",
+          "called": "list_threads",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2041,
+          "input_tokens": 2014,
+          "latency_s": 1.77
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t13",
+          "expected": "list_threads",
+          "called": "list_threads",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2043,
+          "input_tokens": 2014,
+          "latency_s": 0.4
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t14",
+          "expected": "list_messages",
+          "called": "list_messages",
+          "args": {
+            "thread_id": "thr_0c67fbf0dca6"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2063,
+          "input_tokens": 2024,
+          "latency_s": 0.64
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t15",
+          "expected": "list_messages",
+          "called": "list_messages",
+          "args": {
+            "thread_id": "thr_5d4c3b2a1f0e"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2075,
+          "input_tokens": 2030,
+          "latency_s": 0.73
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t16",
+          "expected": "list_events",
+          "called": "list_events",
+          "args": {
+            "since_id": 120
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2055,
+          "input_tokens": 2022,
+          "latency_s": 0.66
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t17",
+          "expected": "marketplace_health",
+          "called": "marketplace_health",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2052,
+          "input_tokens": 2022,
+          "latency_s": 0.7
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t18",
+          "expected": "create_proposal_draft",
+          "called": "create_proposal_draft",
+          "args": {
+            "draft": {
+              "bid_amount": 450,
+              "bid_type": "fixed",
+              "cover_letter": "You need an AI blog tool that publishes to WordPress. I built a WordPress plugin around an LLM API and would start with a one-day prototype.",
+              "dry_run": true,
+              "idempotency_key": "prev-0001",
+              "job_id": "job_f30b54a906a9a53b"
+            },
+            "idempotency_key": "prev-0001"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2199,
+          "input_tokens": 2080,
+          "latency_s": 0.75
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t19",
+          "expected": "submit_proposal",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 4.29
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t20",
+          "expected": "submit_proposal",
+          "called": "create_proposal_draft",
+          "args": {
+            "draft": {
+              "bid_amount": 300,
+              "bid_type": "fixed",
+              "cover_letter": "You need a churn model you can trust. I compared logistic regression and random forest on a similar dataset and documented precision and recall.",
+              "dry_run": true,
+              "idempotency_key": "dry-00000001",
+              "job_id": "job_15ea3926e5f2efa0"
+            },
+            "idempotency_key": "dry-00000001"
+          },
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 2193,
+          "input_tokens": 2078,
+          "latency_s": 1.14
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t21",
+          "expected": "send_message",
+          "called": "send_message",
+          "args": {
+            "message": {
+              "body": "Tuesday 10:00 UTC works for me.",
+              "idempotency_key": "msg-00000042",
+              "thread_id": "thr_0c67fbf0dca6"
+            }
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2112,
+          "input_tokens": 2046,
+          "latency_s": 3.07
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t22",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "filters": null,
+            "k": 5,
+            "persona": "ai_ml",
+            "requirement": "build a RAG chatbot over PDFs"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2076,
+          "input_tokens": 2021,
+          "latency_s": 1.42
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t23",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "filters": {
+              "doc_types": [
+                "case_study",
+                "code",
+                "review"
+              ],
+              "outcome": "won"
+            },
+            "k": 3,
+            "persona": "ai_ml",
+            "requirement": "Power BI dashboard"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2086,
+          "input_tokens": 2021,
+          "latency_s": 1.26
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t24",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "filters": {
+              "outcome": "won"
+            },
+            "k": 5,
+            "requirement": "Stripe billing"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2076,
+          "input_tokens": 2018,
+          "latency_s": 1.31
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t25",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "filters": null,
+            "k": 5,
+            "persona": "ai_ml",
+            "requirement": "Airflow pipelines"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 2082,
+          "input_tokens": 2023,
+          "latency_s": 1.35
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t26",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p07"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2057,
+          "input_tokens": 2017,
+          "latency_s": 0.31
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t27",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p03"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2054,
+          "input_tokens": 2017,
+          "latency_s": 0.71
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t28",
+          "expected": "list_skills",
+          "called": "list_skills",
+          "args": {
+            "persona": "ai_ml"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2051,
+          "input_tokens": 2018,
+          "latency_s": 1.51
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t29",
+          "expected": "list_skills",
+          "called": "list_skills",
+          "args": {
+            "persona": "ai_ml"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2048,
+          "input_tokens": 2017,
+          "latency_s": 0.82
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t30",
+          "expected": "get_free_slots",
+          "called": "get_free_slots",
+          "args": {
+            "days": 5,
+            "max_slots": 8,
+            "slot_minutes": 30,
+            "work_end_hour": 17,
+            "work_start_hour": 9
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2076,
+          "input_tokens": 2024,
+          "latency_s": 2.17
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t31",
+          "expected": "get_free_slots",
+          "called": "get_free_slots",
+          "args": {
+            "days": 7,
+            "max_slots": 3,
+            "slot_minutes": 60
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2071,
+          "input_tokens": 2017,
+          "latency_s": 3.14
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t32",
+          "expected": "create_interview_hold",
+          "called": "create_interview_hold",
+          "args": {
+            "end": "2026-11-17T10:30:00Z",
+            "idempotency_key": "hold-00000001",
+            "start": "2026-11-17T10:00:00Z",
+            "title": "Intro call: RAG bot"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2127,
+          "input_tokens": 2047,
+          "latency_s": 0.66
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t33",
+          "expected": "create_email_draft",
+          "called": "create_email_draft",
+          "args": {
+            "body": "I am free Tuesday morning.",
+            "idempotency_key": "mail-00000009",
+            "subject": "Interview times",
+            "to": "client@example.com"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2097,
+          "input_tokens": 2039,
+          "latency_s": 0.43
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t34",
+          "expected": "list_workspace_items",
+          "called": "list_workspace_items",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2048,
+          "input_tokens": 2017,
+          "latency_s": 0.76
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t35",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "query": "SQL BigQuery",
+            "skills": [
+              "SQL",
+              "BigQuery"
+            ]
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2063,
+          "input_tokens": 2018,
+          "latency_s": 7.75
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t36",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_77aa88bb99cc"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2061,
+          "input_tokens": 2023,
+          "latency_s": 0.75
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t37",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 5,
+            "persona": "ai_ml",
+            "requirement": "computer vision work with OpenCV"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 2081,
+          "input_tokens": 2020,
+          "latency_s": 1.91
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t38",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "page": 2,
+            "query": "LangChain"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2069,
+          "input_tokens": 2022,
+          "latency_s": 7.21
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t39",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_aa11bb22cc33dd44"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2073,
+          "input_tokens": 2030,
+          "latency_s": 0.23
+        },
+        {
+          "tool_set": "fine",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t40",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p12"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2064,
+          "input_tokens": 2024,
+          "latency_s": 0.64
+        }
+      ]
+    },
+    "coarse": {
+      "tool_set": "coarse",
+      "n_tools": 3,
+      "schema_tokens_estimate": 737,
+      "selection_accuracy": 0.75,
+      "argument_accuracy": 0.35,
+      "mean_argument_score": 0.454,
+      "tokens_per_task": 565.4,
+      "input_tokens_per_task": 525.7,
+      "rows": [
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t01",
+          "expected": "search_jobs",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.39
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t02",
+          "expected": "search_jobs",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "currency": "USD",
+              "min_rate": 40,
+              "query": "React hourly",
+              "rate_type": "hourly"
+            },
+            "operation": "search_jobs"
+          },
+          "selected_ok": true,
+          "arg_score": 0.333,
+          "args_ok": false,
+          "tokens": 744,
+          "input_tokens": 691,
+          "latency_s": 0.3
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t03",
+          "expected": "search_jobs",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "query": "fixed-price Power BI dashboard"
+            },
+            "operation": "search_jobs"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 731,
+          "input_tokens": 688,
+          "latency_s": 1.0
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t04",
+          "expected": "search_jobs",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.51
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t05",
+          "expected": "get_job",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "job_id": "job_f30b54a906a9a53b"
+            },
+            "operation": "get_job"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 745,
+          "input_tokens": 698,
+          "latency_s": 0.61
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t06",
+          "expected": "get_job",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "job_id": "job_848801d566733fa1"
+            },
+            "operation": "get_job"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 739,
+          "input_tokens": 695,
+          "latency_s": 2.74
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t07",
+          "expected": "get_job",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "job_id": "job_069b5a1fef41fd94"
+            },
+            "operation": "get_job"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 749,
+          "input_tokens": 702,
+          "latency_s": 0.71
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t08",
+          "expected": "get_client_history",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "client_id": "cl_9a1b2c3d4e5f"
+            },
+            "operation": "get_client_history"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 756,
+          "input_tokens": 705,
+          "latency_s": 0.73
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t09",
+          "expected": "get_client_history",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "client_id": "cl_0f1e2d3c4b5a"
+            },
+            "operation": "get_client_history"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 754,
+          "input_tokens": 703,
+          "latency_s": 0.67
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t10",
+          "expected": "get_connects_balance",
+          "called": "marketplace",
+          "args": {
+            "arguments": {},
+            "operation": "get_connects_balance"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 725,
+          "input_tokens": 688,
+          "latency_s": 0.16
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t11",
+          "expected": "get_connects_balance",
+          "called": "marketplace",
+          "args": {
+            "arguments": {},
+            "operation": "get_connects_balance"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 726,
+          "input_tokens": 689,
+          "latency_s": 0.43
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t12",
+          "expected": "list_threads",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 1.18
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t13",
+          "expected": "list_threads",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.51
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t14",
+          "expected": "list_messages",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.63
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t15",
+          "expected": "list_messages",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.49
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t16",
+          "expected": "list_events",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.52
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t17",
+          "expected": "marketplace_health",
+          "called": "marketplace",
+          "args": {
+            "arguments": {},
+            "operation": "marketplace_health"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 728,
+          "input_tokens": 694,
+          "latency_s": 1.52
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t18",
+          "expected": "create_proposal_draft",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "bid_amount": 450,
+              "fixed": true,
+              "idempotency_key": "prev-0001",
+              "job_id": "job_f30b54a906a9a53b",
+              "letter": "You need an AI blog tool that publishes to WordPress. I built a WordPress plugin around an LLM API and would start with a one-day prototype."
+            },
+            "operation": "create_proposal_draft"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 859,
+          "input_tokens": 752,
+          "latency_s": 0.54
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t19",
+          "expected": "submit_proposal",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "hourly_rate": 60,
+              "idempotency_key": "sub-77777777",
+              "job_id": "job_848801d566733fa1",
+              "proposal_text": "You need a recommendation pipeline. I built one that lifted click-through from 3.2% to 7.8% and would begin with an offline evaluation of your current model."
+            },
+            "operation": "submit_proposal"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 861,
+          "input_tokens": 755,
+          "latency_s": 3.61
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t20",
+          "expected": "submit_proposal",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "amount": 300,
+              "dry_run": "dry-00000001",
+              "job_id": "job_15ea3926e5f2efa0",
+              "letter": "You need a churn model you can trust. I compared logistic regression and random forest on a similar dataset and documented precision and recall."
+            },
+            "operation": "submit_proposal"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 852,
+          "input_tokens": 750,
+          "latency_s": 0.45
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t21",
+          "expected": "send_message",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.58
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t22",
+          "expected": "search_evidence",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "requirement": "built a RAG chatbot over PDFs"
+            },
+            "operation": "search_evidence"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 742,
+          "input_tokens": 693,
+          "latency_s": 0.79
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t23",
+          "expected": "search_evidence",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "requirement": "Power BI dashboard experience"
+            },
+            "operation": "search_evidence"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 740,
+          "input_tokens": 693,
+          "latency_s": 0.39
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t24",
+          "expected": "search_evidence",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "requirement": "Stripe billing"
+            },
+            "operation": "search_evidence"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 740,
+          "input_tokens": 690,
+          "latency_s": 1.12
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t25",
+          "expected": "search_evidence",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "requirement": "Airflow pipelines"
+            },
+            "operation": "search_evidence"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 747,
+          "input_tokens": 695,
+          "latency_s": 0.79
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t26",
+          "expected": "get_case_study",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "project_id": "p07"
+            },
+            "operation": "get_case_study"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 736,
+          "input_tokens": 689,
+          "latency_s": 2.21
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t27",
+          "expected": "get_case_study",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "project_id": "p03"
+            },
+            "operation": "get_case_study"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 735,
+          "input_tokens": 689,
+          "latency_s": 0.63
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t28",
+          "expected": "list_skills",
+          "called": "portfolio",
+          "args": {
+            "arguments": {},
+            "operation": "list_skills"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 728,
+          "input_tokens": 690,
+          "latency_s": 0.61
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t29",
+          "expected": "list_skills",
+          "called": "portfolio",
+          "args": {
+            "arguments": {},
+            "operation": "list_skills"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 725,
+          "input_tokens": 689,
+          "latency_s": 1.87
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t30",
+          "expected": "get_free_slots",
+          "called": "workspace",
+          "args": {
+            "arguments": {
+              "days": 5
+            },
+            "operation": "get_free_slots"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 735,
+          "input_tokens": 696,
+          "latency_s": 0.36
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t31",
+          "expected": "get_free_slots",
+          "called": "workspace",
+          "args": {
+            "arguments": {
+              "days": 7
+            },
+            "operation": "get_free_slots"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 729,
+          "input_tokens": 689,
+          "latency_s": 1.1
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t32",
+          "expected": "create_interview_hold",
+          "called": "workspace",
+          "args": {
+            "arguments": {
+              "end": "2026-11-17T10:30:00Z",
+              "key": "hold-00000001",
+              "start": "2026-11-17T10:00:00Z",
+              "title": "Intro call: RAG bot"
+            },
+            "operation": "create_interview_hold"
+          },
+          "selected_ok": true,
+          "arg_score": 0.667,
+          "args_ok": false,
+          "tokens": 802,
+          "input_tokens": 719,
+          "latency_s": 6.49
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t33",
+          "expected": "create_email_draft",
+          "called": "workspace",
+          "args": {
+            "arguments": {
+              "body": "I am free Tuesday morning.",
+              "key": "mail-00000009",
+              "subject": "Interview times",
+              "to": "client@example.com"
+            },
+            "operation": "create_email_draft"
+          },
+          "selected_ok": true,
+          "arg_score": 0.667,
+          "args_ok": false,
+          "tokens": 777,
+          "input_tokens": 711,
+          "latency_s": 1.53
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t34",
+          "expected": "list_workspace_items",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 1.11
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t35",
+          "expected": "search_jobs",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "query": "data analyst SQL BigQuery"
+            },
+            "operation": "search_jobs"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 736,
+          "input_tokens": 690,
+          "latency_s": 0.66
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t36",
+          "expected": "get_client_history",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "client_id": "cl_77aa88bb99cc"
+            },
+            "operation": "get_client_history"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 740,
+          "input_tokens": 695,
+          "latency_s": 0.55
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t37",
+          "expected": "search_evidence",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "requirement": "computer vision OpenCV"
+            },
+            "operation": "search_evidence"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 746,
+          "input_tokens": 692,
+          "latency_s": 0.66
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t38",
+          "expected": "search_jobs",
+          "called": null,
+          "args": {},
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 0,
+          "input_tokens": 0,
+          "latency_s": 0.37
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t39",
+          "expected": "get_job",
+          "called": "marketplace",
+          "args": {
+            "arguments": {
+              "job_id": "job_aa11bb22cc33dd44"
+            },
+            "operation": "get_job"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 747,
+          "input_tokens": 702,
+          "latency_s": 0.52
+        },
+        {
+          "tool_set": "coarse",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t40",
+          "expected": "get_case_study",
+          "called": "portfolio",
+          "args": {
+            "arguments": {
+              "project_id": "p12"
+            },
+            "operation": "get_case_study"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 743,
+          "input_tokens": 696,
+          "latency_s": 0.54
+        }
+      ]
+    },
+    "best": {
+      "tool_set": "best",
+      "n_tools": 18,
+      "schema_tokens_estimate": 3147,
+      "selection_accuracy": 0.975,
+      "argument_accuracy": 0.875,
+      "mean_argument_score": 0.917,
+      "tokens_per_task": 2390.5,
+      "input_tokens_per_task": 2343.3,
+      "rows": [
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t01",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "query": "Django",
+            "skills": [
+              "Django"
+            ]
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2371,
+          "input_tokens": 2328,
+          "latency_s": 2.1
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t02",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 20,
+            "min_budget": 40,
+            "payment_type": "hourly"
+          },
+          "selected_ok": true,
+          "arg_score": 0.667,
+          "args_ok": false,
+          "tokens": 2384,
+          "input_tokens": 2335,
+          "latency_s": 1.35
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t03",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 20,
+            "payment_type": "fixed",
+            "query": "Power BI dashboard"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2384,
+          "input_tokens": 2332,
+          "latency_s": 9.41
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t04",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 20,
+            "posted_after": "2026-11-01",
+            "query": "machine learning"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2398,
+          "input_tokens": 2340,
+          "latency_s": 0.89
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t05",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_f30b54a906a9a53b"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2382,
+          "input_tokens": 2342,
+          "latency_s": 8.47
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t06",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_848801d566733fa1"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2376,
+          "input_tokens": 2339,
+          "latency_s": 2.02
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t07",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_069b5a1fef41fd94"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2386,
+          "input_tokens": 2346,
+          "latency_s": 1.77
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t08",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_9a1b2c3d4e5f"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2393,
+          "input_tokens": 2349,
+          "latency_s": 0.59
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t09",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_0f1e2d3c4b5a"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2391,
+          "input_tokens": 2347,
+          "latency_s": 0.73
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t10",
+          "expected": "get_connects_balance",
+          "called": "get_connects_balance",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2363,
+          "input_tokens": 2332,
+          "latency_s": 0.89
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t11",
+          "expected": "get_connects_balance",
+          "called": "get_connects_balance",
+          "args": {},
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2363,
+          "input_tokens": 2333,
+          "latency_s": 0.86
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t12",
+          "expected": "list_threads",
+          "called": "list_threads",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2357,
+          "input_tokens": 2330,
+          "latency_s": 0.63
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t13",
+          "expected": "list_threads",
+          "called": "list_threads",
+          "args": {},
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2354,
+          "input_tokens": 2330,
+          "latency_s": 0.29
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t14",
+          "expected": "list_messages",
+          "called": "list_messages",
+          "args": {
+            "thread_id": "thr_0c67fbf0dca6"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2379,
+          "input_tokens": 2340,
+          "latency_s": 0.3
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t15",
+          "expected": "list_messages",
+          "called": "list_messages",
+          "args": {
+            "thread_id": "thr_5d4c3b2a1f0e"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2388,
+          "input_tokens": 2346,
+          "latency_s": 0.14
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t16",
+          "expected": "list_events",
+          "called": "list_events",
+          "args": {
+            "since_id": 120
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2371,
+          "input_tokens": 2338,
+          "latency_s": 1.4
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t17",
+          "expected": "marketplace_health",
+          "called": "marketplace_health",
+          "args": {},
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2365,
+          "input_tokens": 2338,
+          "latency_s": 1.51
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t18",
+          "expected": "create_proposal_draft",
+          "called": "create_proposal_draft",
+          "args": {
+            "draft": {
+              "bid_amount": 450,
+              "bid_type": "fixed",
+              "cover_letter": "You need an AI blog tool that publishes to WordPress. I built a WordPress plugin around an LLM API and would start with a one-day prototype.",
+              "idempotency_key": "prev-0001",
+              "job_id": "job_f30b54a906a9a53b"
+            }
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2499,
+          "input_tokens": 2396,
+          "latency_s": 0.77
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t19",
+          "expected": "submit_proposal",
+          "called": "submit_proposal",
+          "args": {
+            "draft": {
+              "bid_amount": 60,
+              "bid_type": "hourly",
+              "cover_letter": "You need a recommendation pipeline. I built one that lifted click-through from 3.2% to 7.8% and would begin with an offline evaluation of your current model.",
+              "idempotency_key": "sub-77777777",
+              "job_id": "job_848801d566733fa1"
+            }
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2504,
+          "input_tokens": 2399,
+          "latency_s": 0.85
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t20",
+          "expected": "submit_proposal",
+          "called": "create_proposal_draft",
+          "args": {
+            "draft": {
+              "bid_amount": 300,
+              "bid_type": "fixed",
+              "cover_letter": "You need a churn model you can trust. I compared logistic regression and random forest on a similar dataset and documented precision and recall.",
+              "dry_run": true,
+              "idempotency_key": "dry-00000001",
+              "job_id": "job_15ea3926e5f2efa0"
+            }
+          },
+          "selected_ok": false,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 2497,
+          "input_tokens": 2394,
+          "latency_s": 1.13
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t21",
+          "expected": "send_message",
+          "called": "send_message",
+          "args": {
+            "message": {
+              "body": "Tuesday 10:00 UTC works for me.",
+              "idempotency_key": "msg-00000042",
+              "thread_id": "thr_0c67fbf0dca6"
+            }
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2428,
+          "input_tokens": 2362,
+          "latency_s": 1.01
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t22",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 5,
+            "persona": "ai_ml",
+            "requirement": "build a RAG chatbot over PDFs"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2385,
+          "input_tokens": 2337,
+          "latency_s": 0.6
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t23",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 3,
+            "persona": "ai_ml",
+            "requirement": "Power BI dashboard"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2387,
+          "input_tokens": 2337,
+          "latency_s": 0.53
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t24",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 5,
+            "outcome": "won",
+            "requirement": "Stripe billing"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 2384,
+          "input_tokens": 2334,
+          "latency_s": 0.89
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t25",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 5,
+            "persona": "ai_ml",
+            "requirement": "writing Airflow pipelines"
+          },
+          "selected_ok": true,
+          "arg_score": 0.5,
+          "args_ok": false,
+          "tokens": 2389,
+          "input_tokens": 2339,
+          "latency_s": 0.76
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t26",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p07"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2373,
+          "input_tokens": 2333,
+          "latency_s": 1.02
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t27",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p03"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2368,
+          "input_tokens": 2333,
+          "latency_s": 0.63
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t28",
+          "expected": "list_skills",
+          "called": "list_skills",
+          "args": {
+            "persona": "ai_ml"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2365,
+          "input_tokens": 2334,
+          "latency_s": 1.45
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t29",
+          "expected": "list_skills",
+          "called": "list_skills",
+          "args": {
+            "persona": "ai_ml"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2364,
+          "input_tokens": 2333,
+          "latency_s": 0.85
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t30",
+          "expected": "get_free_slots",
+          "called": "get_free_slots",
+          "args": {
+            "days": 5,
+            "slot_minutes": 30
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2375,
+          "input_tokens": 2340,
+          "latency_s": 0.78
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t31",
+          "expected": "get_free_slots",
+          "called": "get_free_slots",
+          "args": {
+            "days": 7,
+            "max_slots": 3,
+            "slot_minutes": 60
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2387,
+          "input_tokens": 2333,
+          "latency_s": 0.65
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t32",
+          "expected": "create_interview_hold",
+          "called": "create_interview_hold",
+          "args": {
+            "end": "2026-11-17T10:30:00Z",
+            "idempotency_key": "hold-00000001",
+            "start": "2026-11-17T10:00:00Z",
+            "title": "Intro call: RAG bot"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2443,
+          "input_tokens": 2363,
+          "latency_s": 0.79
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t33",
+          "expected": "create_email_draft",
+          "called": "create_email_draft",
+          "args": {
+            "body": "I am free Tuesday morning.",
+            "idempotency_key": "mail-00000009",
+            "subject": "Interview times",
+            "to": "client@example.com"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2415,
+          "input_tokens": 2355,
+          "latency_s": 0.85
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t34",
+          "expected": "list_workspace_items",
+          "called": "list_workspace_items",
+          "args": {
+            "": ""
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2362,
+          "input_tokens": 2333,
+          "latency_s": 0.69
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t35",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "query": "SQL BigQuery",
+            "skills": [
+              "SQL",
+              "BigQuery"
+            ]
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2379,
+          "input_tokens": 2334,
+          "latency_s": 0.64
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t36",
+          "expected": "get_client_history",
+          "called": "get_client_history",
+          "args": {
+            "client_id": "cl_77aa88bb99cc"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2377,
+          "input_tokens": 2339,
+          "latency_s": 0.54
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t37",
+          "expected": "search_evidence",
+          "called": "search_evidence",
+          "args": {
+            "k": 3,
+            "persona": "ai_ml",
+            "requirement": "computer vision work with OpenCV"
+          },
+          "selected_ok": true,
+          "arg_score": 0.0,
+          "args_ok": false,
+          "tokens": 2383,
+          "input_tokens": 2336,
+          "latency_s": 0.58
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t38",
+          "expected": "search_jobs",
+          "called": "search_jobs",
+          "args": {
+            "limit": 10,
+            "page": 2,
+            "query": "LangChain"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2389,
+          "input_tokens": 2338,
+          "latency_s": 0.67
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t39",
+          "expected": "get_job",
+          "called": "get_job",
+          "args": {
+            "job_id": "job_aa11bb22cc33dd44"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2384,
+          "input_tokens": 2346,
+          "latency_s": 0.67
+        },
+        {
+          "tool_set": "best",
+          "model": "groq:openai/gpt-oss-20b",
+          "id": "t40",
+          "expected": "get_case_study",
+          "called": "get_case_study",
+          "args": {
+            "id": "p12"
+          },
+          "selected_ok": true,
+          "arg_score": 1.0,
+          "args_ok": true,
+          "tokens": 2377,
+          "input_tokens": 2340,
+          "latency_s": 0.64
+        }
+      ]
+    }
+  }
+}

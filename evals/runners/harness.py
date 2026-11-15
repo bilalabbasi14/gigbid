@@ -14,6 +14,7 @@ import json
 import os
 import random
 import statistics
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -83,6 +84,33 @@ def sample_jobs(
             picked += b[: max(1, round(n_per_persona * frac))]
         out += picked[:n_per_persona]
     return out
+
+
+async def client_reaction(adapter: Any, result: Any, wait_s: float = 900.0) -> str:
+    """The simulated client's reaction to a submitted proposal. In GigSim's LLM mode the client
+    reads the proposal in the background, so this waits until GigSim reports it decided."""
+    pid = getattr(result, "proposal_id", None)
+    if not pid or (result.raw.get("proposal") or {}).get("decided", True):
+        return result.status
+    import httpx
+
+    t0 = time.monotonic()
+    async with httpx.AsyncClient(timeout=15) as c:
+        while time.monotonic() - t0 < wait_s:
+            try:
+                r = await c.get(
+                    f"{adapter.base_url}/proposals/{pid}",
+                    headers={"Authorization": f"Bearer {adapter.token}"},
+                )
+            except httpx.TransportError:  # GigSim busy deciding another proposal: poll again
+                await asyncio.sleep(3)
+                continue
+            r.raise_for_status()
+            p = r.json()
+            if p.get("decided", True):
+                return p["status"]
+            await asyncio.sleep(3)
+    return "undecided"
 
 
 def make_deps() -> Deps:
@@ -196,11 +224,70 @@ def cost(usage: dict[str, int]) -> float:
     )
 
 
+def hardware() -> dict[str, Any]:
+    """CPU, cores and RAM of the machine that ran the evaluation (local-model numbers need it).
+    Never queries WMI on Windows (platform.processor() does, and it times out under memory
+    pressure); every lookup is best effort."""
+    cpu: str | None = os.environ.get("PROCESSOR_IDENTIFIER")
+    ram_gb: float | None = None
+    os_name = sys.platform
+    try:
+        if sys.platform == "win32":
+            import ctypes
+            import winreg
+
+            with winreg.OpenKey(
+                winreg.HKEY_LOCAL_MACHINE, r"HARDWARE\DESCRIPTION\System\CentralProcessor\0"
+            ) as k:
+                cpu = str(winreg.QueryValueEx(k, "ProcessorNameString")[0]).strip()
+
+            class _Mem(ctypes.Structure):
+                _fields_ = [  # noqa: RUF012 - ctypes layout
+                    ("dwLength", ctypes.c_ulong),
+                    ("dwMemoryLoad", ctypes.c_ulong),
+                    ("ullTotalPhys", ctypes.c_ulonglong),
+                    ("ullAvailPhys", ctypes.c_ulonglong),
+                    ("ullTotalPageFile", ctypes.c_ulonglong),
+                    ("ullAvailPageFile", ctypes.c_ulonglong),
+                    ("ullTotalVirtual", ctypes.c_ulonglong),
+                    ("ullAvailVirtual", ctypes.c_ulonglong),
+                    ("ullAvailExtendedVirtual", ctypes.c_ulonglong),
+                ]
+
+            m = _Mem()
+            m.dwLength = ctypes.sizeof(_Mem)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
+            ram_gb = round(m.ullTotalPhys / 2**30, 1)
+            v = sys.getwindowsversion()
+            os_name = f"Windows {v.major}.{v.minor}.{v.build}"
+        else:
+            import platform
+
+            os_name = platform.platform()
+            info = Path("/proc/meminfo").read_text().split()
+            ram_gb = round(int(info[info.index("MemTotal:") + 1]) / 2**20, 1)
+            for line in Path("/proc/cpuinfo").read_text().splitlines():
+                if line.startswith("model name"):
+                    cpu = line.split(":", 1)[1].strip()
+                    break
+    except Exception:  # noqa: BLE001, S110 - best effort; never fail a run over it
+        pass
+    return {
+        "cpu": cpu,
+        "logical_cpus": os.cpu_count(),
+        "ram_gb": ram_gb,
+        "gpu": None,
+        "os": os_name,
+    }
+
+
 def write_result(name: str, payload: dict[str, Any]) -> Path:
     RESULTS.mkdir(parents=True, exist_ok=True)
     payload = {
         "generated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "price_per_million_tokens_usd": PRICE_PER_M,
+        "model_profile": os.environ.get("MODEL_PROFILE") or settings.config().models.profile,
+        "hardware": hardware(),
         **payload,
     }
     path = RESULTS / f"{name}.json"
@@ -213,6 +300,9 @@ def write_result(name: str, payload: dict[str, Any]) -> Path:
 # Each finished item is appended to evals/results/<name>_rows.jsonl; a rerun skips those items.
 # Rows are tagged with a fingerprint of everything that decides behaviour (config.yaml, prompts,
 # policy pack, run options), so results from an older configuration are never mixed in.
+
+
+TIMING_ONLY = {"list_prices_usd_per_million", "max_concurrent_calls_per_model"}
 
 
 def fingerprint(extra: dict[str, Any] | None = None) -> str:
@@ -231,7 +321,9 @@ def fingerprint(extra: dict[str, Any] | None = None) -> str:
         "embeddings": cfg.models.embeddings,
         "reranker": cfg.models.reranker,
         "policy_version": cfg.policy_version,
-        **{k: getattr(cfg, k) for k in ("rag", "budgets", "thresholds", "pricing", "guardrails")},
+        **{k: getattr(cfg, k) for k in ("rag", "thresholds", "pricing", "guardrails", "risk")},
+        # prices and call concurrency change cost and timing, not what the agents do
+        "budgets": {k: v for k, v in cfg.budgets.items() if k not in TIMING_ONLY},
         "extra": extra or {},
     }
     h.update(json.dumps(runtime, sort_keys=True, default=str).encode())
@@ -286,7 +378,13 @@ class RowLog:
         """Rows for `keys` in order; exits with status 3 if any are missing (rerun to continue)."""
         rows = [self.rows[k] for k in keys if k in self.rows]
         if len(rows) < len(keys):
-            why = "a daily model cap was reached" if guard.stopped else "some items did not finish"
+            why = (
+                "a daily model cap was reached"
+                if guard.stopped
+                else f"{guard.discarded} items hit model errors and were not saved"
+                if guard.discarded
+                else "some items did not finish"
+            )
             print(
                 f"\npartial: {len(rows)}/{len(keys)} items saved in {self.path.name}; {why}. "
                 "Rerun the same command later to continue."
@@ -296,19 +394,30 @@ class RowLog:
 
 
 class QuotaGuard:
-    """Stops a run when a daily model cap is hit. The item in flight is discarded: its output came
-    from heuristic fallbacks, not the configured models."""
+    """Keeps model failures out of the results.
+
+    A daily model cap stops the run (nothing more can succeed today). Any other model call that
+    failed after every retry discards only the item in flight: its output came from heuristic
+    fallbacks, not the configured models, so it is redone on the next run.
+    """
 
     def __init__(self) -> None:
         self.stopped = False
+        self.discarded = 0
 
     @staticmethod
-    def mark() -> int:
-        return llm.quota_failures()
+    def mark() -> tuple[int, int]:
+        return llm.quota_failures(), llm.call_failures()
 
-    def spoiled(self, mark: int, exc: BaseException | None = None) -> bool:
-        if llm.quota_failures() > mark or (exc is not None and llm.is_daily_cap(exc)):
+    def spoiled(self, mark: tuple[int, int], exc: BaseException | None = None) -> bool:
+        quota, calls = mark
+        if llm.quota_failures() > quota or (exc is not None and llm.is_daily_cap(exc)):
             if not self.stopped:
                 print("  daily model cap reached: stopping; finished items are saved")
             self.stopped = True
-        return self.stopped
+            return True
+        if llm.call_failures() > calls or (exc is not None and llm.is_provider_failure(exc)):
+            self.discarded += 1
+            print("  a model call failed after retries: item discarded, it reruns next time")
+            return True
+        return False

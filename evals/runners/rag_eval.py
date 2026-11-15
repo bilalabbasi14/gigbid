@@ -53,8 +53,13 @@ def metrics(
 
 
 def run_variant(
-    name: str, personas: list[str], limit: int | None, res: Resources
+    name: str,
+    personas: list[str],
+    limit: int | None,
+    res: Resources,
+    query_rows: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    """Aggregate metrics per persona; with `query_rows`, also one row per query for analysis."""
     retriever = build_retriever(name, res)
     out: dict[str, Any] = {"variant": name, "personas": {}, "n_jobs": 0}
     all_rows: list[dict[str, float]] = []
@@ -73,6 +78,25 @@ def run_variant(
             ev = [e for e in ev if not (e.doc_type == "proposal" and e.job_id == r["job_id"])][:10]
             m = metrics([e.project_id for e in ev], set(r["gold_projects"]))
             per.append(m)
+            if query_rows is not None:
+                query_rows.append(
+                    {
+                        "variant": name,
+                        "persona": persona,
+                        "job_id": r["job_id"],
+                        "title": r["job"].get("title", "")[:90],
+                        "gold": sorted(r["gold_projects"]),
+                        "ranked": [
+                            {
+                                "project": e.project_id,
+                                "doc_type": e.doc_type,
+                                "score": round(e.score, 4),
+                            }
+                            for e in ev
+                        ],
+                        **{k: round(v, 4) for k, v in m.items()},
+                    }
+                )
         agg = {k: round(statistics.mean(x[k] for x in per), 4) for k in per[0]}
         agg["n"] = len(per)
         agg["latency_p50_s"] = round(statistics.median(lat), 3)
@@ -93,6 +117,9 @@ def main() -> None:
     ap.add_argument(
         "--tag", default="", help="suffix for result files/summary keys, e.g. _subset20"
     )
+    ap.add_argument(
+        "--rows", action="store_true", help="also write rag_<variant><tag>_rows.jsonl per query"
+    )
     args = ap.parse_args()
     variants = [v for v in args.variants.split(",") if v]
     personas = [p for p in args.personas.split(",") if p]
@@ -104,7 +131,11 @@ def main() -> None:
     summary_path = RESULTS / f"rag_summary{args.tag}.json"
     summary = json.loads(summary_path.read_text(encoding="utf-8")) if summary_path.exists() else {}
     for v in variants:
-        result = run_variant(v, personas, args.limit, res)
+        qrows: list[dict[str, Any]] | None = [] if args.rows else None
+        result = run_variant(v, personas, args.limit, res, qrows)
+        if qrows is not None:
+            with (RESULTS / f"rag_{v}{args.tag}_rows.jsonl").open("w", encoding="utf-8") as f:
+                f.writelines(json.dumps(q) + "\n" for q in qrows)
         result["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         (RESULTS / f"rag_{v}{args.tag}.json").write_text(
             json.dumps(result, indent=2), encoding="utf-8"

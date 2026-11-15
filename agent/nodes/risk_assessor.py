@@ -20,33 +20,42 @@ from agent.structured import call_structured
 NODE = "risk_assessor"
 
 
+def _risk_cfg() -> tuple[dict[str, float], set[str]]:
+    risk = settings.config().risk or {}
+    return {k: float(v) for k, v in (risk.get("weights") or {}).items()}, set(
+        risk.get("hard_signals") or []
+    )
+
+
 def prescreen(job: dict[str, Any], client: dict[str, Any] | None) -> dict[str, Any]:
+    """Heuristic risk score from the post and the client's history. Signal weights and the hard
+    signals come from agent/config.yaml (risk), keyword lists from the policy pack."""
     text = f"{job.get('title', '')}\n{job.get('description', '')}".lower()
     kw = policy.load().get("keywords", {})
+    weights, hard = _risk_cfg()
     flags: list[str] = []
     score = 0.0
-    for key, weight in (("off_platform", 0.45), ("free_work", 0.4), ("guarantee", 0.05)):
-        if any(k in text for k in kw.get(key, [])):
-            flags.append(key)
-            score += weight
-    contact = contains_contact_details(text)
-    if contact:
-        flags.append("contact_details_in_post")
-        score += 0.3
+
+    def hit(name: str) -> None:
+        nonlocal score
+        flags.append(name)
+        score += weights.get(name, 0.0)
+
+    for name in weights:  # every weighted signal with a keyword list in the policy pack
+        if name in kw and any(k in text for k in kw[name]):
+            hit(name)
+    if contains_contact_details(text):
+        hit("contact_details_in_post")
     if "http://" in text or "apply through" in text or "register on" in text:
-        flags.append("external_link")
-        score += 0.2
+        hit("external_link")
     inj = detect_injection(job.get("description", ""))
     if inj:
-        flags.append("prompt_injection")
-        score += 0.35
+        hit("prompt_injection")
     budget = job.get("budget") or 0
     if job.get("payment_type") == "fixed" and budget == 0 and "trial" in text:
-        flags.append("zero_budget_trial")
-        score += 0.3
+        hit("zero_budget_trial")
     if (job.get("hourly_min") or 0) >= 120 and "easy" in text:
-        flags.append("too_good_to_be_true")
-        score += 0.3
+        hit("too_good_to_be_true")
     quality = 0.5
     if client:
         quality = 0.2
@@ -60,11 +69,11 @@ def prescreen(job: dict[str, Any], client: dict[str, Any] | None) -> dict[str, A
             quality += 0.1
         quality = min(1.0, quality)
         if not client.get("payment_verified") and spent == 0:
-            flags.append("unverified_no_spend")
-            score += 0.15
+            hit("unverified_no_spend")
     return {
         "score": round(min(1.0, score), 3),
         "flags": flags,
+        "hard": [f for f in flags if f in hard],
         "injection": [h["id"] for h in inj],
         "client_quality": round(quality, 3),
     }
@@ -118,7 +127,10 @@ async def run(state: BidState, deps: Deps) -> dict[str, Any]:
             client_quality=pre["client_quality"],
             explanation="Heuristic-only assessment (model unavailable).",
         )
-    report.scam_likely = report.score >= float(
-        settings.config().thresholds.get("max_risk_score", 0.7)
+    _, hard = _risk_cfg()
+    report.scam_likely = (
+        report.score >= float(settings.config().thresholds.get("max_risk_score", 0.7))
+        or bool(pre["hard"])
+        or any(f in hard for f in report.flags)
     )
     return node_output(NODE, None, events, usage, risk_report=report.model_dump())

@@ -35,6 +35,7 @@ from langgraph.checkpoint.memory import InMemorySaver
 from agent import settings
 from agent.deps import Deps
 from agent.graphs import portfolio_builder_graph as pbg
+from agent.portfolio_builder.facts import cited_fact_ids, normalise_citations
 from evals.runners.harness import QuotaGuard, RowLog, cost, write_result
 from evals.runners.rag_eval import load_dev, metrics
 from rag.index.pg import ChunkStore
@@ -100,7 +101,7 @@ def write_built(
         prof = d.get("profile", {})
         front = f"---\nproject_id: {pid}\nyear: {prof.get('year') or ''}\nclient_industry: \nskills: {json.dumps(prof.get('languages', []))}\nlibraries: {json.dumps(prof.get('libraries', []))}\nsource: portfolio_builder\nverified: true\n---\n\n"
         (built / "case_studies" / f"gh_{pbg.slug(d['repo'])}.md").write_text(
-            front + d["markdown"].strip() + "\n", encoding="utf-8"
+            front + normalise_citations(d["markdown"]).strip() + "\n", encoding="utf-8"
         )
     return built
 
@@ -119,6 +120,12 @@ def library_scores(
         found = {x.lower() for x in d.get("profile", {}).get("libraries", [])}
         hit = {f for f in found if any(f in t or t in f for t in truth)}
         v = d.get("verification", {})
+        # recounted from the saved draft so drafts saved before citations were normalised
+        # (【id】, [ id ]) count the facts they cite
+        ids = {f["fact_id"] for f in d.get("facts", [])}
+        facts_cited = (
+            len(cited_fact_ids(d.get("markdown", "")) & ids) if ids else v.get("facts_cited")
+        )
         rows.append(
             {
                 "repo": d["repo"],
@@ -129,7 +136,7 @@ def library_scores(
                 "unsupported_rate_after": v.get("unsupported_rate_after"),
                 "removed": v.get("removed"),
                 "facts_total": v.get("facts_total"),
-                "facts_cited": v.get("facts_cited"),
+                "facts_cited": facts_cited,
                 "libraries_found": sorted(found),
                 "libraries_in_metadata": sorted(truth),
                 "library_precision": round(len(hit) / len(found), 3) if found else None,
@@ -243,7 +250,9 @@ def main() -> None:
     for p in personas:
         res = asyncio.run(run_persona(p, args.variant, store, log, guard))
         if res is None:
-            break
+            if guard.stopped:
+                break
+            continue
         per[p] = res
     log.collect(personas, guard)  # exits with status 3 if a persona is still missing
     agg = aggregate(per)

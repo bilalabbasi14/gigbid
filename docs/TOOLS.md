@@ -2,7 +2,9 @@
 
 Every capability an agent can use is an MCP tool with a schema, an owner and a test. Agents never
 call GigSim, Upwork, a database or a file directly. Per-agent allowlists live in
-`agent/mcp_client.py`; schemas are frozen by `tests/contract/`.
+`agent/mcp_client.py`; schemas are frozen by `tests/contract/`. Tool descriptions are data in
+`mcp_servers/tool_descriptions.yaml`, written as what the tool does, when to use it and when not
+to; that form measured best in the tool-granularity study (`evals/results/tool_design.json`).
 
 Annotations: **RO** readOnlyHint, **D** destructiveHint, **I** idempotentHint, **OW** openWorldHint.
 

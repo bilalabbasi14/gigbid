@@ -37,6 +37,7 @@ from evals.runners.harness import (
     QuotaGuard,
     RowLog,
     analyse,
+    client_reaction,
     cost,
     draft,
     make_deps,
@@ -103,7 +104,7 @@ async def run_single(row: dict[str, Any], deps) -> tuple[dict[str, Any], dict[st
     sec = load_sections("baseline_single_agent")
     tools = await job_tools(deps, row["persona"])
     agent = create_agent(
-        llm.chat_for_node("writer", max_tokens=1500),
+        llm.chat_for_node("writer", max_tokens=1500, max_retries=4),
         tools=tools,
         system_prompt=sec["system"].replace("{{", "{").replace("}}", "}"),
     )
@@ -133,7 +134,7 @@ async def run_supervisor(row: dict[str, Any], deps) -> tuple[dict[str, Any], dic
 
     sec = load_sections("baseline_supervisor")
     tools = {t.name: t for t in await job_tools(deps, row["persona"])}
-    medium = llm.chat_for_node("analyst", max_tokens=1200)
+    medium = llm.chat_for_node("analyst", max_tokens=1200, max_retries=4)
     workers = [
         create_agent(
             medium,
@@ -142,7 +143,7 @@ async def run_supervisor(row: dict[str, Any], deps) -> tuple[dict[str, Any], dic
             name="job_reader",
         ),
         create_agent(
-            llm.chat_for_node("risk_assessor", max_tokens=800),
+            llm.chat_for_node("risk_assessor", max_tokens=800, max_retries=4),
             tools=[tools["get_client_history"], tools["get_job"]],
             system_prompt=sec["worker_risk_checker"],
             name="risk_checker",
@@ -154,7 +155,7 @@ async def run_supervisor(row: dict[str, Any], deps) -> tuple[dict[str, Any], dic
             name="evidence_researcher",
         ),
         create_agent(
-            llm.chat_for_node("writer", max_tokens=1500),
+            llm.chat_for_node("writer", max_tokens=1500, max_retries=4),
             tools=[tools["search_evidence"]],
             system_prompt=sec["worker_proposal_writer"],
             name="proposal_writer",
@@ -162,7 +163,7 @@ async def run_supervisor(row: dict[str, Any], deps) -> tuple[dict[str, Any], dic
     ]
     app = create_supervisor(
         workers,
-        model=llm.chat_for_node("critic", max_tokens=1500),
+        model=llm.chat_for_node("critic", max_tokens=1500, max_retries=4),
         prompt=sec["system"].replace("{{", "{").replace("}}", "}"),
         output_mode="last_message",
     ).compile()
@@ -285,7 +286,7 @@ async def submit(row: dict[str, Any], out: dict[str, Any], adapter, system: str)
                 idempotency_key=f"mac-{system}-{row['job_id']}",
             )
         )
-        return r.status
+        return await client_reaction(adapter, r)
     except Exception as exc:  # noqa: BLE001
         return f"error: {exc}"[:80]
 

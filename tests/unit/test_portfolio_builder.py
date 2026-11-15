@@ -215,3 +215,13 @@ async def test_github_source_parses_mcp_outputs():
     assert await src.tree("a") == ["README.md"]
     assert await src.read("a", "README.md") == "hello"
     assert (await src.commits("a")).count == 1
+
+
+def test_citation_variants_are_normalised_and_counted() -> None:
+    from agent.portfolio_builder.facts import cited_fact_ids, normalise_citations
+
+    text = "Uses Airflow【2e3bbac683c8】. Tested [ d906f17df0cb ][860dbc470c81]. Not [p04]."
+    assert normalise_citations(text) == (
+        "Uses Airflow[2e3bbac683c8]. Tested [d906f17df0cb][860dbc470c81]. Not [p04]."
+    )
+    assert cited_fact_ids(text) == {"2e3bbac683c8", "d906f17df0cb", "860dbc470c81"}

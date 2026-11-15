@@ -1,6 +1,6 @@
 .PHONY: help install dev api web worker gigsim mcp test test-unit test-contract test-integration \
         lint fmt typecheck eval eval-rag eval-decisions eval-outcomes eval-smoke seed ingest demo \
-        demo-single ci-checks up down logs openapi-client
+        demo-single ci-checks up down logs openapi-client report-pdf
 
 PY ?= uv run
 COMPOSE ?= docker compose -f infra/docker-compose.yml
@@ -75,6 +75,9 @@ eval-outcomes:  ## Fixed-job-set GigSim reply/hire rate
 
 eval-smoke:  ## 30-job smoke eval with CI thresholds
 	$(PY) python -m evals.runners.smoke_eval
+
+report-pdf:  ## Render docs/report/REPORT.md to PDF (headless Chrome or Edge; 10-page budget)
+	uv run --with markdown --with pypdf python scripts/report_pdf.py
 
 seed:  ## Seed Postgres + GigSim with personas and the reviewer login
 	$(PY) python -m scripts.seed

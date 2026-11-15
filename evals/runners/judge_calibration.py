@@ -9,8 +9,10 @@
        uv run python -m evals.runners.judge_calibration kappa
      -> evals/results/judge_calibration.json (quadratic-weighted and unweighted Cohen's kappa per criterion)
 
-The judge prompt is agent/prompts/judge.md (node "judge", large tier). Proposals come from
-evals/results/proposal_eval*.json rows, which keep the cover letter and the job id.
+The judge prompt is agent/prompts/judge.md (node "judge", large tier). Items are the proposals
+GigBid wrote in evals/results/proposal_eval*.json; when there are fewer than --n, the sheet is
+filled with the personas' past proposals (data/personas/*/proposals.jsonl), drawn evenly from
+won, replied and ignored ones so the items span the quality range. judge_sheet_sources.json says which, out of the scorer's sight.
 """
 
 from __future__ import annotations
@@ -29,8 +31,33 @@ from evals.runners.harness import load_dev, write_result
 
 LABEL_DIR = ROOT / "evals/labeling"
 SHEET = LABEL_DIR / "judge_sheet.csv"
+SOURCES = (
+    LABEL_DIR / "judge_sheet_sources.json"
+)  # where each item came from; not shown to the scorer
 JUDGED = ROOT / "evals/results/judge_scores.json"
 CRITERIA = ["relevance", "specificity", "credibility", "clarity", "next_step", "overall"]
+
+
+def _past_proposals(seed: int) -> list[dict[str, Any]]:
+    """Personas' past proposals, interleaved won / replied / ignored."""
+    by_outcome: dict[str, list[dict[str, Any]]] = {}
+    for f in sorted((ROOT / "data/personas").glob("*/proposals.jsonl")):
+        if f.parent.name.startswith(("_", "x3_")):
+            continue
+        for line in f.open(encoding="utf-8"):
+            r = json.loads(line)
+            if r.get("cover_letter") and r.get("job_id"):
+                r = {**r, "source": f"past_proposal:{f.parent.name}:{r.get('outcome')}"}
+                by_outcome.setdefault(str(r.get("outcome")), []).append(r)
+    rng = random.Random(seed)
+    for rows in by_outcome.values():
+        rng.shuffle(rows)
+    out = []
+    while any(by_outcome.values()):
+        for k in sorted(by_outcome):
+            if by_outcome[k]:
+                out.append(by_outcome[k].pop())
+    return out
 
 
 def proposals(n: int, seed: int) -> list[dict[str, Any]]:
@@ -41,6 +68,7 @@ def proposals(n: int, seed: int) -> list[dict[str, Any]]:
             if r.get("cover_letter"):
                 rows.append({"source": f.name, **r})
     random.Random(seed).shuffle(rows)
+    rows += _past_proposals(seed)
     seen, out = set(), []
     for r in rows:
         key = (r["job_id"], r["cover_letter"][:80])
@@ -50,7 +78,10 @@ def proposals(n: int, seed: int) -> list[dict[str, Any]]:
     return out[:n]
 
 
-def export(n: int, seed: int) -> None:
+def export(n: int, seed: int, force: bool = False) -> None:
+    if SHEET.exists() and not force:  # never overwrite human labels in progress
+        print(f"{SHEET} already exists; keeping it (pass --force to replace it)")
+        return
     LABEL_DIR.mkdir(parents=True, exist_ok=True)
     jobs = {
         r["job_id"]: r["job"] for p in ("ai_ml", "fullstack", "data_analyst") for r in load_dev(p)
@@ -82,8 +113,12 @@ def export(n: int, seed: int) -> None:
                     "",
                 ]
             )
+    SOURCES.write_text(
+        json.dumps({f"j{i:02d}": r["source"] for i, r in enumerate(items, 1)}, indent=2),
+        encoding="utf-8",
+    )
     print(
-        f"wrote {len(items)} proposals to {SHEET} - fill human_* with scores 1-5 (see agent/prompts/judge.md for the rubric)"
+        f"wrote {len(items)} proposals to {SHEET} - fill human_* with scores 1-5 (rubric: evals/labeling/RUBRIC.md)"
     )
 
 
@@ -163,6 +198,11 @@ def kappa() -> None:
             "exact_agreement": round(sum(1 for x, y in pairs if x == y) / len(pairs), 3)
             if pairs
             else None,
+            "within_one_agreement": round(sum(abs(x - y) <= 1 for x, y in pairs) / len(pairs), 3)
+            if pairs
+            else None,
+            "judge_higher": sum(y > x for x, y in pairs),
+            "judge_lower": sum(y < x for x, y in pairs),
             "mean_human": round(sum(h) / len(h), 2) if h else None,
             "mean_judge": round(sum(j) / len(j), 2) if j else None,
         }
@@ -178,9 +218,10 @@ def main() -> None:
     ap.add_argument("cmd", choices=["export", "judge", "kappa"])
     ap.add_argument("--n", type=int, default=30)
     ap.add_argument("--seed", type=int, default=5)
+    ap.add_argument("--force", action="store_true", help="export: replace an existing sheet")
     args = ap.parse_args()
     if args.cmd == "export":
-        export(args.n, args.seed)
+        export(args.n, args.seed, args.force)
     elif args.cmd == "judge":
         asyncio.run(judge_all())
     else:

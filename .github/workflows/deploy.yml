@@ -1,70 +1,61 @@
 name: Deploy
-# Pushes main to the Hugging Face Docker Space that serves the public URL, and keeps it awake.
-# Needs repository secrets HF_TOKEN (write) and HF_SPACE ("user/space-name"). Skips cleanly if unset.
+# Deploys main to the production VM over SSH (infra/vm/deploy.sh: pull, rebuild, restart, wait
+# until healthy) and checks the public URL. A scheduled run checks the URL every 6 hours, so an
+# outage before the hidden test run shows up as a failed workflow.
+# Repository secrets: DEPLOY_HOST (the VM's DNS name), DEPLOY_USER (e.g. azureuser),
+# DEPLOY_SSH_KEY (private key with access to the VM), LIVE_URL (https://<DEPLOY_HOST>).
+# Without them every job skips cleanly.
 on:
   push:
     branches: [main]
   workflow_dispatch:
   schedule:
-    - cron: "17 */6 * * *"   # keep-alive ping so the free Space does not sleep
+    - cron: "17 */6 * * *"
 
 jobs:
   deploy:
     if: github.event_name != 'schedule'
     runs-on: ubuntu-latest
+    timeout-minutes: 75
+    concurrency: { group: deploy, cancel-in-progress: false }
     steps:
-      - uses: actions/checkout@v4
-        with: { fetch-depth: 1, lfs: false }
       - name: Check deploy secrets
         id: cfg
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_SPACE: ${{ secrets.HF_SPACE }}
-        run: echo "ready=$([ -n "$HF_TOKEN" ] && [ -n "$HF_SPACE" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-      - name: Assemble the Space repository
-        if: steps.cfg.outputs.ready == 'true'
-        run: |
-          mkdir -p /tmp/space
-          rsync -a --exclude .git --exclude 'data/raw' --exclude 'data/processed' --exclude 'apps/web/node_modules' --exclude 'evals/results' ./ /tmp/space/
-          cp infra/docker/space.Dockerfile /tmp/space/Dockerfile
-          {
-            echo "---"
-            echo "title: GigBid"
-            echo "emoji: 🧭"
-            echo "colorFrom: indigo"
-            echo "colorTo: gray"
-            echo "sdk: docker"
-            echo "app_port: 7860"
-            echo "pinned: false"
-            echo "---"
-            echo
-            cat README.md
-          } > /tmp/space/README.md
-      - name: Upload to the Space
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: echo "ready=$([ -n "$DEPLOY_HOST" ] && [ -n "$DEPLOY_SSH_KEY" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Deploy over SSH
         if: steps.cfg.outputs.ready == 'true'
         env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          HF_SPACE: ${{ secrets.HF_SPACE }}
-        # upload_folder stores binary files (PDF CVs, PNGs, the gzipped job pool) the way the Hub
-        # requires; files no longer in the repo are deleted from the Space in the same commit
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
-          pip install --quiet "huggingface_hub>=0.26"
-          python - <<'PY'
-          import os
-          from huggingface_hub import HfApi
-          HfApi(token=os.environ["HF_TOKEN"]).upload_folder(
-              folder_path="/tmp/space", repo_id=os.environ["HF_SPACE"], repo_type="space",
-              commit_message=f"deploy {os.environ['GITHUB_SHA'][:7]}", delete_patterns=["*"],
-          )
-          PY
-
-  keepalive:
-    if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Ping the live URL
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=accept-new -o ServerAliveInterval=30 \
+            "${DEPLOY_USER:-azureuser}@$DEPLOY_HOST" "bash /opt/gigbid/infra/vm/deploy.sh"
+      - name: Check the public URL
+        if: steps.cfg.outputs.ready == 'true'
         env:
           LIVE_URL: ${{ secrets.LIVE_URL }}
         run: |
           [ -z "$LIVE_URL" ] && { echo "LIVE_URL not set"; exit 0; }
-          curl -fsS --max-time 60 "$LIVE_URL/api/health" || curl -fsS --max-time 120 "$LIVE_URL/login" > /dev/null
+          curl -fsS --retry 10 --retry-delay 15 --retry-all-errors --max-time 30 "$LIVE_URL/api/health"
+      - name: Skipped
+        if: steps.cfg.outputs.ready != 'true'
+        run: |
+          echo "::notice::Deploy skipped, set DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY and LIVE_URL"
+
+  uptime:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the public URL
+        env:
+          LIVE_URL: ${{ secrets.LIVE_URL }}
+        run: |
+          [ -z "$LIVE_URL" ] && { echo "LIVE_URL not set"; exit 0; }
+          curl -fsS --retry 3 --retry-delay 20 --retry-all-errors --max-time 30 "$LIVE_URL/api/health"

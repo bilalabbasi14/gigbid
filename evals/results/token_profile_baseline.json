@@ -1,0 +1,549 @@
+{
+  "generated_at": "2026-11-13T00:14:24Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows-11-10.0.26200-SP0"
+  },
+  "config": {
+    "per_persona": 1,
+    "seed": 11,
+    "daily_cap": 200000,
+    "allow_fallback": true,
+    "out": "token_profile_baseline"
+  },
+  "summary": {
+    "n_jobs": 3,
+    "models_used": [
+      "openai/gpt-oss-120b",
+      "openai/gpt-oss-20b",
+      "qwen/qwen3.8-27b"
+    ],
+    "per_call_type": {
+      "writer:writer": {
+        "calls": 2.33,
+        "input_tokens": 6249.0,
+        "output_tokens": 938.33
+      },
+      "critic:critic": {
+        "calls": 2.33,
+        "input_tokens": 5382.0,
+        "output_tokens": 534.67
+      },
+      "verifier:verifier": {
+        "calls": 4.67,
+        "input_tokens": 3411.67,
+        "output_tokens": 1078.0
+      },
+      "fit_matcher:fit_assess": {
+        "calls": 1.0,
+        "input_tokens": 2072.67,
+        "output_tokens": 563.67
+      },
+      "analyst:analyst": {
+        "calls": 1.0,
+        "input_tokens": 1293.0,
+        "output_tokens": 404.33
+      },
+      "risk_assessor:risk": {
+        "calls": 1.0,
+        "input_tokens": 1140.33,
+        "output_tokens": 304.67
+      },
+      "verifier:verifier_rewrite": {
+        "calls": 1.67,
+        "input_tokens": 921.33,
+        "output_tokens": 428.67
+      },
+      "fit_matcher:fit_requirements": {
+        "calls": 1.0,
+        "input_tokens": 448.0,
+        "output_tokens": 66.67
+      },
+      "compliance:compliance_rewrite": {
+        "calls": 0.33,
+        "input_tokens": 166.33,
+        "output_tokens": 103.33
+      }
+    },
+    "tokens_per_job_analysed_by_tier": {
+      "medium": 4848,
+      "small": 1445
+    },
+    "tokens_per_proposal_by_tier": {
+      "small": 1715,
+      "medium": 10688,
+      "large": 13104
+    },
+    "daily_token_cap_per_model": 200000,
+    "jobs_analysed_per_day": {
+      "by_tier": {
+        "medium": 41,
+        "small": 138
+      },
+      "bottleneck_tier": "medium",
+      "max": 41
+    },
+    "proposals_per_day": {
+      "by_tier": {
+        "small": 116,
+        "medium": 18,
+        "large": 15
+      },
+      "bottleneck_tier": "large",
+      "max": 15
+    },
+    "latency_s_analysis_mean": 70.9,
+    "latency_s_proposal_mean": 164.2
+  },
+  "rows": [
+    {
+      "job_id": "job_d3f13c725b2cdffd",
+      "persona": "ai_ml",
+      "latency_s_analysis": 66.9,
+      "latency_s_proposal": 173.6,
+      "revisions": 2,
+      "calls": [
+        {
+          "node": "analyst",
+          "prompt": "analyst",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 875,
+          "output_tokens": 383,
+          "ms": 6279
+        },
+        {
+          "node": "risk_assessor",
+          "prompt": "risk",
+          "model": "openai/gpt-oss-20b",
+          "stage": "analysis",
+          "input_tokens": 753,
+          "output_tokens": 284,
+          "ms": 5494
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_requirements",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 347,
+          "output_tokens": 52,
+          "ms": 704
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_assess",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 2172,
+          "output_tokens": 532,
+          "ms": 1402
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2382,
+          "output_tokens": 302,
+          "ms": 1942
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 569,
+          "output_tokens": 116,
+          "ms": 368
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 603,
+          "output_tokens": 120,
+          "ms": 425
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2271,
+          "output_tokens": 291,
+          "ms": 1249
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2695,
+          "output_tokens": 403,
+          "ms": 1386
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 659,
+          "output_tokens": 285,
+          "ms": 733
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 1102,
+          "output_tokens": 452,
+          "ms": 16488
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier_rewrite",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 592,
+          "output_tokens": 302,
+          "ms": 47055
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2335,
+          "output_tokens": 262,
+          "ms": 764
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2766,
+          "output_tokens": 411,
+          "ms": 1309
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 664,
+          "output_tokens": 94,
+          "ms": 16013
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 581,
+          "output_tokens": 182,
+          "ms": 556
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2363,
+          "output_tokens": 173,
+          "ms": 1089
+        }
+      ]
+    },
+    {
+      "job_id": "job_5ff689caa23bb320",
+      "persona": "fullstack",
+      "latency_s_analysis": 81.6,
+      "latency_s_proposal": 129.8,
+      "revisions": 0,
+      "calls": [
+        {
+          "node": "analyst",
+          "prompt": "analyst",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 1075,
+          "output_tokens": 389,
+          "ms": 1075
+        },
+        {
+          "node": "risk_assessor",
+          "prompt": "risk",
+          "model": "openai/gpt-oss-20b",
+          "stage": "analysis",
+          "input_tokens": 961,
+          "output_tokens": 282,
+          "ms": 737
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_requirements",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 549,
+          "output_tokens": 77,
+          "ms": 77148
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_assess",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 2196,
+          "output_tokens": 638,
+          "ms": 1569
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2897,
+          "output_tokens": 445,
+          "ms": 1197
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 652,
+          "output_tokens": 190,
+          "ms": 15854
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 880,
+          "output_tokens": 291,
+          "ms": 821
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier_rewrite",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 546,
+          "output_tokens": 302,
+          "ms": 27933
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2452,
+          "output_tokens": 171,
+          "ms": 1009
+        }
+      ]
+    },
+    {
+      "job_id": "job_1cbfe96ff70a429e",
+      "persona": "data_analyst",
+      "latency_s_analysis": 64.2,
+      "latency_s_proposal": 189.1,
+      "revisions": 2,
+      "calls": [
+        {
+          "node": "analyst",
+          "prompt": "analyst",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 1929,
+          "output_tokens": 441,
+          "ms": 12788
+        },
+        {
+          "node": "risk_assessor",
+          "prompt": "risk",
+          "model": "openai/gpt-oss-20b",
+          "stage": "analysis",
+          "input_tokens": 1707,
+          "output_tokens": 348,
+          "ms": 1206
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_requirements",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 448,
+          "output_tokens": 71,
+          "ms": 9387
+        },
+        {
+          "node": "fit_matcher",
+          "prompt": "fit_assess",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "analysis",
+          "input_tokens": 1850,
+          "output_tokens": 521,
+          "ms": 1412
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2465,
+          "output_tokens": 362,
+          "ms": 1002
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 512,
+          "output_tokens": 78,
+          "ms": 12346
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 578,
+          "output_tokens": 111,
+          "ms": 370
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier_rewrite",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 412,
+          "output_tokens": 166,
+          "ms": 10431
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2183,
+          "output_tokens": 280,
+          "ms": 796
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2773,
+          "output_tokens": 368,
+          "ms": 892
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 547,
+          "output_tokens": 71,
+          "ms": 8034
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 571,
+          "output_tokens": 97,
+          "ms": 317
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier_rewrite",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 438,
+          "output_tokens": 169,
+          "ms": 3379
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2189,
+          "output_tokens": 258,
+          "ms": 1065
+        },
+        {
+          "node": "writer",
+          "prompt": "writer",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2769,
+          "output_tokens": 524,
+          "ms": 1451
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 710,
+          "output_tokens": 438,
+          "ms": 1109
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 1607,
+          "output_tokens": 709,
+          "ms": 39107
+        },
+        {
+          "node": "verifier",
+          "prompt": "verifier_rewrite",
+          "model": "qwen/qwen3.8-27b",
+          "stage": "proposal",
+          "input_tokens": 776,
+          "output_tokens": 347,
+          "ms": 39736
+        },
+        {
+          "node": "critic",
+          "prompt": "critic",
+          "model": "openai/gpt-oss-120b",
+          "stage": "proposal",
+          "input_tokens": 2353,
+          "output_tokens": 169,
+          "ms": 887
+        },
+        {
+          "node": "compliance",
+          "prompt": "compliance_rewrite",
+          "model": "openai/gpt-oss-20b",
+          "stage": "proposal",
+          "input_tokens": 499,
+          "output_tokens": 310,
+          "ms": 775
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "v2_hybrid_fullstack": {
+    "overall": {
+      "recall@5": 0.5859,
+      "mrr": 0.4055,
+      "ndcg@10": 0.4622
+    },
+    "personas": {
+      "fullstack": {
+        "recall@5": 0.5859,
+        "mrr": 0.4055,
+        "ndcg@10": 0.4622,
+        "n": 64,
+        "latency_p50_s": 0.367,
+        "latency_p95_s": 0.932
+      }
+    },
+    "n_jobs": 64,
+    "timestamp": "2026-11-13T04:28:53Z"
+  },
+  "v3_rerank_fullstack": {
+    "overall": {
+      "recall@5": 0.5,
+      "mrr": 0.2756,
+      "ndcg@10": 0.358
+    },
+    "personas": {
+      "fullstack": {
+        "recall@5": 0.5,
+        "mrr": 0.2756,
+        "ndcg@10": 0.358,
+        "n": 64,
+        "latency_p50_s": 12.799,
+        "latency_p95_s": 30.917
+      }
+    },
+    "n_jobs": 64,
+    "timestamp": "2026-11-13T04:46:16Z"
+  }
+}

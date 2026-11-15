@@ -1,0 +1,3 @@
+# False positives, one fingerprint per line (commit:file:rule:line).
+# The Actions cache key 'ollama-qwen3-4b-instruct-v1' in the eval workflow is a cache name, not a credential.
+2d5be277bd43d274ca41d3de01a8af6f34bb4bec:.github/workflows/eval.yml:generic-api-key:74

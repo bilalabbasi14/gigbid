@@ -1,0 +1,84 @@
+{
+  "generated_at": "2026-11-13T21:40:20Z",
+  "price_per_million_tokens_usd": {
+    "input": 0.15,
+    "output": 0.6
+  },
+  "model_profile": "open",
+  "hardware": {
+    "cpu": "11th Gen Intel(R) Core(TM) i5-1155G7 @ 2.50GHz",
+    "logical_cpus": 8,
+    "ram_gb": 7.8,
+    "gpu": null,
+    "os": "Windows 10.0.26200"
+  },
+  "criteria": {
+    "relevance": {
+      "n": 30,
+      "kappa_quadratic": 0.741,
+      "kappa_unweighted": 0.284,
+      "exact_agreement": 0.467,
+      "within_one_agreement": 1.0,
+      "judge_higher": 9,
+      "judge_lower": 7,
+      "mean_human": 3.7,
+      "mean_judge": 3.77
+    },
+    "specificity": {
+      "n": 30,
+      "kappa_quadratic": 0.688,
+      "kappa_unweighted": 0.063,
+      "exact_agreement": 0.333,
+      "within_one_agreement": 1.0,
+      "judge_higher": 14,
+      "judge_lower": 6,
+      "mean_human": 3.0,
+      "mean_judge": 3.27
+    },
+    "credibility": {
+      "n": 30,
+      "kappa_quadratic": 0.405,
+      "kappa_unweighted": 0.185,
+      "exact_agreement": 0.467,
+      "within_one_agreement": 0.933,
+      "judge_higher": 11,
+      "judge_lower": 5,
+      "mean_human": 2.9,
+      "mean_judge": 3.17
+    },
+    "clarity": {
+      "n": 30,
+      "kappa_quadratic": 0.383,
+      "kappa_unweighted": 0.034,
+      "exact_agreement": 0.333,
+      "within_one_agreement": 0.9,
+      "judge_higher": 12,
+      "judge_lower": 8,
+      "mean_human": 3.5,
+      "mean_judge": 3.6
+    },
+    "next_step": {
+      "n": 30,
+      "kappa_quadratic": 0.799,
+      "kappa_unweighted": 0.337,
+      "exact_agreement": 0.5,
+      "within_one_agreement": 0.9,
+      "judge_higher": 11,
+      "judge_lower": 4,
+      "mean_human": 3.27,
+      "mean_judge": 3.53
+    },
+    "overall": {
+      "n": 30,
+      "kappa_quadratic": 0.708,
+      "kappa_unweighted": 0.094,
+      "exact_agreement": 0.333,
+      "within_one_agreement": 1.0,
+      "judge_higher": 16,
+      "judge_lower": 4,
+      "mean_human": 2.8,
+      "mean_judge": 3.2
+    }
+  },
+  "sheet": "evals\\labeling\\judge_sheet.csv"
+}

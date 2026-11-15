@@ -342,3 +342,17 @@ async def extract_facts(
         "commits": commits.count,
     }
     return facts, profile
+
+
+# The prompt asks for [fact_id]; models also write 【fact_id】 or [ fact_id ].
+_CITATION = re.compile(r"[\[【]\s*([0-9a-f]{12})\s*[\]】]")
+
+
+def normalise_citations(text: str) -> str:
+    """Rewrite the citation variants models produce as the canonical [fact_id]."""
+    return _CITATION.sub(r"[\1]", text)
+
+
+def cited_fact_ids(text: str) -> set[str]:
+    """Fact ids cited in a draft, whatever bracket style the model used."""
+    return set(_CITATION.findall(text))
